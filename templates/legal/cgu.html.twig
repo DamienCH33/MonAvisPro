@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conditions Générales d’Utilisation{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="max-width: 800px;">
+    <div class="mb-3">
+        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
+            ← Retour
+        </a>
+    </div>
+    <h1>Conditions Générales d’Utilisation</h1>
+
+    <p>Les présentes Conditions Générales d’Utilisation (CGU) régissent l’accès et l’utilisation du service Mon Avis
+        Pro.</p>
+
+    <h2>1. Présentation du service</h2>
+    <p>Mon Avis Pro est une plateforme permettant d’analyser des avis clients et de générer des réponses assistées par
+        intelligence artificielle.</p>
+
+    <h2>2. Création de compte</h2>
+    <p>L’utilisateur doit fournir des informations exactes. Il est responsable de la confidentialité de ses
+        identifiants.</p>
+
+    <h2>3. Utilisation du service</h2>
+    <p>L’utilisateur s’engage à ne pas utiliser le service à des fins illégales, frauduleuses ou portant atteinte à des
+        tiers.</p>
+
+    <h2>4. Intelligence artificielle</h2>
+    <p>Les réponses générées par l’intelligence artificielle sont fournies à titre indicatif. L’utilisateur reste seul
+        responsable de leur utilisation et de leur publication.</p>
+
+    <h2>5. Responsabilité</h2>
+    <p>Le service est fourni “en l’état”. L’éditeur ne garantit pas l’exactitude des analyses ou des réponses générées.
+    </p>
+
+    <h2>6. Données</h2>
+    <p>L’utilisateur est responsable des données qu’il soumet (avis, contenus). Il garantit disposer des droits
+        nécessaires.</p>
+
+    <h2>7. Suspension / résiliation</h2>
+    <p>L’éditeur peut suspendre ou supprimer un compte en cas de non-respect des présentes CGU.</p>
+
+    <h2>8. Évolution du service</h2>
+    <p>Le service peut être modifié ou interrompu à tout moment.</p>
+
+    <h2>9. Droit applicable</h2>
+    <p>Les présentes CGU sont soumises au droit français.</p>
+
+    <p class="text-muted mt-4">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
+</div>
+{% endblock %}

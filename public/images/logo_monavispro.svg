@@ -1,0 +1,63 @@
+<svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" width="320" height="80">
+  <defs>
+    <linearGradient id="grad_bubble" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#534ab7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d9e75;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad_star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5dcaa5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a5f3d6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad_text_mon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.95" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Bulle de dialogue avec coins arrondis -->
+  <rect x="6" y="8" width="56" height="48" rx="12" ry="12"
+        fill="url(#grad_bubble)" opacity="0.15"/>
+  <rect x="6" y="8" width="56" height="48" rx="12" ry="12"
+        fill="none" stroke="url(#grad_bubble)" stroke-width="2"/>
+
+  <!-- Petite queue de bulle -->
+  <path d="M22 56 L18 66 L32 56 Z"
+        fill="url(#grad_bubble)" opacity="0.15"/>
+  <path d="M22 56 L18 66 L32 56"
+        fill="none" stroke="url(#grad_bubble)" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Étoile -->
+  <polygon points="34,18 37.5,27.5 48,27.5 39.5,33.5 43,43 34,37 25,43 28.5,33.5 20,27.5 30.5,27.5"
+           fill="url(#grad_star)" filter="url(#glow)"/>
+
+  <!-- Texte Mon -->
+  <text x="76" y="50"
+        font-family="DM Sans, system-ui, sans-serif"
+        font-size="30"
+        font-weight="800"
+        letter-spacing="-0.5"
+        fill="rgba(255,255,255,0.92)">Mon</text>
+
+  <!-- Texte Avis -->
+  <text x="148" y="50"
+        font-family="DM Sans, system-ui, sans-serif"
+        font-size="30"
+        font-weight="800"
+        letter-spacing="-0.5"
+        fill="url(#grad_bubble)">Avis</text>
+
+  <!-- Texte Pro -->
+  <text x="220" y="50"
+        font-family="DM Sans, system-ui, sans-serif"
+        font-size="30"
+        font-weight="800"
+        letter-spacing="-0.5"
+        fill="#5dcaa5">Pro</text>
+</svg>

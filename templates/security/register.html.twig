@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+{% block title %}Inscription — Mon Avis Pro{% endblock %}
+
+{% block public_nav %}
+<div class="d-flex align-items-center gap-2">
+  <span style="font-size:12px;color:rgba(255,255,255,.4)">Déjà un compte ?</span>
+  <a href="{{ path('app_login') }}" class="rr-btn rr-btn-secondary rr-btn-sm">Connexion</a>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="rr-auth-wrapper">
+  <div class="rr-auth-box">
+
+    <div class="rr-logo mb-4 justify-content-center">
+      <div class="rr-logo__dot"></div>
+      <span class="rr-logo__text">Mon Avis Pro</span>
+    </div>
+
+    <div class="rr-auth-title text-center">Créer un compte</div>
+    <div class="rr-auth-sub text-center">Gratuit · 3 analyses sans carte bancaire</div>
+
+    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_errors(registrationForm) }}
+
+    <div class="mb-3">
+      {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'rr-label'}}) }}
+      {{ form_widget(registrationForm.email, {'attr': {'class': 'rr-input', 'placeholder': 'vous@exemple.fr'}}) }}
+      {% if form_errors(registrationForm.email) %}
+      <div class="rr-error">{{ form_errors(registrationForm.email) }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form_label(registrationForm.plainPassword.first, 'Mot de passe', {'label_attr': {'class': 'rr-label'}}) }}
+      {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'rr-input', 'placeholder': '8 caractères
+      minimum'}}) }}
+      {% if form_errors(registrationForm.plainPassword.first) %}
+      <div class="rr-error">{{ form_errors(registrationForm.plainPassword.first) }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-4">
+      {{ form_label(registrationForm.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class':
+      'rr-label'}}) }}
+      {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'rr-input', 'placeholder': 'Répétez le
+      mot de passe'}}) }}
+      {% if form_errors(registrationForm.plainPassword.second) %}
+      <div class="rr-error">{{ form_errors(registrationForm.plainPassword.second) }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="rr-label">
+        {{ form_widget(registrationForm.agreeTerms) }}
+        J’accepte les conditions
+      </label>
+
+      {% if form_errors(registrationForm.agreeTerms) %}
+      <div class="rr-error">{{ form_errors(registrationForm.agreeTerms) }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="rr-btn rr-btn-primary rr-btn-full rr-btn-lg">
+      Créer mon compte
+    </button>
+
+    {{ form_end(registrationForm) }}
+
+    <div class="text-center mt-3" style="font-size:11px;color:rgba(255,255,255,.25);line-height:1.6">
+      En créant un compte vous acceptez les
+      <a href="{{ path('app_cgu') }}" style="color:rgba(255,255,255,.4)">CGU</a> et la
+      <a href="{{ path('app_privacy') }}" style="color:rgba(255,255,255,.4)">politique de confidentialité</a>.
+    </div>
+
+    <div class="text-center mt-3" style="font-size:12px;color:rgba(255,255,255,.35)">
+      Déjà un compte ?
+      <a href="{{ path('app_login') }}" style="color:var(--rr-green)">Se connecter</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

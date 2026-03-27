@@ -1,0 +1,64 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+{% block title %}Connexion — ReviewRadar{% endblock %}
+
+{% block public_nav %}
+  <div class="d-flex align-items-center gap-2">
+    <span style="font-size:12px;color:rgba(255,255,255,.4)">Pas de compte ?</span>
+    <a href="{{ path('app_register') }}" class="rr-btn rr-btn-primary rr-btn-sm">S'inscrire</a>
+  </div>
+{% endblock %}
+
+{% block body %}
+<div class="rr-auth-wrapper">
+  <div class="rr-auth-box">
+
+    <div class="rr-logo mb-4 justify-content-center">
+      <div class="rr-logo__dot"></div>
+      <span class="rr-logo__text">Mon Avis Pro</span>
+    </div>
+
+    <div class="rr-auth-title text-center">Bon retour</div>
+    <div class="rr-auth-sub text-center">Connectez-vous à votre espace Mon Avis Pro</div>
+
+    {% if error %}
+      <div class="rr-flash rr-flash-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+      <div class="mb-3">
+        <label class="rr-label" for="email">Email</label>
+        <input class="rr-input" type="email" id="email" name="_username"
+               value="{{ last_username }}" placeholder="vous@exemple.fr"
+               autocomplete="email" required autofocus>
+      </div>
+
+      <div class="mb-3">
+        <label class="rr-label" for="password">Mot de passe</label>
+        <input class="rr-input" type="password" id="password" name="_password"
+               placeholder="Votre mot de passe" autocomplete="current-password" required>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <label class="rr-check">
+          <input type="checkbox" name="_remember_me">
+          Se souvenir de moi
+        </label>
+        <a href="#" style="font-size:12px;color:var(--rr-green)">Mot de passe oublié ?</a>
+      </div>
+
+      <button type="submit" class="rr-btn rr-btn-primary rr-btn-full rr-btn-lg">
+        Se connecter
+      </button>
+    </form>
+
+    <div class="text-center mt-4" style="font-size:12px;color:rgba(255,255,255,.35)">
+      Pas encore de compte ?
+      <a href="{{ path('app_register') }}" style="color:var(--rr-green)">S'inscrire gratuitement</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

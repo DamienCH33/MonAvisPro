@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un établissement — MonAvisPro{% endblock %}
+{% block page_title %}Ajouter un établissement{% endblock %}
+
+{% block body %}
+<script>const JWT_TOKEN = '{{ jwt_token }}';</script>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        <div class="rr-card rr-card-lg">
+
+            <div class="rr-page-title mb-1">Nouvel établissement</div>
+            <div class="rr-page-sub mb-4">
+                Ajoutez votre commerce pour commencer à surveiller vos avis Google.
+            </div>
+
+            <div id="form-error" class="rr-flash rr-flash-error" style="display:none"></div>
+
+            <div class="mb-3">
+                <label class="rr-label">Nom de l'établissement *</label>
+                <input type="text" class="rr-input" id="name"
+                       placeholder="Ex: Boulangerie Du Coin">
+            </div>
+
+            <div class="mb-3">
+                <label class="rr-label">Adresse complète *</label>
+                <input type="text" class="rr-input" id="address"
+                       placeholder="Ex: 12 rue de la Paix, 75001 Paris">
+            </div>
+
+            <div class="mb-3">
+                <label class="rr-label">Google Place ID *</label>
+                <input type="text" class="rr-input rr-mono" id="placeId"
+                       placeholder="Ex: ChIJN1t_tDeuEmsRUsoyG83frY4">
+                <div class="rr-hint">
+                    Trouvez votre Place ID sur
+                    <a href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
+                       target="_blank" style="color:var(--rr-green)">
+                        Google Place ID Finder →
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="rr-check">
+                    <input type="checkbox" id="alertsEnabled" checked>
+                    Activer les alertes email pour les avis négatifs (≤ 2★)
+                </label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button onclick="createEstablishment()" class="rr-btn rr-btn-primary rr-btn-lg" id="create-btn">
+                    Ajouter l'établissement
+                </button>
+                <a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
+                    Annuler
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+async function createEstablishment() {
+    const btn     = document.getElementById('create-btn');
+    const errDiv  = document.getElementById('form-error');
+    const name    = document.getElementById('name').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const placeId = document.getElementById('placeId').value.trim();
+    const alerts  = document.getElementById('alertsEnabled').checked;
+
+    // Reset UI
+    errDiv.style.display = 'none';
+    errDiv.textContent   = '';
+
+    // Validation frontend
+    if (!name || !address || !placeId) {
+        errDiv.textContent = 'Tous les champs obligatoires doivent être remplis.';
+        errDiv.style.display = 'flex';
+        return;
+    }
+
+    btn.textContent = 'Création en cours…';
+    btn.disabled    = true;
+
+    try {
+        const res = await fetch('/api/establishments', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + JWT_TOKEN,
+                'Content-Type':  'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                address,
+                placeId,
+                alertsEnabled: alerts,
+            })
+        });
+
+        const data = await res.json();
+
+        // RATE LIMIT
+        if (res.status === 429) {
+            errDiv.textContent = "Trop de tentatives. Réessaie dans 1 minute.";
+            errDiv.style.display = 'flex';
+            return;
+        }
+
+        // NON AUTHENTIFIÉ
+        if (res.status === 401) {
+            errDiv.textContent = "Session expirée. Recharge la page.";
+            errDiv.style.display = 'flex';
+            return;
+        }
+
+        // VALIDATION BACKEND
+        if (!res.ok) {
+            errDiv.textContent = data.error ?? 'Erreur lors de la création.';
+            errDiv.style.display = 'flex';
+            return;
+        }
+
+        // SUCCÈS
+        window.location.href = `/dashboard/${data.id}`;
+
+    } catch(e) {
+        errDiv.textContent = 'Erreur réseau. Vérifie ta connexion.';
+        errDiv.style.display = 'flex';
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = "Ajouter l'établissement";
+    }
+}
+</script>
+{% endblock %}

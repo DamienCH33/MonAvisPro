@@ -1,0 +1,86 @@
+{# templates/partials/_sidebar.html.twig #}
+
+{% set current_id = current_establishment is defined and current_establishment ? current_establishment.id~'' : null %}
+{% set route = app.request.attributes.get('_route') %}
+
+<a href="{{ path('dashboard') }}" class="rr-logo">
+    <div class="rr-logo__dot"></div>
+    <span class="rr-logo__text">MonAvisPro</span>
+</a>
+
+<span class="rr-nav-section">Navigation</span>
+
+<a href="{{ current_id ? path('dashboard_establishment', {id: current_id}) : path('dashboard') }}"
+   class="rr-nav-item {% if route in ['dashboard', 'dashboard_establishment'] %}active{% endif %}">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".8"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".3"/>
+    </svg>
+    Dashboard
+</a>
+
+{% if current_id %}
+<a href="{{ path('reviews_list', {id: current_id}) }}"
+   class="rr-nav-item {% if route == 'reviews_list' %}active{% endif %}">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Tous les avis
+    {% if unread_count is defined and unread_count > 0 %}
+        <span class="rr-nav-badge">{{ unread_count }}</span>
+    {% endif %}
+</a>
+
+<a href="{{ path('analysis', {id: current_id}) }}"
+   class="rr-nav-item {% if route == 'analysis' %}active{% endif %}">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Analyse IA
+</a>
+
+<a href="{{ path('settings', {id: current_id}) }}"
+   class="rr-nav-item {% if route == 'settings' %}active{% endif %}">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Paramètres
+</a>
+{% endif %}
+
+{% if establishments is defined and establishments|length > 0 %}
+<span class="rr-nav-section">Mes établissements</span>
+{% for establishment in establishments %}
+    <a href="{{ path('dashboard_establishment', {id: establishment.id~''}) }}"
+       class="rr-nav-item {% if current_establishment is defined and current_establishment and establishment.id~'' == current_establishment.id~'' %}active{% endif %}">
+        <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M2 14V7L8 2l6 5v7H2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <rect x="6" y="10" width="4" height="4" rx=".5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        {{ establishment.name|length > 18 ? establishment.name|slice(0, 18) ~ '…' : establishment.name }}
+    </a>
+{% endfor %}
+{% endif %}
+
+<a href="{{ path('establishment_new') }}" class="rr-nav-item">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Ajouter un lieu
+</a>
+
+<div class="rr-sidebar-footer">
+    <div class="rr-user-chip">
+        <div class="rr-avatar">{{ app.user.email|first|upper }}</div>
+        <div>
+            <div class="rr-user-name">{{ app.user.email|split('@')[0] }}</div>
+            <div class="rr-user-plan">Plan gratuit</div>
+        </div>
+    </div>
+</div>

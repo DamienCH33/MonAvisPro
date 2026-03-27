@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres — {{ current_establishment.name }}{% endblock %}
+{% block page_title %}Paramètres{% endblock %}
+
+{% block body %}
+<script>const JWT_TOKEN = '{{ jwt_token }}';</script>
+<script>const ESTABLISHMENT_ID = '{{ current_establishment.id }}';</script>
+
+<div class="row g-3">
+
+    {# ── Informations établissement ── #}
+    <div class="col-12 col-lg-6">
+        <div class="rr-card rr-card-lg">
+            <div class="rr-section-title">Informations</div>
+
+            <div class="mb-3">
+                <label class="rr-label">Nom de l'établissement</label>
+                <input type="text" class="rr-input" id="estab-name"
+                       value="{{ current_establishment.name }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="rr-label">Adresse</label>
+                <input type="text" class="rr-input" id="estab-address"
+                       value="{{ current_establishment.address }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="rr-label">Google Place ID</label>
+                <input type="text" class="rr-input rr-mono" id="estab-place-id"
+                       value="{{ current_establishment.placeId }}" readonly
+                       style="opacity:.6;cursor:not-allowed">
+                <div class="rr-hint">Le Place ID ne peut pas être modifié après création.</div>
+            </div>
+
+            <button onclick="saveSettings()" class="rr-btn rr-btn-primary" id="save-btn">
+                Enregistrer les modifications
+            </button>
+        </div>
+    </div>
+
+    {# ── Alertes ── #}
+    <div class="col-12 col-lg-6">
+        <div class="rr-card rr-card-lg">
+            <div class="rr-section-title">Alertes email</div>
+
+            <div class="rr-toggle">
+                <div>
+                    <div class="rr-toggle-name">Alertes pour cet établissement</div>
+                    <div class="rr-toggle-desc">Recevoir un email dès qu'un avis ≤ 2★ est détecté</div>
+                </div>
+                <button class="rr-switch {{ current_establishment.alertsEnabled ? 'rr-switch-on' : 'rr-switch-off' }}"
+                        id="alerts-toggle"
+                        onclick="toggleAlerts(this)">
+                </button>
+            </div>
+
+            <div class="rr-divider"></div>
+
+            <div style="font-size:12px;color:var(--rr-t3);line-height:1.6">
+                Les alertes sont envoyées à <strong style="color:var(--rr-t2)">{{ app.user.email }}</strong>.<br>
+                Dernière sync : {{ current_establishment.lastSyncAt
+                    ? current_establishment.lastSyncAt|date('d/m/Y à H:i')
+                    : 'Jamais synchronisé' }}
+            </div>
+        </div>
+
+        {# ── Sync manuelle ── #}
+        <div class="rr-card rr-card-lg mt-3">
+            <div class="rr-section-title">Synchronisation</div>
+            <div style="font-size:13px;color:var(--rr-t2);margin-bottom:14px;line-height:1.6">
+                Forcer la récupération des derniers avis Google maintenant.
+            </div>
+            <button onclick="syncNow()" class="rr-btn rr-btn-secondary" id="sync-btn">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                    <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 1v3.5L10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Synchroniser maintenant
+            </button>
+        </div>
+    </div>
+
+    {# ── Danger zone ── #}
+    <div class="col-12">
+        <div class="rr-danger-zone">
+            <div class="rr-danger-zone-title">⚠️ Zone de danger</div>
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div style="font-size:13px;color:var(--rr-t1);font-weight:600">Supprimer cet établissement</div>
+                    <div style="font-size:12px;color:var(--rr-t3);margin-top:2px">
+                        Supprime l'établissement et tous ses avis. Action irréversible.
+                    </div>
+                </div>
+                <button onclick="deleteEstablishment()" class="rr-btn rr-btn-danger rr-btn-sm">
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Sauvegarder
+async function saveSettings() {
+    const btn = document.getElementById('save-btn');
+    btn.textContent = 'Enregistrement…';
+    btn.disabled    = true;
+
+    const res = await fetch(`/api/establishments/${ESTABLISHMENT_ID}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': 'Bearer ' + JWT_TOKEN,
+            'Content-Type':  'application/json'
+        },
+        body: JSON.stringify({
+            name:    document.getElementById('estab-name').value,
+            address: document.getElementById('estab-address').value,
+        })
+    });
+
+    btn.disabled    = false;
+    btn.textContent = 'Enregistrer les modifications';
+
+    if (res.ok) {
+        showFlash('Modifications enregistrées.', 'success');
+    } else {
+        showFlash('Erreur lors de la sauvegarde.', 'error');
+    }
+}
+
+// Toggle alertes
+async function toggleAlerts(btn) {
+    const isOn = btn.classList.contains('rr-switch-on');
+
+    await fetch(`/api/establishments/${ESTABLISHMENT_ID}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': 'Bearer ' + JWT_TOKEN,
+            'Content-Type':  'application/json'
+        },
+        body: JSON.stringify({ alertsEnabled: !isOn })
+    });
+
+    btn.classList.toggle('rr-switch-on',  !isOn);
+    btn.classList.toggle('rr-switch-off',  isOn);
+    showFlash(!isOn ? 'Alertes activées.' : 'Alertes désactivées.', 'success');
+}
+
+// Sync maintenant
+async function syncNow() {
+    const btn = document.getElementById('sync-btn');
+    btn.textContent = 'Synchronisation…';
+    btn.disabled    = true;
+
+    const res  = await fetch(`/api/establishments/${ESTABLISHMENT_ID}/sync`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+    });
+    const data = await res.json();
+
+    btn.disabled    = false;
+    btn.innerHTML   = '↺ Synchroniser maintenant';
+    showFlash(data.message, 'success');
+}
+
+// Supprimer
+async function deleteEstablishment() {
+    if (!confirm('Supprimer cet établissement et tous ses avis ? Cette action est irréversible.')) return;
+
+    const res = await fetch(`/api/establishments/${ESTABLISHMENT_ID}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+    });
+
+    if (res.ok) {
+        window.location.href = '/dashboard';
+    } else {
+        showFlash('Erreur lors de la suppression.', 'error');
+    }
+}
+
+// Flash message
+function showFlash(message, type) {
+    const flash = document.createElement('div');
+    flash.className = `rr-flash rr-flash-${type}`;
+    flash.textContent = message;
+    document.querySelector('.rr-page').prepend(flash);
+    setTimeout(() => flash.remove(), 4000);
+}
+</script>
+{% endblock %}

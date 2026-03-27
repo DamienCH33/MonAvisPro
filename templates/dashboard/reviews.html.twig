@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Avis — {{ current_establishment.name }}{% endblock %}
+{% block page_title %}Tous les avis{% endblock %}
+
+{% block topbar_actions %}
+<select class="rr-select" id="filter-rating" onchange="loadReviews()">
+    <option value="">Toutes les notes</option>
+    <option value="5">★★★★★ 5</option>
+    <option value="4">★★★★☆ 4</option>
+    <option value="3">★★★☆☆ 3</option>
+    <option value="2">★★☆☆☆ 2</option>
+    <option value="1">★☆☆☆☆ 1</option>
+</select>
+<select class="rr-select" id="filter-period" onchange="loadReviews()">
+    <option value="all">Toute période</option>
+    <option value="7j">7 derniers jours</option>
+    <option value="30j">30 derniers jours</option>
+    <option value="90j">90 derniers jours</option>
+</select>
+{% endblock %}
+
+{% block body %}
+<script>const JWT_TOKEN = '{{ jwt_token }}';</script>
+<script>const ESTABLISHMENT_ID = '{{ current_establishment.id }}';</script>
+
+{# ── Liste des avis ── #}
+<div id="reviews-container">
+    <div class="rr-empty">Chargement des avis…</div>
+</div>
+
+{# ── Pagination ── #}
+<div class="d-flex justify-content-between align-items-center mt-4" id="pagination-container" style="display:none!important"></div>
+
+{# ── Modal réponse IA ── #}
+<div class="modal fade" id="replyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background:#0f1224;border:1px solid rgba(255,255,255,.1);border-radius:16px">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,.08)">
+                <h5 class="modal-title" style="color:#fff;font-size:15px;font-weight:700">Générer une réponse IA</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="rr-label">Ton de la réponse</label>
+                    <div class="rr-tabs">
+                        <button class="rr-tab active" onclick="setTone('cordial', this)">Cordial</button>
+                        <button class="rr-tab" onclick="setTone('formel', this)">Formel</button>
+                        <button class="rr-tab" onclick="setTone('empathique', this)">Empathique</button>
+                    </div>
+                </div>
+                <div id="reply-result" style="display:none">
+                    <label class="rr-label">Réponse générée</label>
+                    <div class="rr-textarea" id="reply-text"
+                         style="min-height:100px;font-size:13px;line-height:1.6;color:var(--rr-t2)"></div>
+                    <button onclick="copyReply()" class="rr-btn rr-btn-primary rr-btn-sm mt-2">
+                        Copier la réponse
+                    </button>
+                </div>
+                <div id="reply-loading" style="display:none;text-align:center;padding:20px;color:var(--rr-t3);font-size:13px">
+                    Génération en cours…
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,.08)">
+                <button type="button" class="rr-btn rr-btn-secondary rr-btn-sm" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="rr-btn rr-btn-primary rr-btn-sm" onclick="generateReply()" id="generate-btn">
+                    Générer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentPage     = 1;
+let currentReviewId = null;
+let currentTone     = 'cordial';
+
+// Chargement des avis
+async function loadReviews(page = 1) {
+    currentPage = page;
+    const rating = document.getElementById('filter-rating').value;
+    const period = document.getElementById('filter-period').value;
+
+    let url = `/api/establishments/${ESTABLISHMENT_ID}/reviews?page=${page}`;
+    if (rating) url += `&rating=${rating}`;
+    if (period !== 'all') url += `&period=${period}`;
+
+    const res  = await fetch(url, { headers: { 'Authorization': 'Bearer ' + JWT_TOKEN } });
+    const data = await res.json();
+
+    renderReviews(data.data);
+    renderPagination(data.pagination);
+}
+
+// Rendu des avis
+function renderReviews(reviews) {
+    const container = document.getElementById('reviews-container');
+
+    if (reviews.length === 0) {
+        container.innerHTML = '<div class="rr-empty">Aucun avis trouvé.</div>';
+        return;
+    }
+
+    container.innerHTML = reviews.map(r => `
+        <div class="rr-card ${r.rating <= 2 ? 'rr-card-neg' : ''} ${!r.isRead ? 'rr-card-unread' : ''} mb-3" id="review-${r.id}">
+            <div class="d-flex align-items-start justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    ${r.googleAuthorPhoto
+                        ? `<img src="${r.googleAuthorPhoto}" width="36" height="36" style="border-radius:50%;object-fit:cover" alt="">`
+                        : `<div class="rr-avatar" style="width:36px;height:36px;font-size:12px">${r.googleAuthor[0].toUpperCase()}</div>`
+                    }
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:var(--rr-t1)">${r.googleAuthor}</div>
+                        <div style="font-size:11px;color:var(--rr-t3)">${new Date(r.publishedAt).toLocaleDateString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="${r.rating >= 4 ? 'rr-stars' : 'rr-stars-neg'}">
+                        ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                    </span>
+                    ${r.rating <= 2 ? `<span class="rr-pill rr-pill-red">Négatif</span>` : ''}
+                    ${!r.isRead ? `<span class="rr-pill rr-pill-yellow">Non lu</span>` : ''}
+                </div>
+            </div>
+
+            ${r.text ? `<div style="font-size:13px;color:var(--rr-t2);margin-top:10px;line-height:1.6">${r.text}</div>` : ''}
+
+            <div class="d-flex gap-2 mt-3">
+                <button onclick="openReplyModal('${r.id}')" class="rr-btn rr-btn-primary rr-btn-sm">
+                    ✨ Générer une réponse
+                </button>
+                ${!r.isRead ? `<button onclick="markAsRead('${r.id}')" class="rr-btn rr-btn-secondary rr-btn-sm">Marquer comme lu</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Pagination
+function renderPagination(pagination) {
+    const container = document.getElementById('pagination-container');
+    if (pagination.totalPages <= 1) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'flex';
+    container.innerHTML = `
+        <span style="font-size:12px;color:var(--rr-t3)">
+            Page ${pagination.page} / ${pagination.totalPages} — ${pagination.total} avis
+        </span>
+        <div class="rr-pag">
+            ${pagination.page > 1 ? `<button class="rr-pag-btn rr-pag-inactive" onclick="loadReviews(${pagination.page - 1})">←</button>` : ''}
+            ${Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(p => `
+                <button class="rr-pag-btn ${p === pagination.page ? 'rr-pag-active' : 'rr-pag-inactive'}"
+                        onclick="loadReviews(${p})">${p}</button>
+            `).join('')}
+            ${pagination.page < pagination.totalPages ? `<button class="rr-pag-btn rr-pag-inactive" onclick="loadReviews(${pagination.page + 1})">→</button>` : ''}
+        </div>
+    `;
+}
+
+// Marquer comme lu
+async function markAsRead(reviewId) {
+    await fetch(`/api/reviews/${reviewId}/read`, {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+    });
+    loadReviews(currentPage);
+}
+
+// Modal réponse IA
+function openReplyModal(reviewId) {
+    currentReviewId = reviewId;
+    document.getElementById('reply-result').style.display  = 'none';
+    document.getElementById('reply-loading').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('replyModal')).show();
+}
+
+function setTone(tone, btn) {
+    currentTone = tone;
+    document.querySelectorAll('.rr-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+async function generateReply() {
+    document.getElementById('reply-loading').style.display = 'block';
+    document.getElementById('reply-result').style.display  = 'none';
+    document.getElementById('generate-btn').disabled       = true;
+
+    const res  = await fetch(`/api/reviews/${currentReviewId}/generate-reply`, {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + JWT_TOKEN,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tone: currentTone })
+    });
+    const data = await res.json();
+
+    document.getElementById('reply-loading').style.display = 'none';
+    document.getElementById('reply-result').style.display  = 'block';
+    document.getElementById('reply-text').textContent      = data.reply;
+    document.getElementById('generate-btn').disabled       = false;
+}
+
+function copyReply() {
+    navigator.clipboard.writeText(document.getElementById('reply-text').textContent);
+    alert('Réponse copiée !');
+}
+
+loadReviews();
+</script>
+{% endblock %}

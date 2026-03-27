@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Analyse IA — {{ current_establishment.name }}{% endblock %}
+{% block page_title %}Analyse IA{% endblock %}
+
+{% block topbar_actions %}
+<button onclick="refreshAnalysis()" class="rr-btn rr-btn-primary rr-btn-sm" id="refresh-btn">
+    ✨ Relancer l'analyse
+</button>
+{% endblock %}
+
+{% block body %}
+<script>const JWT_TOKEN = '{{ jwt_token }}';</script>
+<script>const ESTABLISHMENT_ID = '{{ current_establishment.id }}';</script>
+
+<div id="analysis-container">
+{% if analysis %}
+
+    <div class="row g-3 mb-4">
+        {# ── Thèmes positifs ── #}
+        <div class="col-12 col-lg-6">
+            <div class="rr-card rr-card-lg rr-card-success h-100">
+                <div class="rr-analyse-title rr-analyse-pos">Points forts</div>
+                {% for theme in analysis.positiveThemes %}
+                <div class="rr-bar mb-3">
+                    <div style="flex:1">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span style="font-size:12px;color:var(--rr-t1);font-weight:600">{{ theme.theme }}</span>
+                            <span class="rr-bar-pct rr-green">{{ theme.percentage }}%</span>
+                        </div>
+                        <div class="rr-bar-track">
+                            <div class="rr-bar-fill rr-bar-fill-green" style="width:{{ theme.percentage }}%"></div>
+                        </div>
+                        {% if theme.example is defined %}
+                        <div style="font-size:11px;color:var(--rr-t3);margin-top:4px;font-style:italic">
+                            "{{ theme.example }}"
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Thèmes négatifs ── #}
+        <div class="col-12 col-lg-6">
+            <div class="rr-card rr-card-lg rr-card-neg h-100">
+                <div class="rr-analyse-title rr-analyse-neg">Points à améliorer</div>
+                {% for theme in analysis.negativeThemes %}
+                <div class="rr-bar mb-3">
+                    <div style="flex:1">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span style="font-size:12px;color:var(--rr-t1);font-weight:600">{{ theme.theme }}</span>
+                            <span class="rr-bar-pct rr-red">{{ theme.percentage }}%</span>
+                        </div>
+                        <div class="rr-bar-track">
+                            <div class="rr-bar-fill rr-bar-fill-red" style="width:{{ theme.percentage }}%"></div>
+                        </div>
+                        {% if theme.example is defined %}
+                        <div style="font-size:11px;color:var(--rr-t3);margin-top:4px;font-style:italic">
+                            "{{ theme.example }}"
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Suggestion d'action ── #}
+    <div class="rr-card rr-card-warn mb-4">
+        <div class="d-flex align-items-start gap-3">
+            <span style="font-size:20px">💡</span>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--rr-yellow);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
+                    Action recommandée cette semaine
+                </div>
+                <div style="font-size:14px;color:var(--rr-t1);line-height:1.6">
+                    {{ analysis.actionSuggestion }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Date de mise à jour ── #}
+    <div style="font-size:11px;color:var(--rr-t3);text-align:right">
+        Dernière analyse : {{ analysis.updatedAt|date('d/m/Y à H:i') }}
+    </div>
+
+{% else %}
+
+    {# ── Empty state ── #}
+    <div class="rr-empty">
+        <div style="font-size:32px;margin-bottom:12px">🤖</div>
+        <div style="font-size:16px;font-weight:700;color:var(--rr-t1);margin-bottom:8px">
+            Aucune analyse disponible
+        </div>
+        <div>Lancez votre première analyse IA pour découvrir les thèmes récurrents dans vos avis.</div>
+        <button onclick="refreshAnalysis()" class="rr-btn rr-btn-primary rr-btn-lg mt-4">
+            ✨ Lancer l'analyse
+        </button>
+    </div>
+
+{% endif %}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+async function refreshAnalysis() {
+    const btn = document.getElementById('refresh-btn');
+    btn.textContent = 'Analyse en cours…';
+    btn.disabled    = true;
+
+    try {
+        const res  = await fetch(`/api/establishments/${ESTABLISHMENT_ID}/analysis/refresh`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            location.reload();
+        } else {
+            alert(data.error ?? 'Erreur lors de l\'analyse.');
+        }
+    } catch(e) {
+        alert('Erreur réseau.');
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = '✨ Relancer l\'analyse';
+    }
+}
+</script>
+{% endblock %}

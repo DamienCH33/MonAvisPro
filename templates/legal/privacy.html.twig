@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de confidentialité{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="max-width: 800px;">
+    <div class="mb-3">
+        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
+            ← Retour
+        </a>
+    </div>
+    <h1>Politique de confidentialité</h1>
+
+    <h2>1. Données collectées</h2>
+    <ul>
+        <li>Email</li>
+        <li>Données d’utilisation du service</li>
+        <li>Contenus fournis (avis, réponses)</li>
+    </ul>
+
+    <h2>2. Finalités</h2>
+    <p>Les données sont utilisées pour :</p>
+    <ul>
+        <li>Fournir le service</li>
+        <li>Améliorer les fonctionnalités</li>
+        <li>Assurer la sécurité</li>
+    </ul>
+
+    <h2>3. Base légale</h2>
+    <p>Le traitement repose sur le consentement de l’utilisateur et l’exécution du service.</p>
+
+    <h2>4. Conservation</h2>
+    <p>Les données sont conservées pendant la durée d’utilisation du compte.</p>
+
+    <h2>5. Sécurité</h2>
+    <p>Des mesures techniques et organisationnelles sont mises en place pour protéger les données.</p>
+
+    <h2>6. Droits des utilisateurs</h2>
+    <p>Conformément au RGPD, vous pouvez :</p>
+    <ul>
+        <li>Accéder à vos données</li>
+        <li>Les modifier</li>
+        <li>Demander leur suppression</li>
+    </ul>
+
+    <h2>7. Contact</h2>
+    <p>Email : contact@monavispro.fr</p>
+
+    <p class="text-muted mt-4">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
+</div>
+{% endblock %}

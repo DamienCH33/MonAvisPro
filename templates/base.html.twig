@@ -1,16 +1,124 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
 
-        {% block javascripts %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mon Avis Pro{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="rr-aurora"></div>
+
+    {% if app.user %}
+
+    {# ==================== LAYOUT AUTHENTIFIÉ ==================== #}
+
+    {# Offcanvas sidebar (mobile) #}
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas"
+        style="background:#0f1224;border-right:1px solid rgba(255,255,255,.1);width:240px">
+        <div class="offcanvas-body p-0">
+            {% include 'partials/_sidebar.html.twig' %}
+        </div>
+    </div>
+
+    {# Sidebar desktop #}
+    <aside class="rr-sidebar d-none d-lg-flex flex-column">
+        {% include 'partials/_sidebar.html.twig' %}
+    </aside>
+
+    {# Main content #}
+    <div class="rr-main-content">
+
+        {# Topbar #}
+        <header class="rr-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="rr-offcanvas-btn d-lg-none" data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebarOffcanvas">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+                <span class="rr-breadcrumb d-none d-md-inline">Mon Avis Pro /</span>
+                <span class="rr-topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                {% block topbar_actions %}{% endblock %}
+                <a href=" {{ path('app_logout') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
+                    Déconnexion
+                </a>
+            </div>
+        </header>
+
+        {# Page content #}
+        <div class="rr-page">
+
+            {# Flash messages #}
+            {% for message in app.flashes('success') %}
+            <div class="rr-flash rr-flash-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+            <div class="rr-flash rr-flash-error">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('warning') %}
+            <div class="rr-flash rr-flash-warning">{{ message }}</div>
+            {% endfor %}
+
+            {% else %}
+
+            {# ==================== LAYOUT PUBLIC ==================== #}
+            <div style="position:relative;z-index:1;min-height:100vh">
+
+                {# Public topbar #}
+                <header class="rr-topbar">
+                    <a href="{{ path('app_home') }}" class="rr-logo">
+                        <img src="{{ asset('images/logo_monavispro.svg') }}" alt="MonAvisPro" height="40">
+                    </a>
+                    {% block public_nav %}
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ path('app_login') }}" class="rr-btn rr-btn-secondary rr-btn-sm">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-primary rr-btn-sm">Démarrer gratuit</a>
+                    </div>
+                    {% endblock %}
+                </header>
+
+                {# Flash messages public #}
+                {% for message in app.flashes('success') %}
+                <div class="rr-flash rr-flash-success mx-3 mt-3">{{ message }}</div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                <div class="rr-flash rr-flash-error mx-3 mt-3">{{ message }}</div>
+                {% endfor %}
+
+                {% endif %}
+
+                {# ==================== BLOCK BODY UNIQUE ==================== #}
+                {% block body %}{% endblock %}
+
+                {% if app.user %}
+            </div>{# fin .rr-page #}
+        </div>{# fin .rr-main-content #}
+        {% else %}
+    </div>{# fin div public #}
+    {% endif %}
+
+    {# Bootstrap 5 JS #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+
 </html>
