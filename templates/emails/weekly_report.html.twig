@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .header { background: #0a0e1a; padding: 24px 32px; }
+        .header h1 { color: #fff; font-size: 18px; margin: 0; }
+        .header span { color: #5dcaa5; }
+        .body { padding: 28px 32px; }
+        .estab-block { border: 1px solid #eee; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .estab-name { font-size: 16px; font-weight: 700; color: #0a0e1a; margin-bottom: 8px; }
+        .stats { display: flex; gap: 16px; margin-bottom: 12px; }
+        .stat { text-align: center; background: #f9f9f9; border-radius: 6px; padding: 8px 16px; }
+        .stat-val { font-size: 20px; font-weight: 800; color: #0a0e1a; }
+        .stat-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .review-item { border-left: 3px solid #eee; padding: 8px 12px; margin-bottom: 8px; font-size: 13px; color: #444; }
+        .review-item.negative { border-color: #f09595; background: #fff5f5; }
+        .review-item.positive { border-color: #5dcaa5; background: #f0faf6; }
+        .stars { color: #f59e0b; }
+        .footer { background: #f9f9f9; padding: 16px 32px; font-size: 11px; color: #aaa; border-top: 1px solid #eee; }
+        .btn { display: inline-block; background: #0a0e1a; color: #fff !important; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mon<span>Avis</span>Pro — Rapport hebdomadaire</h1>
+        </div>
+        <div class="body">
+            <p style="font-size:14px;color:#555;">Bonjour, voici le résumé de vos avis pour la semaine du {{ weekStart|date('d/m/Y') }}.</p>
+
+            {% for data in reportData %}
+            <div class="estab-block">
+                <div class="estab-name">{{ data.establishment.name }}</div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-val">{{ data.newCount }}</div>
+                        <div class="stat-label">Nouveaux avis</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-val">{{ data.average ?? 'N/A' }}</div>
+                        <div class="stat-label">Note moyenne</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-val rr-red">{{ data.unread }}</div>
+                        <div class="stat-label">Non lus</div>
+                    </div>
+                </div>
+
+                {% if data.newReviews is empty %}
+                    <p style="font-size:13px;color:#888;">Aucun nouvel avis cette semaine.</p>
+                {% else %}
+                    {% for review in data.newReviews %}
+                    <div class="review-item {{ review.rating <= 2 ? 'negative' : (review.rating >= 4 ? 'positive' : '') }}">
+                        <span class="stars">
+                            {% for i in 1..5 %}{{ i <= review.rating ? '★' : '☆' }}{% endfor %}
+                        </span>
+                        <strong>{{ review.googleAuthor }}</strong> — {{ review.publishedAt|date('d/m/Y') }}<br>
+                        {{ review.text ?? 'Aucun commentaire.' }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <a href="#" class="btn">Voir le dashboard complet →</a>
+        </div>
+        <div class="footer">
+            Vous recevez cet email chaque lundi matin car vous êtes abonné à MonAvisPro.
+        </div>
+    </div>
+</body>
+</html>
