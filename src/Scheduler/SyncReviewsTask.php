@@ -12,7 +12,8 @@ class SyncReviewsTask
     public function __construct(
         private EstablishmentRepository $establishmentRepository,
         private ReviewSyncService $reviewSyncService,
-    ) {}
+    ) {
+    }
 
     public function __invoke(): void
     {

@@ -19,7 +19,8 @@ class WeeklyReportTask
         private ReviewRepository $reviewRepository,
         private MailerInterface $mailer,
         private Environment $twig,
-    ) {}
+    ) {
+    }
 
     public function __invoke(): void
     {
@@ -43,24 +44,24 @@ class WeeklyReportTask
                 );
 
                 $allReviews = $this->reviewRepository->findBy(['establishment' => $establishment]);
-                $average    = empty($allReviews) ? null : round(
-                    array_sum(array_map(fn($r) => $r->getRating(), $allReviews)) / count($allReviews),
+                $average = empty($allReviews) ? null : round(
+                    array_sum(array_map(fn ($r) => $r->getRating(), $allReviews)) / count($allReviews),
                     1
                 );
 
                 $reportData[] = [
                     'establishment' => $establishment,
-                    'newReviews'    => $newReviews,
-                    'newCount'      => count($newReviews),
-                    'average'       => $average,
-                    'unread'        => count(array_filter($newReviews, fn($r) => !$r->isRead())),
+                    'newReviews' => $newReviews,
+                    'newCount' => count($newReviews),
+                    'average' => $average,
+                    'unread' => count(array_filter($newReviews, fn ($r) => !$r->isRead())),
                 ];
             }
 
             $html = $this->twig->render('emails/weekly_report.html.twig', [
-                'user'       => $user,
+                'user' => $user,
                 'reportData' => $reportData,
-                'weekStart'  => new \DateTimeImmutable('-7 days'),
+                'weekStart' => new \DateTimeImmutable('-7 days'),
             ]);
 
             $email = (new Email())
