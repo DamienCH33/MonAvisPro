@@ -17,15 +17,12 @@ class EstablishmentController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private EstablishmentRepository $establishmentRepository,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'api_establishments_list', methods: ['GET'])]
     public function list(): JsonResponse
     {
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
@@ -35,17 +32,13 @@ class EstablishmentController extends AbstractController
         );
 
         return $this->json(
-            array_map(fn(Establishment $e) => $this->serialize($e), $establishments)
+            array_map(fn (Establishment $e) => $this->serialize($e), $establishments)
         );
     }
 
     #[Route('', name: 'api_establishments_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
         $data = json_decode($request->getContent(), true);
 
         if (empty($data['name'])) {
@@ -84,11 +77,7 @@ class EstablishmentController extends AbstractController
     #[Route('/{id}', name: 'api_establishments_show', methods: ['GET'])]
     public function show(Establishment $establishment): JsonResponse
     {
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
-        $this->denyAccessUnlessOwner($establishment);
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
         return $this->json($this->serialize($establishment));
     }
@@ -96,11 +85,7 @@ class EstablishmentController extends AbstractController
     #[Route('/{id}', name: 'api_establishments_update', methods: ['PATCH'])]
     public function update(Establishment $establishment, Request $request): JsonResponse
     {
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
-        $this->denyAccessUnlessOwner($establishment);
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
         $data = json_decode($request->getContent(), true);
 
@@ -124,11 +109,7 @@ class EstablishmentController extends AbstractController
     #[Route('/{id}', name: 'api_establishments_delete', methods: ['DELETE'])]
     public function delete(Establishment $establishment): JsonResponse
     {
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
-        $this->denyAccessUnlessOwner($establishment);
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
         $this->em->remove($establishment);
         $this->em->flush();
@@ -137,44 +118,42 @@ class EstablishmentController extends AbstractController
     }
 
     #[Route('/{id}/sync', name: 'api_establishments_sync', methods: ['POST'])]
-    public function sync(
-        Establishment $establishment,
-        ReviewSyncService $reviewSyncService
-    ): JsonResponse {
-
-        if (!$this->getUser()) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
-
-        $this->denyAccessUnlessOwner($establishment);
+    public function sync(Establishment $establishment, ReviewSyncService $reviewSyncService): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
         $count = $reviewSyncService->sync($establishment);
 
         return $this->json([
             'message' => 'Sync terminée',
             'newReviews' => $count,
-            'lastSyncAt' => $establishment->getLastSyncAt()?->format('c')
+            'lastSyncAt' => $establishment->getLastSyncAt()?->format('c'),
         ]);
     }
 
+    /**
+     * @return array{
+     *     id: string|null,
+     *     name: string,
+     *     placeId: string,
+     *     address: string,
+     *     alertsEnabled: bool,
+     *     lastSyncAt: string|null,
+     *     createdAt: string,
+     *     reviewsCount: int
+     * }
+     */
     private function serialize(Establishment $e): array
     {
         return [
-            'id'            => $e->getId(),
-            'name'          => $e->getName(),
-            'placeId'       => $e->getPlaceId(),
-            'address'       => $e->getAddress(),
+            'id' => $e->getId()?->toRfc4122(),
+            'name' => $e->getName() ?? '',
+            'placeId' => $e->getPlaceId() ?? '',
+            'address' => $e->getAddress() ?? '',
             'alertsEnabled' => $e->isAlertsEnabled(),
-            'lastSyncAt'    => $e->getLastSyncAt()?->format('c'),
-            'createdAt'     => $e->getCreatedAt()->format('c'),
-            'reviewsCount'  => $e->getReviews()->count(),
+            'lastSyncAt' => $e->getLastSyncAt()?->format('c'),
+            'createdAt' => $e->getCreatedAt()?->format('c') ?? '',
+            'reviewsCount' => $e->getReviews()->count(),
         ];
-    }
-
-    private function denyAccessUnlessOwner(Establishment $establishment): void
-    {
-        if ($establishment->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
-        }
     }
 }

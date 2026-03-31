@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/auth')]
 class AuthController extends AbstractController
@@ -19,8 +18,8 @@ class AuthController extends AbstractController
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $passwordHasher,
         private JWTTokenManagerInterface $jwtManager,
-        private ValidatorInterface $validator,
-    ) {}
+    ) {
+    }
 
     #[Route('/register', name: 'api_auth_register', methods: ['POST'])]
     public function register(Request $request): JsonResponse
@@ -66,12 +65,12 @@ class AuthController extends AbstractController
 
         return $this->json([
             'message' => 'Compte créé avec succès.',
-            'token'   => $token,
-            'user'    => [
-                'id'            => $user->getId(),
-                'email'         => $user->getEmail(),
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
                 'alertsEnabled' => $user->isAlertsEnabled(),
-                'createdAt'     => $user->getCreatedAt()->format('c'),
+                'createdAt' => $user->getCreatedAt()->format('c'),
             ],
         ], 201);
     }
@@ -98,12 +97,12 @@ class AuthController extends AbstractController
 
         return $this->json([
             'message' => 'Connexion réussie.',
-            'token'   => $token,
-            'user'    => [
-                'id'            => $user->getId(),
-                'email'         => $user->getEmail(),
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
                 'alertsEnabled' => $user->isAlertsEnabled(),
-                'createdAt'     => $user->getCreatedAt()->format('c'),
+                'createdAt' => $user->getCreatedAt()->format('c'),
             ],
         ]);
     }
@@ -118,15 +117,11 @@ class AuthController extends AbstractController
             return $this->json(['error' => 'Non authentifié'], 401);
         }
 
-        if (!$user) {
-            return $this->json(['error' => 'Non authentifié.'], 401);
-        }
-
         return $this->json([
-            'id'            => $user->getId(),
-            'email'         => $user->getEmail(),
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
             'alertsEnabled' => $user->isAlertsEnabled(),
-            'createdAt'     => $user->getCreatedAt()->format('c'),
+            'createdAt' => $user->getCreatedAt()->format('c'),
         ]);
     }
 }
