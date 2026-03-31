@@ -28,7 +28,7 @@ class RegistrationFormType extends AbstractType
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'invalid_message' => 'Les mots de passe ne correspondent pas',
-                'first_options'  => [
+                'first_options' => [
                     'label' => false,
                 ],
                 'second_options' => [
