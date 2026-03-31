@@ -1,8 +1,8 @@
 {
-    auto_https off
+	auto_https off
 }
 
 :8080 {
-    root * /app/public
-    php_server
+	root * /app/public
+	php_server
 }
