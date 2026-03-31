@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\EstablishmentRepository;
 use App\Repository\ReviewRepository;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 #[Route('/dashboard')]
 class DashboardController extends AbstractController
@@ -17,37 +17,38 @@ class DashboardController extends AbstractController
         private EstablishmentRepository $establishmentRepository,
         private ReviewRepository $reviewRepository,
         private JWTTokenManagerInterface $jwtManager,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'dashboard')]
     public function index(): Response
     {
         /** @var User $user */
-        $user           = $this->getUser();
+        $user = $this->getUser();
         $establishments = $this->establishmentRepository->findBy(
             ['owner' => $user],
             ['createdAt' => 'DESC']
         );
 
         $current = $establishments[0] ?? null;
-        $stats   = null;
+        $stats = null;
         $reviews = [];
 
         if ($current) {
             $allReviews = $this->reviewRepository->findBy(['establishment' => $current]);
-            $total      = count($allReviews);
-            $sum        = array_sum(array_map(fn($r) => $r->getRating(), $allReviews));
-            $positive   = count(array_filter($allReviews, fn($r) => $r->getRating() >= 4));
-            $negative   = count(array_filter($allReviews, fn($r) => $r->getRating() <= 2));
-            $unread     = count(array_filter($allReviews, fn($r) => !$r->isRead()));
+            $total = count($allReviews);
+            $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
+            $positive = count(array_filter($allReviews, fn ($r) => $r->getRating() >= 4));
+            $negative = count(array_filter($allReviews, fn ($r) => $r->getRating() <= 2));
+            $unread = count(array_filter($allReviews, fn ($r) => !$r->isRead()));
 
             $stats = [
-                'average'      => $total > 0 ? round($sum / $total, 1) : null,
-                'total'        => $total,
+                'average' => $total > 0 ? round($sum / $total, 1) : null,
+                'total' => $total,
                 'positiveRate' => $total > 0 ? round(($positive / $total) * 100) : 0,
                 'negativeRate' => $total > 0 ? round(($negative / $total) * 100) : 0,
-                'unreadCount'  => $unread,
-                'curve'        => $this->reviewRepository->getAverageRatingByMonth($current),
+                'unreadCount' => $unread,
+                'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
             ];
 
             $reviews = $this->reviewRepository->findBy(
@@ -60,12 +61,12 @@ class DashboardController extends AbstractController
         $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/dashboard.html.twig', [
-            'establishments'       => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => $current,
-            'stats'                => $stats,
-            'reviews'              => $reviews,
-            'unread_count'         => $stats['unreadCount'] ?? 0,
-            'jwt_token'            => $token,
+            'stats' => $stats,
+            'reviews' => $reviews,
+            'unread_count' => $stats['unreadCount'] ?? 0,
+            'jwt_token' => $token,
         ]);
     }
 
@@ -73,7 +74,7 @@ class DashboardController extends AbstractController
     public function establishment(string $id): Response
     {
         /** @var User $user */
-        $user    = $this->getUser();
+        $user = $this->getUser();
         $current = $this->establishmentRepository->find($id);
 
         if (!$current || $current->getOwner() !== $user) {
@@ -86,19 +87,19 @@ class DashboardController extends AbstractController
         );
 
         $allReviews = $this->reviewRepository->findBy(['establishment' => $current]);
-        $total      = count($allReviews);
-        $sum        = array_sum(array_map(fn($r) => $r->getRating(), $allReviews));
-        $positive   = count(array_filter($allReviews, fn($r) => $r->getRating() >= 4));
-        $negative   = count(array_filter($allReviews, fn($r) => $r->getRating() <= 2));
-        $unread     = count(array_filter($allReviews, fn($r) => !$r->isRead()));
+        $total = count($allReviews);
+        $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
+        $positive = count(array_filter($allReviews, fn ($r) => $r->getRating() >= 4));
+        $negative = count(array_filter($allReviews, fn ($r) => $r->getRating() <= 2));
+        $unread = count(array_filter($allReviews, fn ($r) => !$r->isRead()));
 
         $stats = [
-            'average'      => $total > 0 ? round($sum / $total, 1) : null,
-            'total'        => $total,
+            'average' => $total > 0 ? round($sum / $total, 1) : null,
+            'total' => $total,
             'positiveRate' => $total > 0 ? round(($positive / $total) * 100) : 0,
             'negativeRate' => $total > 0 ? round(($negative / $total) * 100) : 0,
-            'unreadCount'  => $unread,
-            'curve'        => $this->reviewRepository->getAverageRatingByMonth($current),
+            'unreadCount' => $unread,
+            'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
         ];
 
         $reviews = $this->reviewRepository->findBy(
@@ -110,12 +111,12 @@ class DashboardController extends AbstractController
         $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/dashboard.html.twig', [
-            'establishments'        => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => $current,
-            'stats'                 => $stats,
-            'reviews'               => $reviews,
-            'unread_count'          => $unread,
-            'jwt_token'             => $token,
+            'stats' => $stats,
+            'reviews' => $reviews,
+            'unread_count' => $unread,
+            'jwt_token' => $token,
         ]);
     }
 
@@ -123,7 +124,7 @@ class DashboardController extends AbstractController
     public function reviews(string $id): Response
     {
         /** @var User $user */
-        $user    = $this->getUser();
+        $user = $this->getUser();
         $current = $this->establishmentRepository->find($id);
 
         if (!$current || $current->getOwner() !== $user) {
@@ -131,17 +132,17 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token          = $this->jwtManager->create($user);
-        $unread         = count(array_filter(
+        $token = $this->jwtManager->create($user);
+        $unread = count(array_filter(
             $this->reviewRepository->findBy(['establishment' => $current]),
-            fn($r) => !$r->isRead()
+            fn ($r) => !$r->isRead()
         ));
 
         return $this->render('dashboard/reviews.html.twig', [
-            'establishments'        => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => $current,
-            'unread_count'          => $unread,
-            'jwt_token'             => $token,
+            'unread_count' => $unread,
+            'jwt_token' => $token,
         ]);
     }
 
@@ -149,7 +150,7 @@ class DashboardController extends AbstractController
     public function analysis(string $id): Response
     {
         /** @var User $user */
-        $user    = $this->getUser();
+        $user = $this->getUser();
         $current = $this->establishmentRepository->find($id);
 
         if (!$current || $current->getOwner() !== $user) {
@@ -157,14 +158,14 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token          = $this->jwtManager->create($user);
+        $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/analysis.html.twig', [
-            'establishments'        => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => $current,
-            'analysis'              => $current->getReviewAnalysis(),
-            'unread_count'          => 0,
-            'jwt_token'             => $token,
+            'analysis' => $current->getReviewAnalysis(),
+            'unread_count' => 0,
+            'jwt_token' => $token,
         ]);
     }
 
@@ -172,7 +173,7 @@ class DashboardController extends AbstractController
     public function settings(string $id): Response
     {
         /** @var User $user */
-        $user    = $this->getUser();
+        $user = $this->getUser();
         $current = $this->establishmentRepository->find($id);
 
         if (!$current || $current->getOwner() !== $user) {
@@ -180,13 +181,13 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token          = $this->jwtManager->create($user);
+        $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/settings.html.twig', [
-            'establishments'        => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => $current,
-            'unread_count'          => 0,
-            'jwt_token'             => $token,
+            'unread_count' => 0,
+            'jwt_token' => $token,
         ]);
     }
 
@@ -201,10 +202,10 @@ class DashboardController extends AbstractController
         );
 
         return $this->render('dashboard/establishment_new.html.twig', [
-            'establishments'        => $establishments,
+            'establishments' => $establishments,
             'current_establishment' => null,
-            'unread_count'          => 0,
-            'jwt_token'             => $token,
+            'unread_count' => 0,
+            'jwt_token' => $token,
         ]);
     }
 }

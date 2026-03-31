@@ -29,12 +29,14 @@ class TestEmailCommand extends Command
 
         if (!$establishment || !$review) {
             $output->writeln('<error>Pas de données en base.</error>');
+
             return Command::FAILURE;
         }
 
         $this->alertEmailService->sendNegativeReviewAlert($establishment, $review);
 
         $output->writeln('<info>Email envoyé ! Vérifie Mailtrap.</info>');
+
         return Command::SUCCESS;
     }
 }
