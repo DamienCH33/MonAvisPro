@@ -30,13 +30,13 @@ final class EstablishmentFactory extends PersistentProxyObjectFactory
         $pick = self::faker()->randomElement($establishments);
 
         return [
-            'owner'         => UserFactory::new(),
-            'name'          => $pick['name'],
-            'placeId'       => 'ChIJ' . strtoupper(self::faker()->bothify('??##??##??##??##')),
-            'address'       => $pick['address'],
+            'owner' => UserFactory::new(),
+            'name' => $pick['name'],
+            'placeId' => 'ChIJ'.strtoupper(self::faker()->bothify('??##??##??##??##')),
+            'address' => $pick['address'],
             'alertsEnabled' => self::faker()->boolean(75),
-            'lastSyncAt'    => self::faker()->optional(0.8)->dateTimeBetween('-2 days', 'now'),
-            'createdAt'     => self::faker()->dateTimeBetween('-3 months', '-1 week'),
+            'lastSyncAt' => self::faker()->optional(0.8)->dateTimeBetween('-2 days', 'now'),
+            'createdAt' => self::faker()->dateTimeBetween('-3 months', '-1 week'),
         ];
     }
 }

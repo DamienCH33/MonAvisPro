@@ -12,7 +12,7 @@ use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 final class UserFactory extends PersistentProxyObjectFactory
 {
     public function __construct(
-        private UserPasswordHasherInterface $passwordHasher
+        private UserPasswordHasherInterface $passwordHasher,
     ) {
         parent::__construct();
     }
@@ -25,9 +25,9 @@ final class UserFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'email'         => self::faker()->unique()->safeEmail(),
-            'password'      => 'password123',
-            'createdAt'     => self::faker()->dateTimeBetween('-6 months', 'now'),
+            'email' => self::faker()->unique()->safeEmail(),
+            'password' => 'password123',
+            'createdAt' => self::faker()->dateTimeBetween('-6 months', 'now'),
             'alertsEnabled' => self::faker()->boolean(80),
         ];
     }

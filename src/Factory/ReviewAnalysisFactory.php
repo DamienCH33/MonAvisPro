@@ -18,7 +18,7 @@ final class ReviewAnalysisFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'establishment'  => EstablishmentFactory::new(),
+            'establishment' => EstablishmentFactory::new(),
             'positiveThemes' => [
                 ['theme' => 'accueil chaleureux',   'percentage' => self::faker()->numberBetween(50, 85), 'example' => 'Personnel très accueillant'],
                 ['theme' => 'rapidité du service',  'percentage' => self::faker()->numberBetween(30, 60), 'example' => 'Service rapide et efficace'],
@@ -31,7 +31,7 @@ final class ReviewAnalysisFactory extends PersistentProxyObjectFactory
             'actionSuggestion' => self::faker()->randomElement([
                 "5 clients mentionnent l'attente le samedi — envisagez un système de réservation.",
                 "Plusieurs avis pointent le manque de communication — formez l'équipe sur l'accueil client.",
-                "Le rapport qualité/prix est souvent cité positivement — mettez-le en avant sur votre fiche Google.",
+                'Le rapport qualité/prix est souvent cité positivement — mettez-le en avant sur votre fiche Google.',
             ]),
             'updatedAt' => self::faker()->dateTimeBetween('-1 week', 'now'),
         ];
