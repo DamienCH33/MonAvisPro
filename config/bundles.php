@@ -10,7 +10,7 @@ $bundles = [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
 ];
 
-if ($_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? 'dev' !== 'prod') {
+if (($_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? 'dev') !== 'prod') {
     $bundles[Symfony\Bundle\MakerBundle\MakerBundle::class] = ['dev' => true];
     $bundles[Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class] = ['dev' => true, 'test' => true];
     $bundles[Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class] = ['dev' => true, 'test' => true];
