@@ -2,8 +2,8 @@
 
 namespace App\Repository;
 
-use App\Entity\Review;
 use App\Entity\Establishment;
+use App\Entity\Review;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,6 +16,14 @@ class ReviewRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Review::class);
     }
+
+    /**
+     * @return list<array{
+     *     month: string,
+     *     average: string,
+     *     total: string
+     * }>
+     */
     public function getAverageRatingByMonth(Establishment $establishment): array
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -31,13 +39,29 @@ class ReviewRepository extends ServiceEntityRepository
         ORDER BY month ASC
     ";
 
-        $result = $conn->executeQuery($sql, ['id' => $establishment->getId()]);
+        $result = $conn->executeQuery($sql, [
+            'id' => $establishment->getId(),
+        ]);
 
-        return $result->fetchAllAssociative();
+        $rows = $result->fetchAllAssociative();
+
+        return array_map(
+            static fn (array $row): array => [
+                'month' => (string) ($row['month'] ?? ''),
+                'average' => (string) ($row['average'] ?? '0'),
+                'total' => (string) ($row['total'] ?? '0'),
+            ],
+            $rows
+        );
     }
 
-    public function findNewReviewsSince(Establishment $establishment, \DateTimeImmutable $since): array
-    {
+    /**
+     * @return list<Review>
+     */
+    public function findNewReviewsSince(
+        Establishment $establishment,
+        \DateTimeImmutable $since,
+    ): array {
         return $this->createQueryBuilder('r')
             ->where('r.establishment = :establishment')
             ->andWhere('r.publishedAt >= :since')
