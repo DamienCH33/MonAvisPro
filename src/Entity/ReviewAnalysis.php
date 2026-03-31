@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ReviewAnalysisRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ReviewAnalysisRepository::class)]
@@ -12,16 +13,22 @@ class ReviewAnalysis
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     private ?Uuid $id = null;
 
     #[ORM\OneToOne(inversedBy: 'reviewAnalysis')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Establishment $establishment = null;
 
+    /**
+     * @var string[]
+     */
     #[ORM\Column(type: 'json')]
     private array $positiveThemes = [];
 
+    /**
+     * @var string[]
+     */
     #[ORM\Column(type: 'json')]
     private array $negativeThemes = [];
 
@@ -49,28 +56,43 @@ class ReviewAnalysis
     public function setEstablishment(?Establishment $establishment): static
     {
         $this->establishment = $establishment;
+
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getPositiveThemes(): array
     {
         return $this->positiveThemes;
     }
 
+    /**
+     * @param string[] $positiveThemes
+     */
     public function setPositiveThemes(array $positiveThemes): static
     {
         $this->positiveThemes = $positiveThemes;
+
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getNegativeThemes(): array
     {
         return $this->negativeThemes;
     }
 
+    /**
+     * @param string[] $negativeThemes
+     */
     public function setNegativeThemes(array $negativeThemes): static
     {
         $this->negativeThemes = $negativeThemes;
+
         return $this;
     }
 
@@ -82,6 +104,7 @@ class ReviewAnalysis
     public function setActionSuggestion(string $actionSuggestion): static
     {
         $this->actionSuggestion = $actionSuggestion;
+
         return $this;
     }
 
@@ -93,6 +116,7 @@ class ReviewAnalysis
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ReviewRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
@@ -12,7 +13,7 @@ class Review
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     private ?Uuid $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
@@ -53,6 +54,7 @@ class Review
     public function setEstablishment(?Establishment $establishment): static
     {
         $this->establishment = $establishment;
+
         return $this;
     }
 
@@ -64,6 +66,7 @@ class Review
     public function setGoogleAuthor(string $googleAuthor): static
     {
         $this->googleAuthor = $googleAuthor;
+
         return $this;
     }
 
@@ -75,6 +78,7 @@ class Review
     public function setGoogleAuthorPhoto(?string $googleAuthorPhoto): static
     {
         $this->googleAuthorPhoto = $googleAuthorPhoto;
+
         return $this;
     }
 
@@ -86,6 +90,7 @@ class Review
     public function setRating(int $rating): static
     {
         $this->rating = $rating;
+
         return $this;
     }
 
@@ -97,6 +102,7 @@ class Review
     public function setText(?string $text): static
     {
         $this->text = $text;
+
         return $this;
     }
 
@@ -108,6 +114,7 @@ class Review
     public function setPublishedAt(\DateTimeImmutable $publishedAt): static
     {
         $this->publishedAt = $publishedAt;
+
         return $this;
     }
 
@@ -119,6 +126,7 @@ class Review
     public function setGoogleReviewId(string $googleReviewId): static
     {
         $this->googleReviewId = $googleReviewId;
+
         return $this;
     }
 
@@ -130,6 +138,7 @@ class Review
     public function setIsRead(bool $isRead): static
     {
         $this->isRead = $isRead;
+
         return $this;
     }
 }

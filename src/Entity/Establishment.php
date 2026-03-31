@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Entity\User;
 use App\Repository\EstablishmentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: EstablishmentRepository::class)]
@@ -15,7 +15,7 @@ class Establishment
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     private ?Uuid $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'establishments')]
@@ -40,6 +40,9 @@ class Establishment
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /**
+     * @var Collection<int, Review>
+     */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'establishment', orphanRemoval: true)]
     private Collection $reviews;
 
@@ -65,6 +68,7 @@ class Establishment
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
         return $this;
     }
 
@@ -76,6 +80,7 @@ class Establishment
     public function setName(string $name): static
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -87,6 +92,7 @@ class Establishment
     public function setPlaceId(string $placeId): static
     {
         $this->placeId = $placeId;
+
         return $this;
     }
 
@@ -98,6 +104,7 @@ class Establishment
     public function setAddress(string $address): static
     {
         $this->address = $address;
+
         return $this;
     }
 
@@ -109,6 +116,7 @@ class Establishment
     public function setAlertsEnabled(bool $alertsEnabled): static
     {
         $this->alertsEnabled = $alertsEnabled;
+
         return $this;
     }
 
@@ -120,6 +128,7 @@ class Establishment
     public function setLastSyncAt(?\DateTimeImmutable $lastSyncAt): static
     {
         $this->lastSyncAt = $lastSyncAt;
+
         return $this;
     }
 
@@ -131,6 +140,7 @@ class Establishment
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -148,6 +158,7 @@ class Establishment
             $this->reviews->add($review);
             $review->setEstablishment($this);
         }
+
         return $this;
     }
 
@@ -158,6 +169,7 @@ class Establishment
                 $review->setEstablishment(null);
             }
         }
+
         return $this;
     }
 
@@ -168,13 +180,14 @@ class Establishment
 
     public function setReviewAnalysis(?ReviewAnalysis $reviewAnalysis): static
     {
-        if ($reviewAnalysis === null && $this->reviewAnalysis !== null) {
+        if (null === $reviewAnalysis && null !== $this->reviewAnalysis) {
             $this->reviewAnalysis->setEstablishment(null);
         }
-        if ($reviewAnalysis !== null && $reviewAnalysis->getEstablishment() !== $this) {
+        if (null !== $reviewAnalysis && $reviewAnalysis->getEstablishment() !== $this) {
             $reviewAnalysis->setEstablishment($this);
         }
         $this->reviewAnalysis = $reviewAnalysis;
+
         return $this;
     }
 }
