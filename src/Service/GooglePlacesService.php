@@ -11,20 +11,39 @@ class GooglePlacesService
     public function __construct(
         private HttpClientInterface $httpClient,
         private string $apiKey,
-    ) {}
+    ) {
+    }
 
     /**
-     * Récupère les détails + avis d'un établissement via son Google Place ID
+     * Récupère les détails + avis d'un établissement via son Google Place ID.
+     *
+     * @return array{
+     *     name: string,
+     *     address: string,
+     *     rating: int|float|null,
+     *     reviews: list<array{
+     *         googleReviewId: string,
+     *         googleAuthor: string,
+     *         googleAuthorPhoto: string|null,
+     *         rating: int|float,
+     *         text: string|null,
+     *         publishedAt: \DateTimeImmutable
+     *     }>
+     * }|null
      */
     public function getPlaceDetails(string $placeId): ?array
     {
         try {
-            $response = $this->httpClient->request('GET', self::BASE_URL . $placeId, [
-                'headers' => [
-                    'X-Goog-Api-Key'    => $this->apiKey,
-                    'X-Goog-FieldMask'  => 'id,displayName,formattedAddress,rating,reviews',
-                ],
-            ]);
+            $response = $this->httpClient->request(
+                'GET',
+                self::BASE_URL.$placeId,
+                [
+                    'headers' => [
+                        'X-Goog-Api-Key' => $this->apiKey,
+                        'X-Goog-FieldMask' => 'id,displayName,formattedAddress,rating,reviews',
+                    ],
+                ]
+            );
 
             $data = $response->toArray();
 
@@ -35,7 +54,23 @@ class GooglePlacesService
     }
 
     /**
-     * Formate la réponse brute Google en tableau propre
+     * Formate la réponse brute Google en tableau propre.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return array{
+     *     name: string,
+     *     address: string,
+     *     rating: int|float|null,
+     *     reviews: list<array{
+     *         googleReviewId: string,
+     *         googleAuthor: string,
+     *         googleAuthorPhoto: string|null,
+     *         rating: int|float,
+     *         text: string|null,
+     *         publishedAt: \DateTimeImmutable
+     *     }>
+     * }
      */
     private function format(array $data): array
     {
@@ -43,21 +78,21 @@ class GooglePlacesService
 
         foreach ($data['reviews'] ?? [] as $review) {
             $reviews[] = [
-                'googleReviewId'    => $review['name'] ?? uniqid('review_'),
-                'googleAuthor'      => $review['authorAttribution']['displayName'] ?? 'Anonyme',
+                'googleReviewId' => $review['name'] ?? uniqid('review_'),
+                'googleAuthor' => $review['authorAttribution']['displayName'] ?? 'Anonyme',
                 'googleAuthorPhoto' => $review['authorAttribution']['photoUri'] ?? null,
-                'rating'            => $review['rating'] ?? 0,
-                'text'              => $review['text']['text'] ?? null,
-                'publishedAt'       => isset($review['publishTime'])
+                'rating' => $review['rating'] ?? 0,
+                'text' => $review['text']['text'] ?? null,
+                'publishedAt' => isset($review['publishTime'])
                     ? new \DateTimeImmutable($review['publishTime'])
                     : new \DateTimeImmutable(),
             ];
         }
 
         return [
-            'name'    => $data['displayName']['text'] ?? '',
+            'name' => $data['displayName']['text'] ?? '',
             'address' => $data['formattedAddress'] ?? '',
-            'rating'  => $data['rating'] ?? null,
+            'rating' => $data['rating'] ?? null,
             'reviews' => $reviews,
         ];
     }

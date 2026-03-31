@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\Establishment;
 use App\Entity\Review;
-use App\Service\AlertEmailService;
 use App\Repository\ReviewRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -15,33 +14,39 @@ class ReviewSyncService
         private EntityManagerInterface $em,
         private ReviewRepository $reviewRepository,
         private AlertEmailService $alertEmailService,
-    ) {}
+    ) {
+    }
 
     /**
      * Synchronise les avis Google d'un établissement
-     * Retourne le nombre de nouveaux avis insérés
+     * Retourne le nombre de nouveaux avis insérés.
      */
     public function sync(Establishment $establishment): int
     {
-        $data = $this->googlePlacesService->getPlaceDetails($establishment->getPlaceId());
+        $placeId = $establishment->getPlaceId();
 
-        if ($data === null || empty($data['reviews'])) {
+        if (null === $placeId) {
+            return 0;
+        }
+
+        $data = $this->googlePlacesService->getPlaceDetails($placeId);
+
+        if (null === $data || empty($data['reviews'])) {
             return 0;
         }
 
         $existingReviews = $this->reviewRepository->findBy([
-            'establishment' => $establishment
+            'establishment' => $establishment,
         ]);
 
         $existingIds = array_map(
-            fn(Review $review) => $review->getGoogleReviewId(),
+            static fn (Review $review): ?string => $review->getGoogleReviewId(),
             $existingReviews
         );
 
         $newCount = 0;
 
         foreach ($data['reviews'] as $reviewData) {
-
             if (empty($reviewData['googleReviewId'])) {
                 continue;
             }
@@ -50,21 +55,26 @@ class ReviewSyncService
                 continue;
             }
 
+            $rating = (int) round($reviewData['rating']);
+
             $review = new Review();
             $review->setEstablishment($establishment);
             $review->setGoogleReviewId($reviewData['googleReviewId']);
-            $review->setGoogleAuthor($reviewData['googleAuthor'] ?? null);
-            $review->setGoogleAuthorPhoto($reviewData['googleAuthorPhoto'] ?? null);
-            $review->setRating($reviewData['rating'] ?? 0);
+            $review->setGoogleAuthor($reviewData['googleAuthor']);
+            $review->setGoogleAuthorPhoto($reviewData['googleAuthorPhoto']);
+            $review->setRating($rating);
             $review->setText($reviewData['text'] ?? '');
-            $review->setPublishedAt($reviewData['publishedAt'] ?? new \DateTimeImmutable());
+            $review->setPublishedAt($reviewData['publishedAt']);
             $review->setIsRead(false);
 
             $this->em->persist($review);
-            $newCount++;
+            ++$newCount;
 
-            if (($reviewData['rating'] ?? 5) <= 2 && $establishment->isAlertsEnabled()) {
-                $this->alertEmailService->sendNegativeReviewAlert($establishment, $review);
+            if ($rating <= 2 && $establishment->isAlertsEnabled()) {
+                $this->alertEmailService->sendNegativeReviewAlert(
+                    $establishment,
+                    $review
+                );
             }
         }
 

@@ -13,10 +13,11 @@ class AlertEmailService
     public function __construct(
         private MailerInterface $mailer,
         private Environment $twig,
-    ) {}
+    ) {
+    }
 
     /**
-     * Envoie une alerte email quand un avis négatif (≤ 2) est détecté
+     * Envoie une alerte email quand un avis négatif (≤ 2) est détecté.
      */
     public function sendNegativeReviewAlert(Establishment $establishment, Review $review): void
     {
@@ -28,7 +29,7 @@ class AlertEmailService
 
         $html = $this->twig->render('emails/negative_review_alert.html.twig', [
             'establishment' => $establishment,
-            'review'        => $review,
+            'review' => $review,
         ]);
 
         $email = (new Email())

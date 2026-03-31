@@ -13,21 +13,27 @@ class ReviewAnalysisService
         private LlmService $llmService,
         private ReviewRepository $reviewRepository,
         private EntityManagerInterface $em,
-    ) {}
+    ) {
+    }
 
     /**
-     * Lance ou relance l'analyse LLM pour un établissement
+     * Lance ou relance l'analyse LLM pour un établissement.
      */
     public function analyze(Establishment $establishment): ?ReviewAnalysis
     {
-        $reviews = $this->reviewRepository->findBy(['establishment' => $establishment]);
+        $reviews = $this->reviewRepository->findBy([
+            'establishment' => $establishment,
+        ]);
 
         $reviewsData = array_filter(
-            array_map(fn($r) => [
-                'rating' => $r->getRating(),
-                'text'   => $r->getText(),
-            ], $reviews),
-            fn($r) => !empty($r['text'])
+            array_map(
+                static fn ($r): array => [
+                    'rating' => $r->getRating(),
+                    'text' => $r->getText(),
+                ],
+                $reviews
+            ),
+            static fn (array $r): bool => !empty($r['text'])
         );
 
         if (empty($reviewsData)) {
@@ -36,21 +42,31 @@ class ReviewAnalysisService
 
         $result = $this->llmService->analyzeReviews(array_values($reviewsData));
 
-        if ($result === null) {
+        if (null === $result) {
             return null;
         }
 
         $analysis = $establishment->getReviewAnalysis();
 
-        if ($analysis === null) {
+        if (null === $analysis) {
             $analysis = new ReviewAnalysis();
             $analysis->setEstablishment($establishment);
             $this->em->persist($analysis);
         }
 
-        $analysis->setPositiveThemes($result['positive_themes'] ?? []);
-        $analysis->setNegativeThemes($result['negative_themes'] ?? []);
-        $analysis->setActionSuggestion($result['action_suggestion'] ?? '');
+        $positiveThemes = array_map(
+            static fn (array $theme): string => $theme['theme'],
+            $result['positive_themes']
+        );
+
+        $negativeThemes = array_map(
+            static fn (array $theme): string => $theme['theme'],
+            $result['negative_themes']
+        );
+
+        $analysis->setPositiveThemes($positiveThemes);
+        $analysis->setNegativeThemes($negativeThemes);
+        $analysis->setActionSuggestion($result['action_suggestion']);
         $analysis->setUpdatedAt(new \DateTimeImmutable());
 
         $this->em->flush();

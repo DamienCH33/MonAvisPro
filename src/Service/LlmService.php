@@ -7,21 +7,45 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class LlmService
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
-    private const MODEL   = 'gpt-4o-mini';
+    private const MODEL = 'gpt-4o-mini';
 
     public function __construct(
         private HttpClientInterface $httpClient,
         private string $apiKey,
-    ) {}
+    ) {
+    }
 
     /**
-     * Analyse thématique des avis d'un établissement
-     * Retourne un tableau structuré avec thèmes positifs/négatifs + suggestion
+     * Analyse thématique des avis d'un établissement.
+     * Retourne un tableau structuré avec thèmes positifs/négatifs + suggestion.
+     *
+     * @param list<array{
+     *     rating: int,
+     *     text: string|null
+     * }> $reviews
+     *
+     * @return array{
+     *     positive_themes: list<array{
+     *         theme: string,
+     *         percentage: int,
+     *         example: string
+     *     }>,
+     *     negative_themes: list<array{
+     *         theme: string,
+     *         percentage: int,
+     *         example: string
+     *     }>,
+     *     action_suggestion: string
+     * }|null
      */
     public function analyzeReviews(array $reviews): ?array
     {
         $reviewsList = implode("\n", array_map(
-            fn($r) => sprintf('- Note %d/5 : %s', $r['rating'], $r['text'] ?? '(sans commentaire)'),
+            fn (array $r) => sprintf(
+                '- Note %d/5 : %s',
+                $r['rating'],
+                $r['text'] ?? '(sans commentaire)'
+            ),
             $reviews
         ));
 
@@ -47,42 +71,62 @@ PROMPT;
         try {
             $response = $this->httpClient->request('POST', self::API_URL, [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model'           => self::MODEL,
+                    'model' => self::MODEL,
                     'response_format' => ['type' => 'json_object'],
-                    'messages'        => [
+                    'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens'      => 1000,
-                    'temperature'     => 0.3,
+                    'max_tokens' => 1000,
+                    'temperature' => 0.3,
                 ],
             ]);
 
-            $data    = $response->toArray();
+            $data = $response->toArray();
             $content = $data['choices'][0]['message']['content'] ?? null;
 
-            if ($content === null) {
+            if (null === $content) {
                 return null;
             }
 
-            return json_decode($content, true);
+            /** @var array{
+             *     positive_themes: list<array{
+             *         theme: string,
+             *         percentage: int,
+             *         example: string
+             *     }>,
+             *     negative_themes: list<array{
+             *         theme: string,
+             *         percentage: int,
+             *         example: string
+             *     }>,
+             *     action_suggestion: string
+             * } $decoded
+             */
+            $decoded = json_decode($content, true);
+
+            return $decoded;
         } catch (\Exception $e) {
             return null;
         }
     }
 
     /**
-     * Génère une réponse professionnelle à un avis
+     * Génère une réponse professionnelle à un avis.
      */
-    public function generateReply(string $establishmentName, int $rating, ?string $reviewText, string $tone = 'cordial'): ?string
-    {
+    public function generateReply(
+        string $establishmentName,
+        int $rating,
+        ?string $reviewText,
+        string $tone = 'cordial',
+    ): ?string {
         $toneLabel = match ($tone) {
-            'formel'    => 'formel et professionnel',
+            'formel' => 'formel et professionnel',
             'empathique' => 'empathique et compréhensif',
-            default      => 'cordial et chaleureux',
+            default => 'cordial et chaleureux',
         };
 
         $prompt = <<<PROMPT
@@ -98,20 +142,21 @@ PROMPT;
         try {
             $response = $this->httpClient->request('POST', self::API_URL, [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model'       => self::MODEL,
-                    'messages'    => [
+                    'model' => self::MODEL,
+                    'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens'  => 300,
+                    'max_tokens' => 300,
                     'temperature' => 0.7,
                 ],
             ]);
 
             $data = $response->toArray();
+
             return $data['choices'][0]['message']['content'] ?? null;
         } catch (\Exception $e) {
             return null;
