@@ -19,6 +19,21 @@
 </head>
 
 <body>
+    {% if app_demo_mode is defined and app_demo_mode %}
+<div style="
+    background:#f59e0b;
+    color:#111;
+    text-align:center;
+    padding:7px;
+    font-size:13px;
+    font-weight:700;
+    position:sticky;
+    top:0;
+    z-index:999999;
+">
+    Version démo — utilisez demo@monavispro.fr / demo1234*
+</div>
+{% endif %}
 
     <div class="rr-aurora"></div>
 
@@ -90,7 +105,11 @@
                     {% block public_nav %}
                     <div class="d-flex align-items-center gap-2">
                         <a href="{{ path('app_login') }}" class="rr-btn rr-btn-secondary rr-btn-sm">Connexion</a>
-                        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-primary rr-btn-sm">Démarrer gratuit</a>
+                        {% if not app_demo_mode %}
+                        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta rr-btn-lg">
+                            Démarrer gratuitement
+                        </a>
+                        {% endif %}
                     </div>
                     {% endblock %}
                 </header>
@@ -115,7 +134,9 @@
     </div>{# fin div public #}
     {% endif %}
 
-    {# Bootstrap 5 JS #}
+        {# Bootstrap 5 JS #}
+    {% block modals %}{% endblock %}
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 
     {% block javascripts %}{% endblock %}

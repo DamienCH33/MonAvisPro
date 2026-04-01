@@ -23,9 +23,11 @@
         </p>
 
         <div class="d-flex flex-wrap gap-2 justify-content-center mb-5">
-          <a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta rr-btn-lg">
-            Démarrer gratuitement
-          </a>
+          {% if not app_demo_mode %}
+            <a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta rr-btn-lg">
+              Démarrer gratuitement
+            </a>
+          {% endif %}
           <a href="#features" class="rr-btn rr-btn-secondary rr-btn-lg">
             Voir comment ça marche
           </a>

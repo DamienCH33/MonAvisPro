@@ -1043,6 +1043,23 @@ a {
     position: relative;
     z-index: 2002 !important;
 }
+
+.modal,
+.modal-dialog,
+.modal-content {
+    pointer-events: auto !important;
+}
+
+body.modal-open .rr-topbar,
+body.modal-open .rr-sidebar,
+body.modal-open .rr-main-content {
+    pointer-events: none;
+}
+
+body.modal-open .modal,
+body.modal-open .modal * {
+    pointer-events: auto !important;
+}
 /* ---- OFFCANVAS SIDEBAR MOBILE ---- */
 .rr-offcanvas-btn {
     display: none;

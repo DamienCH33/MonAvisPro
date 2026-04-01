@@ -1,5 +1,7 @@
 twig:
-    file_name_pattern: '*.twig'
+    file_name_pattern: "*.twig"
+    globals:
+        app_demo_mode: "%app.demo_mode%"
 
 when@test:
     twig:
