@@ -1,4 +1,5 @@
 parameters:
+    app.demo_mode: "%env(bool:APP_DEMO_MODE)%"
 
 services:
     _defaults:
