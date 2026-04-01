@@ -41,6 +41,9 @@ class Review
     #[ORM\Column]
     private bool $isRead = false;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $ownerReply = null;
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -138,6 +141,18 @@ class Review
     public function setIsRead(bool $isRead): static
     {
         $this->isRead = $isRead;
+
+        return $this;
+    }
+
+    public function getOwnerReply(): ?string
+    {
+        return $this->ownerReply;
+    }
+
+    public function setOwnerReply(?string $ownerReply): self
+    {
+        $this->ownerReply = $ownerReply;
 
         return $this;
     }

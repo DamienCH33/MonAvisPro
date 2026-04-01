@@ -29,6 +29,7 @@ trait ReviewSerializerTrait
             'publishedAt' => $r->getPublishedAt()->format('c'),
             'isRead' => $r->isRead(),
             'googleReviewId' => $r->getGoogleReviewId(),
+            'ownerReply' => $r->getOwnerReply(),
         ];
     }
 }

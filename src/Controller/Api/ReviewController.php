@@ -20,8 +20,7 @@ class ReviewController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private ReviewRepository $reviewRepository,
-    ) {
-    }
+    ) {}
 
     #[Route('/establishments/{id}/reviews', name: 'api_reviews_list', methods: ['GET'])]
     public function list(Establishment $establishment, Request $request): JsonResponse
@@ -80,7 +79,7 @@ class ReviewController extends AbstractController
             ->getResult();
 
         return $this->json([
-            'data' => array_map(fn (Review $r) => $this->serialize($r), $reviews),
+            'data' => array_map(fn(Review $r) => $this->serialize($r), $reviews),
             'pagination' => [
                 'page' => $page,
                 'limit' => $limit,
@@ -109,10 +108,10 @@ class ReviewController extends AbstractController
         }
 
         $total = count($reviews);
-        $sum = array_sum(array_map(fn (Review $r) => $r->getRating(), $reviews));
-        $positive = count(array_filter($reviews, fn (Review $r) => $r->getRating() >= 4));
-        $negative = count(array_filter($reviews, fn (Review $r) => $r->getRating() <= 2));
-        $unread = count(array_filter($reviews, fn (Review $r) => !$r->isRead()));
+        $sum = array_sum(array_map(fn(Review $r) => $r->getRating(), $reviews));
+        $positive = count(array_filter($reviews, fn(Review $r) => $r->getRating() >= 4));
+        $negative = count(array_filter($reviews, fn(Review $r) => $r->getRating() <= 2));
+        $unread = count(array_filter($reviews, fn(Review $r) => !$r->isRead()));
 
         $repartition = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         foreach ($reviews as $review) {
@@ -141,5 +140,56 @@ class ReviewController extends AbstractController
         $this->em->flush();
 
         return $this->json(['message' => 'Avis marqué comme lu.']);
+    }
+
+    #[Route('/reviews/{id}/unread', name: 'api_reviews_mark_unread', methods: ['PATCH'])]
+    public function markUnread(Review $review): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $review->getEstablishment());
+
+        $review->setIsRead(false);
+        $this->em->flush();
+
+        return $this->json(['message' => 'Avis marqué comme non lu']);
+    }
+
+    #[Route('/reviews/{id}/reply', name: 'api_review_reply', methods: ['POST'])]
+    public function reply(Review $review, Request $request): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $review->getEstablishment());
+
+        $data = json_decode($request->getContent(), true);
+
+        $reply = $data['reply'] ?? null;
+
+        if (!$reply) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Réponse vide'
+            ], 400);
+        }
+
+        $review->setOwnerReply($reply);
+        $this->em->flush();
+
+        return $this->json([
+            'success' => true
+        ]);
+    }
+
+    #[Route('/reviews/{id}/reply', name: 'api_review_delete_reply', methods: ['DELETE'])]
+    public function deleteReply(Review $review): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(
+            'ESTABLISHMENT_OWNER',
+            $review->getEstablishment()
+        );
+
+        $review->setOwnerReply(null);
+        $this->em->flush();
+
+        return $this->json([
+            'success' => true
+        ]);
     }
 }
