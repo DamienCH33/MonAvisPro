@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+{% block title %}Email envoyé — MonAvisPro{% endblock %}
+
+{% block body %}
+<div class="rr-auth-wrapper">
+    <div class="rr-auth-box">
+
+        <div class="rr-logo mb-4 justify-content-center">
+            <div class="rr-logo__dot"></div>
+            <span class="rr-logo__text">MonAvisPro</span>
+        </div>
+
+        <div class="text-center mb-4" style="font-size:32px">📧</div>
+
+        <div class="rr-auth-title text-center">Email envoyé !</div>
+        <div class="rr-auth-sub text-center">
+            Si un compte correspond à votre email, vous allez recevoir un lien de réinitialisation.
+            Ce lien expirera dans
+            <strong style="color:var(--rr-t1)">
+                {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}
+            </strong>.
+        </div>
+
+        <div class="rr-flash rr-flash-warning mt-3">
+            Si vous ne recevez pas d'email, vérifiez vos spams ou
+            <a href="{{ path('app_forgot_password_request') }}" style="color:var(--rr-yellow)">réessayez</a>.
+        </div>
+
+        <div class="text-center mt-4" style="font-size:12px;color:rgba(255,255,255,.35)">
+            <a href="{{ path('app_login') }}" style="color:var(--rr-green)">← Retour à la connexion</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

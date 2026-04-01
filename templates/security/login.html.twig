@@ -1,6 +1,5 @@
-{# templates/security/login.html.twig #}
 {% extends 'base.html.twig' %}
-{% block title %}Connexion — ReviewRadar{% endblock %}
+{% block title %}Connexion — Mon Avis Pro{% endblock %}
 
 {% block public_nav %}
   <div class="d-flex align-items-center gap-2">
@@ -46,7 +45,9 @@
           <input type="checkbox" name="_remember_me">
           Se souvenir de moi
         </label>
-        <a href="#" style="font-size:12px;color:var(--rr-green)">Mot de passe oublié ?</a>
+        <a href="{{ path('app_forgot_password_request') }}" style="font-size:12px;color:var(--rr-green)">
+            Mot de passe oublié ?
+        </a>
       </div>
 
       <button type="submit" class="rr-btn rr-btn-primary rr-btn-full rr-btn-lg">

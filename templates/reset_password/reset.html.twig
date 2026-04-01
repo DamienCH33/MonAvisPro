@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau mot de passe — MonAvisPro{% endblock %}
+
+{% block body %}
+<div class="rr-auth-wrapper">
+    <div class="rr-auth-box">
+
+        <div class="rr-logo mb-4 justify-content-center">
+            <div class="rr-logo__dot"></div>
+            <span class="rr-logo__text">MonAvisPro</span>
+        </div>
+
+        <div class="rr-auth-title text-center">Nouveau mot de passe</div>
+        <div class="rr-auth-sub text-center">Choisissez un mot de passe sécurisé.</div>
+
+        {{ form_start(resetForm, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(resetForm.plainPassword.first, 'Nouveau mot de passe', {'label_attr': {'class': 'rr-label'}}) }}
+            {{ form_widget(resetForm.plainPassword.first, {'attr': {'class': 'rr-input', 'placeholder': '8 caractères minimum'}}) }}
+            {% if form_errors(resetForm.plainPassword.first) %}
+                <div class="rr-error">{{ form_errors(resetForm.plainPassword.first) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+            {{ form_label(resetForm.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'rr-label'}}) }}
+            {{ form_widget(resetForm.plainPassword.second, {'attr': {'class': 'rr-input', 'placeholder': 'Répétez le mot de passe'}}) }}
+            {% if form_errors(resetForm.plainPassword.second) %}
+                <div class="rr-error">{{ form_errors(resetForm.plainPassword.second) }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="rr-btn rr-btn-primary rr-btn-full rr-btn-lg">
+            Réinitialiser le mot de passe
+        </button>
+
+        {{ form_end(resetForm) }}
+
+    </div>
+</div>
+{% endblock %}
