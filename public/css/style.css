@@ -1026,6 +1026,23 @@ a {
     margin-bottom: 24px;
 }
 
+.modal {
+    z-index: 2000 !important;
+}
+
+.modal-dialog {
+    z-index: 2001 !important;
+    position: relative;
+}
+
+.modal-backdrop {
+    z-index: 1990 !important;
+}
+
+.modal-content {
+    position: relative;
+    z-index: 2002 !important;
+}
 /* ---- OFFCANVAS SIDEBAR MOBILE ---- */
 .rr-offcanvas-btn {
     display: none;
