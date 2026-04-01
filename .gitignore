@@ -36,3 +36,6 @@ phpstan-result-cache.php
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
+.env
+config/jwt/private.pem
+config/jwt/public.pem
