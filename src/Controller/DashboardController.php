@@ -17,7 +17,8 @@ class DashboardController extends AbstractController
         private EstablishmentRepository $establishmentRepository,
         private ReviewRepository $reviewRepository,
         private JWTTokenManagerInterface $jwtManager,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'dashboard')]
     public function index(): Response
@@ -36,25 +37,25 @@ class DashboardController extends AbstractController
 
         if ($current) {
             $allReviews = $this->reviewRepository->findBy([
-                'establishment' => $current
+                'establishment' => $current,
             ]);
 
             $total = count($allReviews);
-            $sum = array_sum(array_map(fn($r) => $r->getRating(), $allReviews));
+            $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
 
             $positive = count(array_filter(
                 $allReviews,
-                fn($r) => $r->getRating() >= 4
+                fn ($r) => $r->getRating() >= 4
             ));
 
             $negative = count(array_filter(
                 $allReviews,
-                fn($r) => $r->getRating() <= 2
+                fn ($r) => $r->getRating() <= 2
             ));
 
             $unread = count(array_filter(
                 $allReviews,
-                fn($r) => !$r->isRead()
+                fn ($r) => !$r->isRead()
             ));
 
             $repartition = [
@@ -66,7 +67,7 @@ class DashboardController extends AbstractController
             ];
 
             foreach ($allReviews as $review) {
-                $repartition[$review->getRating()]++;
+                ++$repartition[$review->getRating()];
             }
 
             $stats = [
@@ -116,25 +117,25 @@ class DashboardController extends AbstractController
         );
 
         $allReviews = $this->reviewRepository->findBy([
-            'establishment' => $current
+            'establishment' => $current,
         ]);
 
         $total = count($allReviews);
-        $sum = array_sum(array_map(fn($r) => $r->getRating(), $allReviews));
+        $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
 
         $positive = count(array_filter(
             $allReviews,
-            fn($r) => $r->getRating() >= 4
+            fn ($r) => $r->getRating() >= 4
         ));
 
         $negative = count(array_filter(
             $allReviews,
-            fn($r) => $r->getRating() <= 2
+            fn ($r) => $r->getRating() <= 2
         ));
 
         $unread = count(array_filter(
             $allReviews,
-            fn($r) => !$r->isRead()
+            fn ($r) => !$r->isRead()
         ));
 
         $repartition = [
@@ -146,7 +147,7 @@ class DashboardController extends AbstractController
         ];
 
         foreach ($allReviews as $review) {
-            $repartition[$review->getRating()]++;
+            ++$repartition[$review->getRating()];
         }
 
         $stats = [
@@ -192,7 +193,7 @@ class DashboardController extends AbstractController
         $token = $this->jwtManager->create($user);
         $unread = count(array_filter(
             $this->reviewRepository->findBy(['establishment' => $current]),
-            fn($r) => !$r->isRead()
+            fn ($r) => !$r->isRead()
         ));
 
         return $this->render('dashboard/reviews.html.twig', [

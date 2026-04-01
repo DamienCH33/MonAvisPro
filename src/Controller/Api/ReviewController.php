@@ -20,7 +20,8 @@ class ReviewController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private ReviewRepository $reviewRepository,
-    ) {}
+    ) {
+    }
 
     #[Route('/establishments/{id}/reviews', name: 'api_reviews_list', methods: ['GET'])]
     public function list(Establishment $establishment, Request $request): JsonResponse
@@ -79,7 +80,7 @@ class ReviewController extends AbstractController
             ->getResult();
 
         return $this->json([
-            'data' => array_map(fn(Review $r) => $this->serialize($r), $reviews),
+            'data' => array_map(fn (Review $r) => $this->serialize($r), $reviews),
             'pagination' => [
                 'page' => $page,
                 'limit' => $limit,
@@ -108,10 +109,10 @@ class ReviewController extends AbstractController
         }
 
         $total = count($reviews);
-        $sum = array_sum(array_map(fn(Review $r) => $r->getRating(), $reviews));
-        $positive = count(array_filter($reviews, fn(Review $r) => $r->getRating() >= 4));
-        $negative = count(array_filter($reviews, fn(Review $r) => $r->getRating() <= 2));
-        $unread = count(array_filter($reviews, fn(Review $r) => !$r->isRead()));
+        $sum = array_sum(array_map(fn (Review $r) => $r->getRating(), $reviews));
+        $positive = count(array_filter($reviews, fn (Review $r) => $r->getRating() >= 4));
+        $negative = count(array_filter($reviews, fn (Review $r) => $r->getRating() <= 2));
+        $unread = count(array_filter($reviews, fn (Review $r) => !$r->isRead()));
 
         $repartition = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         foreach ($reviews as $review) {
@@ -165,7 +166,7 @@ class ReviewController extends AbstractController
         if (!$reply) {
             return $this->json([
                 'success' => false,
-                'message' => 'Réponse vide'
+                'message' => 'Réponse vide',
             ], 400);
         }
 
@@ -173,7 +174,7 @@ class ReviewController extends AbstractController
         $this->em->flush();
 
         return $this->json([
-            'success' => true
+            'success' => true,
         ]);
     }
 
@@ -189,7 +190,7 @@ class ReviewController extends AbstractController
         $this->em->flush();
 
         return $this->json([
-            'success' => true
+            'success' => true,
         ]);
     }
 }
