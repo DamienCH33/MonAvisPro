@@ -3,6 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="To8fXuk1DV1uyYgRflzRh3YpnioNpgtCsgjXUJnf7mI" />
+    <meta name="description"
+        content="Gérez vos avis Google, détectez les avis négatifs et générez des réponses automatiques grâce à l’IA. Améliorez votre e-réputation et votre note client." />
+    <meta name="robots" content="index, follow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mon Avis Pro{% endblock %}</title>
 
@@ -20,7 +24,7 @@
 
 <body>
     {% if app_demo_mode is defined and app_demo_mode %}
-<div style="
+    <div style="
     background:#f59e0b;
     color:#111;
     text-align:center;
@@ -31,9 +35,9 @@
     top:0;
     z-index:999999;
 ">
-    Version démo — utilisez demo@monavispro.fr / demo1234*
-</div>
-{% endif %}
+        Version démo — utilisez demo@monavispro.fr / demo1234*
+    </div>
+    {% endif %}
 
     <div class="rr-aurora"></div>
 
@@ -134,7 +138,7 @@
     </div>{# fin div public #}
     {% endif %}
 
-        {# Bootstrap 5 JS #}
+    {# Bootstrap 5 JS #}
     {% block modals %}{% endblock %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
