@@ -1,141 +1,116 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un établissement — MonAvisPro{% endblock %}
-{% block page_title %}Ajouter un établissement{% endblock %}
-
-{% block body %}
-<script>const JWT_TOKEN = '{{ jwt_token }}';</script>
-
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-6">
-        <div class="rr-card rr-card-lg">
-
-            <div class="rr-page-title mb-1">Nouvel établissement</div>
-            <div class="rr-page-sub mb-4">
-                Ajoutez votre commerce pour commencer à surveiller vos avis Google.
-            </div>
-
-            <div id="form-error" class="rr-flash rr-flash-error" style="display:none"></div>
-
-            <div class="mb-3">
-                <label class="rr-label">Nom de l'établissement *</label>
-                <input type="text" class="rr-input" id="name"
-                       placeholder="Ex: Boulangerie Du Coin">
-            </div>
-
-            <div class="mb-3">
-                <label class="rr-label">Adresse complète *</label>
-                <input type="text" class="rr-input" id="address"
-                       placeholder="Ex: 12 rue de la Paix, 75001 Paris">
-            </div>
-
-            <div class="mb-3">
-                <label class="rr-label">Google Place ID *</label>
-                <input type="text" class="rr-input rr-mono" id="placeId"
-                       placeholder="Ex: ChIJN1t_tDeuEmsRUsoyG83frY4">
-                <div class="rr-hint">
-                    Trouvez votre Place ID sur
-                    <a href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
-                       target="_blank" style="color:var(--rr-green)">
-                        Google Place ID Finder →
-                    </a>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="rr-check">
-                    <input type="checkbox" id="alertsEnabled" checked>
-                    Activer les alertes email pour les avis négatifs (≤ 2★)
-                </label>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button onclick="createEstablishment()" class="rr-btn rr-btn-primary rr-btn-lg" id="create-btn">
-                    Ajouter l'établissement
-                </button>
-                <a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
-                    Annuler
-                </a>
-            </div>
-
-        </div>
-    </div>
-</div>
-
+{% block title %}Ajouter un établissement — MonAvisPro
+{% endblock %}
+{% block page_title %}Ajouter un établissement
 {% endblock %}
 
-{% block javascripts %}
-<script>
-async function createEstablishment() {
-    const btn     = document.getElementById('create-btn');
-    const errDiv  = document.getElementById('form-error');
-    const name    = document.getElementById('name').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const placeId = document.getElementById('placeId').value.trim();
-    const alerts  = document.getElementById('alertsEnabled').checked;
+{% block body %}
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-7">
 
-    // Reset UI
-    errDiv.style.display = 'none';
-    errDiv.textContent   = '';
+			<div class="rr-card rr-card-lg">
 
-    // Validation frontend
-    if (!name || !address || !placeId) {
-        errDiv.textContent = 'Tous les champs obligatoires doivent être remplis.';
-        errDiv.style.display = 'flex';
-        return;
-    }
+				<div class="text-center mb-4">
+					<div style="font-size: 4rem; color: #4285F4;">
+						<i class="bi bi-google"></i>
+					</div>
+					<div class="rr-page-title mb-2">Connectez votre Google Business Profile</div>
+					<div class="rr-page-sub">
+						Gérez vos avis Google directement depuis MonAvisPro
+					</div>
+				</div>
 
-    btn.textContent = 'Création en cours…';
-    btn.disabled    = true;
+				<div class="rr-card mb-4" style="background: var(--rr-bg-card); padding: 1.5rem;">
+					<h6 style="font-weight: 600; margin-bottom: 1rem;">
+						Ce que vous pourrez faire :
+					</h6>
+					<div class="mb-2">
+						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
+						<strong>Répondre en un clic</strong>
+						: Publiez vos réponses directement sur Google
+					</div>
+					<div class="mb-2">
+						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
+						<strong>Modifier et supprimer</strong>
+						: Gérez vos réponses comme bon vous semble
+					</div>
+					<div class="mb-2">
+						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
+						<strong>Sécurité garantie</strong>
+						: Impossible de gérer un établissement qui ne vous appartient pas
+					</div>
+					<div class="mb-2">
+						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
+						<strong>Synchronisation auto</strong>
+						: Vos informations toujours à jour
+					</div>
+				</div>
 
-    try {
-        const res = await fetch('/api/establishments', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + JWT_TOKEN,
-                'Content-Type':  'application/json'
-            },
-            body: JSON.stringify({
-                name,
-                address,
-                placeId,
-                alertsEnabled: alerts,
-            })
-        });
+				<div class="rr-card mb-4" style="background: var(--rr-bg-card); padding: 1.5rem; border-left: 4px solid var(--rr-green);">
+					<div class="d-flex align-items-start">
+						<i class="bi bi-shield-check" style="font-size: 2rem; color: var(--rr-green); margin-right: 1rem; flex-shrink: 0;"></i>
+						<div>
+							<h6 style="font-weight: 600; margin-bottom: 0.5rem;">
+								<i class="bi bi-lock-fill text-success"></i>
+								Connexion 100% sécurisée OAuth 2.0
+							</h6>
+							<p class="mb-2" style="font-size: 0.95rem;">
+								Google va vous demander d'autoriser MonAvisPro à accéder à votre Google Business Profile.
+							</p>
+							<p class="mb-2" style="font-size: 0.95rem;">
+								C'est la
+								<strong>méthode officielle et recommandée par Google</strong>.
+							</p>
+							<ul style="font-size: 0.9rem; margin-bottom: 0; padding-left: 1.2rem;">
+								<li>
+									<strong>Aucun mot de passe</strong>
+									n'est jamais stocké sur nos serveurs</li>
+								<li>Vous gardez
+									<strong>le contrôle total</strong>
+									: révocable à tout moment depuis votre compte Google</li>
+								<li>Accès
+									<strong>limité et auditable</strong>
+									: MonAvisPro ne peut accéder qu'aux avis de VOS établissements</li>
+								<li>Conforme
+									<strong>RGPD</strong>
+									: vos données restent chez Google, nous n'accédons qu'aux informations nécessaires</li>
+							</ul>
+						</div>
+					</div>
+				</div>
 
-        const data = await res.json();
+				<div class="alert alert-info mb-4">
+					<i class="bi bi-info-circle"></i>
+					<strong>Comment ça marche ?</strong><br>
+					<small>
+						1. Cliquez sur "Connecter avec Google" ci-dessous<br>
+						2. Choisissez votre compte Google professionnel<br>
+						3. Autorisez MonAvisPro (vous pouvez révoquer à tout moment)<br>
+						4. Sélectionnez l'établissement à connecter<br>
+						5. C'est prêt ! Vous pouvez désormais répondre aux avis depuis MonAvisPro
+					</small>
+				</div>
 
-        // RATE LIMIT
-        if (res.status === 429) {
-            errDiv.textContent = "Trop de tentatives. Réessaie dans 1 minute.";
-            errDiv.style.display = 'flex';
-            return;
-        }
+				<div class="d-flex gap-2">
+					<a href="{{ path('google_business_connect') }}" class="rr-btn rr-btn-primary rr-btn-lg flex-grow-1 text-center">
+						<i class="bi bi-google"></i>
+						Connecter avec Google
+					</a>
+					<a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
+						Annuler
+					</a>
+				</div>
 
-        // NON AUTHENTIFIÉ
-        if (res.status === 401) {
-            errDiv.textContent = "Session expirée. Recharge la page.";
-            errDiv.style.display = 'flex';
-            return;
-        }
+				<div class="rr-hint mt-4 text-center">
+					Vous n'avez pas de Google Business Profile ?
+					<a href="https://business.google.com/" target="_blank" style="color:var(--rr-green)">
+						Créez-en un gratuitement
+					</a>
+				</div>
 
-        // VALIDATION BACKEND
-        if (!res.ok) {
-            errDiv.textContent = data.error ?? 'Erreur lors de la création.';
-            errDiv.style.display = 'flex';
-            return;
-        }
+			</div>
 
-        // SUCCÈS
-        window.location.href = `/dashboard/${data.id}`;
-
-    } catch(e) {
-        errDiv.textContent = 'Erreur réseau. Vérifie ta connexion.';
-        errDiv.style.display = 'flex';
-    } finally {
-        btn.disabled    = false;
-        btn.textContent = "Ajouter l'établissement";
-    }
-}
-</script>
+		</div>
+	</div>
 {% endblock %}

@@ -28,6 +28,9 @@ class Establishment
     #[ORM\Column(length: 255, unique: true)]
     private ?string $placeId = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googlePlaceId = null;
+
     #[ORM\Column(length: 500)]
     private ?string $address = null;
 
@@ -39,6 +42,21 @@ class Establishment
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleAccountId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleLocationId = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $googleAccessToken = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $googleRefreshToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $googleTokenExpiresAt = null;
 
     /**
      * @var Collection<int, Review>
@@ -187,6 +205,77 @@ class Establishment
             $reviewAnalysis->setEstablishment($this);
         }
         $this->reviewAnalysis = $reviewAnalysis;
+
+        return $this;
+    }
+
+    public function getGoogleAccountId(): ?string
+    {
+        return $this->googleAccountId;
+    }
+
+    public function setGoogleAccountId(?string $googleAccountId): static
+    {
+        $this->googleAccountId = $googleAccountId;
+
+        return $this;
+    }
+
+    public function getGoogleLocationId(): ?string
+    {
+        return $this->googleLocationId;
+    }
+
+    public function setGoogleLocationId(?string $googleLocationId): static
+    {
+        $this->googleLocationId = $googleLocationId;
+
+        return $this;
+    }
+
+    public function getGoogleAccessToken(): ?string
+    {
+        return $this->googleAccessToken;
+    }
+
+    public function setGoogleAccessToken(?string $googleAccessToken): static
+    {
+        $this->googleAccessToken = $googleAccessToken;
+
+        return $this;
+    }
+
+    public function getGoogleRefreshToken(): ?string
+    {
+        return $this->googleRefreshToken;
+    }
+
+    public function setGoogleRefreshToken(?string $googleRefreshToken): static
+    {
+        $this->googleRefreshToken = $googleRefreshToken;
+
+        return $this;
+    }
+
+    public function getGoogleTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->googleTokenExpiresAt;
+    }
+
+    public function setGoogleTokenExpiresAt(?\DateTimeImmutable $googleTokenExpiresAt): static
+    {
+        $this->googleTokenExpiresAt = $googleTokenExpiresAt;
+
+        return $this;
+    }
+    public function getGooglePlaceId(): ?string
+    {
+        return $this->googlePlaceId;
+    }
+
+    public function setGooglePlaceId(?string $googlePlaceId): static
+    {
+        $this->googlePlaceId = $googlePlaceId;
 
         return $this;
     }
