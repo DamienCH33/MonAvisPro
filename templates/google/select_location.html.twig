@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sélectionner votre établissement — MonAvisPro{% endblock %}
+{% block page_title %}Sélectionner votre établissement{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        
+        <div class="rr-card rr-card-lg">
+            
+            <div class="text-center mb-4">
+                <div style="font-size: 3rem; color: #4285F4;">
+                    <i class="bi bi-google"></i>
+                </div>
+                <div class="rr-page-title mb-2">Sélectionnez votre établissement</div>
+                <div class="rr-page-sub">
+                    Choisissez l'établissement Google Business à connecter à MonAvisPro
+                </div>
+            </div>
+
+            {% if locations is empty %}
+                <div class="alert alert-warning mb-4">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Aucun établissement trouvé sur votre compte Google Business.
+                </div>
+                <a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
+                    Retour au tableau de bord
+                </a>
+            {% else %}
+                <form method="post" action="{{ path('google_business_save_location') }}">
+                    
+                    <div class="mb-4">
+                        {% for location in locations %}
+                            <label class="rr-card mb-3" style="cursor: pointer; border: 2px solid var(--rr-border); transition: all 0.2s;">
+                                <div class="d-flex align-items-start">
+                                    <input 
+                                        type="radio" 
+                                        name="location_name" 
+                                        value="{{ location.name }}" 
+                                        class="me-3 mt-1"
+                                        required
+                                        data-location-data="{{ location|json_encode|e('html_attr') }}"
+                                        style="cursor: pointer;"
+                                    >
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; font-size: 15px; color: var(--rr-t1); margin-bottom: 0.5rem;">
+                                            {{ location.title }}
+                                        </div>
+                                        {% if location.storefrontAddress %}
+                                            <div style="font-size: 13px; color: var(--rr-t2); margin-bottom: 0.25rem;">
+                                                {{ location.storefrontAddress.addressLines|join(', ') }}
+                                            </div>
+                                            <div style="font-size: 13px; color: var(--rr-t2);">
+                                                {{ location.storefrontAddress.postalCode }}
+                                                {{ location.storefrontAddress.locality }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="rr-hint mt-2">
+                                            ID: {{ location.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <input type="hidden" name="location_data" id="location_data">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="rr-btn rr-btn-primary rr-btn-lg flex-grow-1">
+                            <i class="bi bi-check-circle"></i>
+                            Confirmer la sélection
+                        </button>
+                        <a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+
+                <script>
+                    document.querySelectorAll('input[name="location_name"]').forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            document.getElementById('location_data').value = 
+                                e.target.getAttribute('data-location-data');
+                            
+                            document.querySelectorAll('label.rr-card').forEach(label => {
+                                label.style.borderColor = 'var(--rr-border)';
+                                label.style.backgroundColor = 'var(--rr-bg-card)';
+                            });
+                            e.target.closest('label').style.borderColor = 'var(--rr-green)';
+                            e.target.closest('label').style.backgroundColor = 'rgba(34, 197, 94, 0.05)';
+                        });
+                    });
+                </script>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
