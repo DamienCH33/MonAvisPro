@@ -10,6 +10,7 @@
         "ext-pdo_pgsql": "*",
         "beberlei/doctrineextensions": "^1.5",
         "doctrine/doctrine-bundle": "^3.2.2",
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6.2",
         "lexik/jwt-authentication-bundle": "^3.2",
@@ -38,7 +39,8 @@
         "symfony/yaml": "7.4.*",
         "symfonycasts/reset-password-bundle": "^1.25",
         "twig/extra-bundle": "^2.12|^3.23",
-        "twig/twig": "^2.12|^3.23"
+        "twig/twig": "^2.12|^3.23",
+        "zenstruck/foundry": "^2.9"
     },
     "config": {
         "allow-plugins": {
@@ -94,7 +96,6 @@
         }
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "fakerphp/faker": "^1.24",
         "friendsofphp/php-cs-fixer": "^3.94",
         "phpstan/phpstan": "^2.1",
@@ -104,7 +105,6 @@
         "symfony/css-selector": "7.4.*",
         "symfony/maker-bundle": "^1.66",
         "symfony/stopwatch": "7.4.*",
-        "symfony/web-profiler-bundle": "7.4.*",
-        "zenstruck/foundry": "^2.9"
+        "symfony/web-profiler-bundle": "7.4.*"
     }
 }
