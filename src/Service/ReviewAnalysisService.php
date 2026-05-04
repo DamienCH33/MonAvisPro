@@ -13,8 +13,7 @@ class ReviewAnalysisService
         private LlmService $llmService,
         private ReviewRepository $reviewRepository,
         private EntityManagerInterface $em,
-    ) {
-    }
+    ) {}
 
     /**
      * Lance ou relance l'analyse LLM pour un établissement.
@@ -27,13 +26,13 @@ class ReviewAnalysisService
 
         $reviewsData = array_filter(
             array_map(
-                static fn ($r): array => [
+                static fn($r): array => [
                     'rating' => $r->getRating(),
                     'text' => $r->getText(),
                 ],
                 $reviews
             ),
-            static fn (array $r): bool => !empty($r['text'])
+            static fn(array $r): bool => !empty($r['text'])
         );
 
         if (empty($reviewsData)) {
@@ -54,23 +53,34 @@ class ReviewAnalysisService
             $this->em->persist($analysis);
         }
 
-        $positiveThemes = array_map(
-            static fn (array $theme): string => $theme['theme'],
-            $result['positive_themes']
-        );
-
-        $negativeThemes = array_map(
-            static fn (array $theme): string => $theme['theme'],
-            $result['negative_themes']
-        );
+        $positiveThemes = $this->normalizeThemes($result['positive_themes'] ?? []);
+        $negativeThemes = $this->normalizeThemes($result['negative_themes'] ?? []);
 
         $analysis->setPositiveThemes($positiveThemes);
         $analysis->setNegativeThemes($negativeThemes);
-        $analysis->setActionSuggestion($result['action_suggestion']);
+        $analysis->setActionSuggestion($result['action_suggestion'] ?? '');
         $analysis->setUpdatedAt(new \DateTimeImmutable());
 
         $this->em->flush();
 
         return $analysis;
+    }
+
+    /**
+     * Normalise les données LLM pour garantir un format propre
+     */
+    private function normalizeThemes(array $themes): array
+    {
+        return array_values(array_filter(array_map(function ($theme) {
+            if (!is_array($theme)) {
+                return null;
+            }
+
+            return [
+                'theme' => $theme['theme'] ?? 'Inconnu',
+                'percentage' => isset($theme['percentage']) ? (int) $theme['percentage'] : 0,
+                'example' => $theme['example'] ?? null,
+            ];
+        }, $themes)));
     }
 }

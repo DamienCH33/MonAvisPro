@@ -21,13 +21,13 @@ class ReviewAnalysis
     private ?Establishment $establishment = null;
 
     /**
-     * @var string[]
+     * @var array<int, array{theme:string, percentage:int, example?:string}>
      */
     #[ORM\Column(type: 'json')]
     private array $positiveThemes = [];
 
     /**
-     * @var string[]
+     * @var array<int, array{theme:string, percentage:int, example?:string}>
      */
     #[ORM\Column(type: 'json')]
     private array $negativeThemes = [];
@@ -61,7 +61,7 @@ class ReviewAnalysis
     }
 
     /**
-     * @return string[]
+     * @return array<int, array{theme:string, percentage:int, example?:string}>
      */
     public function getPositiveThemes(): array
     {
@@ -69,17 +69,16 @@ class ReviewAnalysis
     }
 
     /**
-     * @param string[] $positiveThemes
+     * @param array<int, array{theme:string, percentage:int, example?:string}> $positiveThemes
      */
     public function setPositiveThemes(array $positiveThemes): static
     {
         $this->positiveThemes = $positiveThemes;
-
         return $this;
     }
 
     /**
-     * @return string[]
+     * @return array<int, array{theme:string, percentage:int, example?:string}>
      */
     public function getNegativeThemes(): array
     {
@@ -87,12 +86,11 @@ class ReviewAnalysis
     }
 
     /**
-     * @param string[] $negativeThemes
+     * @param array<int, array{theme:string, percentage:int, example?:string}> $negativeThemes
      */
     public function setNegativeThemes(array $negativeThemes): static
     {
         $this->negativeThemes = $negativeThemes;
-
         return $this;
     }
 
