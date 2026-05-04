@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2b9fdf35f754b7316b19b023a2913795",
+    "content-hash": "fd860f9bd54608e46b2ebfc54a5649b3",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -11197,7 +11197,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2 <8.6",
+        "php": ">=8.2 <8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo_pgsql": "*"
