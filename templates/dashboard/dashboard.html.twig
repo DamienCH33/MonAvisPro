@@ -1,208 +1,168 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tableau de bord — {{ current_establishment.name ?? 'Mon Avis Pro' }}{% endblock %}
-{% block page_title %}Tableau de bord{% endblock %}
+{% block title %}Tableau de bord —
+	{{ current_establishment.name ?? 'Mon Avis Pro' }}
+{% endblock %}
+{% block page_title %}Tableau de bord
+{% endblock %}
+
+{% block stylesheets %}
+	<style>
+		.rr-review-link {
+			display: block;
+			text-decoration: none;
+			color: inherit;
+		}
+		.rr-card-clickable {
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.rr-review-link:hover .rr-card-clickable {
+			transform: translateY(-2px);
+			border-color: var(--rr-green);
+			box-shadow: 0 4px 12px rgba(93, 202, 165, 0.15);
+		}
+	</style>
+{% endblock %}
 
 {% block topbar_actions %}
-{% if current_establishment %}
-<button onclick="syncEstablishment()" class="rr-btn rr-btn-secondary rr-btn-sm" id="sync-btn">
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-        <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        <path d="M8 1v3.5L10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-            stroke-linejoin="round" />
-    </svg>
-    Synchroniser
-</button>
-{% endif %}
+	{% if current_establishment %}
+		<button onclick="syncEstablishment()" class="rr-btn rr-btn-secondary rr-btn-sm" id="sync-btn">
+			<svg width="12" height="12" viewbox="0 0 16 16" fill="none">
+				<path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+				<path d="M8 1v3.5L10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+			Synchroniser
+		</button>
+	{% endif %}
 {% endblock %}
 
 {% block body %}
-<script>
-    const JWT_TOKEN = '{{ jwt_token }}';
-    const ESTABLISHMENT_ID = {{ current_establishment ?current_establishment.id: 'null' }};
-</script>
+	<script>
+		window.CURVE_DATA = {{ stats.curve|default([])|json_encode|raw }};
+	</script>
+	{% if establishments is empty %}
+		<div class="rr-empty">
+			<div style="font-size:32px;margin-bottom:12px">🏪</div>
+			<div style="font-size:16px;font-weight:700;color:var(--rr-t1);margin-bottom:8px">Aucun établissement</div>
+			<div>Ajoutez votre premier établissement pour commencer à surveiller vos avis Google.</div>
+			<a href="{{ path('establishment_new') }}" class="rr-btn rr-btn-primary rr-btn-lg mt-4">
+				+ Ajouter un établissement
+			</a>
+		</div>
+	{% else %}
 
-{% if establishments is empty %}
-{# ── Empty state ── #}
-<div class="rr-empty">
-    <div style="font-size:32px;margin-bottom:12px">🏪</div>
-    <div style="font-size:16px;font-weight:700;color:var(--rr-t1);margin-bottom:8px">Aucun établissement</div>
-    <div>Ajoutez votre premier établissement pour commencer à surveiller vos avis Google.</div>
-    <a href="{{ path('establishment_new') }}" class="rr-btn rr-btn-primary rr-btn-lg mt-4">
-        + Ajouter un établissement
-    </a>
-</div>
+		<div class="row g-3 mb-4">
+			<div class="col-12 col-md-3">
+				<div class="rr-hero">
+					<div class="rr-hero-sub mb-1">Note moyenne</div>
+					<div class="rr-hero-score">{{ stats.average ?? '—' }}</div>
+					<div class="rr-hero-stars">
+						{% if stats.average %}
+							{% for i in 1..5 %}
+								{{ i <= stats.average ? '★' : '☆' }}
+							{% endfor %}
+						{% endif %}
+					</div>
+					<div class="rr-hero-sub mt-1">{{ stats.total }}
+						avis au total</div>
+				</div>
+			</div>
+			<div class="col-6 col-md-3">
+				<div class="rr-card h-100">
+					<div class="rr-stat-label">Avis positifs</div>
+					<div class="rr-stat-val rr-green">{{ stats.positiveRate }}%</div>
+					<div class="rr-stat-trend rr-green">Notes 4 et 5 ★</div>
+				</div>
+			</div>
+			<div class="col-6 col-md-3">
+				<div class="rr-card h-100">
+					<div class="rr-stat-label">Avis négatifs</div>
+					<div class="rr-stat-val rr-red">{{ stats.negativeRate }}%</div>
+					<div class="rr-stat-trend rr-red">Notes 1 et 2 ★</div>
+				</div>
+			</div>
+			<div class="col-6 col-md-3">
+				<div class="rr-card h-100">
+					<div class="rr-stat-label">Non lus</div>
+					<div class="rr-stat-val rr-yellow">{{ stats.unreadCount }}</div>
+					<div class="rr-stat-trend rr-muted">À traiter</div>
+				</div>
+			</div>
+		</div>
 
-{% else %}
+		<div class="row g-3 mb-4">
+			<div class="col-12 col-lg-7">
+				<div class="rr-card rr-card-lg">
+					<div class="rr-section-title">Évolution de la note moyenne</div>
+					<canvas id="ratingChart" height="120"></canvas>
+				</div>
+			</div>
+			<div class="col-12 col-lg-5">
+				<div class="rr-card rr-card-lg">
+					<div class="rr-section-title">Répartition des notes</div>
+					{% for star in 5..1 %}
+						{% set count = stats.repartition[star]|default(0) %}
+						{% set pct = stats.total > 0 ? (count / stats.total * 100)|round : 0 %}
+						<div class="rr-bar">
+							<span class="rr-bar-label rr-yellow">{{ star }}★</span>
+							<div class="rr-bar-track">
+								<div class="rr-bar-fill {{ star >= 4 ? 'rr-bar-fill-green' : (star <= 2 ? 'rr-bar-fill-red' : '') }}" style="width:{{ pct }}%;background:{{ star == 3 ? 'rgba(175,169,236,0.5)' : '' }}"></div>
+							</div>
+							<span class="rr-bar-pct">{{ count }}</span>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
 
-{# ── Stats ── #}
-<div class="row g-3 mb-4">
-    <div class="col-12 col-md-3">
-        <div class="rr-hero">
-            <div class="rr-hero-sub mb-1">Note moyenne</div>
-            <div class="rr-hero-score">{{ stats.average ?? '—' }}</div>
-            <div class="rr-hero-stars">
-                {% if stats.average %}
-                {% for i in 1..5 %}{{ i <= stats.average ? '★' : '☆' }}{% endfor %} {% endif %} </div>
-                    <div class="rr-hero-sub mt-1">{{ stats.total }} avis au total</div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="rr-card h-100">
-                <div class="rr-stat-label">Avis positifs</div>
-                <div class="rr-stat-val rr-green">{{ stats.positiveRate }}%</div>
-                <div class="rr-stat-trend rr-green">Notes 4 et 5 ★</div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="rr-card h-100">
-                <div class="rr-stat-label">Avis négatifs</div>
-                <div class="rr-stat-val rr-red">{{ stats.negativeRate }}%</div>
-                <div class="rr-stat-trend rr-red">Notes 1 et 2 ★</div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="rr-card h-100">
-                <div class="rr-stat-label">Non lus</div>
-                <div class="rr-stat-val rr-yellow">{{ stats.unreadCount }}</div>
-                <div class="rr-stat-trend rr-muted">À traiter</div>
-            </div>
-        </div>
-    </div>
+		<div class="rr-card rr-card-lg">
+			<div class="d-flex align-items-center justify-content-between mb-3">
+				<div class="rr-section-title mb-0">Derniers avis</div>
+				{% if current_establishment %}
+					<a href="{{ path('reviews_list', {id: current_establishment.id}) }}" class="rr-btn rr-btn-secondary rr-btn-sm">
+						Voir tout →
+					</a>
+				{% endif %}
+			</div>
 
-    {# ── Chart + derniers avis ── #}
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-lg-7">
-            <div class="rr-card rr-card-lg">
-                <div class="rr-section-title">Évolution de la note moyenne</div>
-                <canvas id="ratingChart" height="120"></canvas>
-            </div>
-        </div>
-        <div class="col-12 col-lg-5">
-            <div class="rr-card rr-card-lg">
-                <div class="rr-section-title">Répartition des notes</div>
-                {% for star in 5..1 %}
-                {% set count = stats.repartition[star]|default(0) %}
-                {% set pct = stats.total > 0 ? (count / stats.total * 100)|round : 0 %}
-                <div class="rr-bar">
-                    <span class="rr-bar-label rr-yellow">{{ star }}★</span>
-                    <div class="rr-bar-track">
-                        <div class="rr-bar-fill {{ star >= 4 ? 'rr-bar-fill-green' : (star <= 2 ? 'rr-bar-fill-red' : '') }}"
-                            style="width:{{ pct }}%;background:{{ star == 3 ? 'rgba(175,169,236,0.5)' : '' }}"></div>
-                    </div>
-                    <span class="rr-bar-pct">{{ count }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+			{% for review in reviews %}
+				<a href="{{ path('reviews_list', {id: current_establishment.id}) }}#review-{{ review.id }}" class="rr-review-link">
+					<div class="rr-card rr-card-clickable {{ review.rating <= 2 ? 'rr-card-neg rr-card-unread' : '' }} mb-2">
+						<div class="d-flex align-items-start justify-content-between gap-2">
+							<div class="d-flex align-items-center gap-2">
+								{% if review.googleAuthorPhoto %}
+									<img src="{{ review.googleAuthorPhoto }}" alt="" width="32" height="32" style="border-radius:50%;object-fit:cover">
+								{% else %}
+									<div class="rr-avatar" style="width:32px;height:32px;font-size:11px">
+										{{ review.googleAuthor|first|upper }}
+									</div>
+								{% endif %}
+								<div>
+									<div style="font-size:13px;font-weight:600;color:var(--rr-t1)">{{ review.googleAuthor }}</div>
+									<div style="font-size:11px;color:var(--rr-t3)">{{ review.publishedAt|date('d/m/Y') }}</div>
+								</div>
+							</div>
+							<div class="{{ review.rating >= 4 ? 'rr-stars' : 'rr-stars-neg' }}">
+								{% for i in 1..5 %}
+									{{ i <= review.rating ? '★' : '☆' }}
+								{% endfor %}
+							</div>
+						</div>
+						{% if review.text %}
+							<div style="font-size:13px;color:var(--rr-t2);margin-top:8px;line-height:1.6">
+								{{ review.text|length > 120 ? review.text|slice(0,120) ~ '…' : review.text }}
+							</div>
+						{% endif %}
+					</div>
+				</a>
+			{% endfor %}
+		</div>
 
-    {# ── Derniers avis ── #}
-    <div class="rr-card rr-card-lg">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="rr-section-title mb-0">Derniers avis</div>
-            {% if current_establishment %}
-            <a href="{{ path('reviews_list', {id: current_establishment.id}) }}"
-                class="rr-btn rr-btn-secondary rr-btn-sm">
-                Voir tout →
-            </a>
-            {% endif %}
-        </div>
+	{% endif %}
+{% endblock %}
 
-        {% for review in reviews %}
-        <div class="rr-card {{ review.rating <= 2 ? 'rr-card-neg rr-card-unread' : '' }} mb-2">
-            <div class="d-flex align-items-start justify-content-between gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    {% if review.googleAuthorPhoto %}
-                    <img src="{{ review.googleAuthorPhoto }}" alt="" width="32" height="32"
-                        style="border-radius:50%;object-fit:cover">
-                    {% else %}
-                    <div class="rr-avatar" style="width:32px;height:32px;font-size:11px">
-                        {{ review.googleAuthor|first|upper }}
-                    </div>
-                    {% endif %}
-                    <div>
-                        <div style="font-size:13px;font-weight:600;color:var(--rr-t1)">{{ review.googleAuthor }}</div>
-                        <div style="font-size:11px;color:var(--rr-t3)">{{ review.publishedAt|date('d/m/Y') }}</div>
-                    </div>
-                </div>
-                <div class="{{ review.rating >= 4 ? 'rr-stars' : 'rr-stars-neg' }}">
-                    {% for i in 1..5 %}{{ i <= review.rating ? '★' : '☆' }}{% endfor %} </div>
-                </div>
-                {% if review.text %}
-                <div style="font-size:13px;color:var(--rr-t2);margin-top:8px;line-height:1.6">
-                    {{ review.text|length > 120 ? review.text|slice(0,120) ~ '…' : review.text }}
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-
-        {% endif %}
-        {% endblock %}
-
-        {% block javascripts %}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-        <script>
-            // Chart évolution
-            const curve = {{ stats.curve|default ([]) | json_encode | raw }};
-            if (curve.length > 0) {
-                const ctx = document.getElementById('ratingChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: curve.map(d => d.month),
-                        datasets: [{
-                            label: 'Note moyenne',
-                            data: curve.map(d => parseFloat(d.average)),
-                            borderColor: '#5dcaa5',
-                            backgroundColor: 'rgba(93,202,165,0.08)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#5dcaa5',
-                            pointRadius: 4,
-                            tension: 0.3,
-                            fill: true,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                min: 1, max: 5,
-                                ticks: { color: 'rgba(255,255,255,0.4)', stepSize: 1 },
-                                grid: { color: 'rgba(255,255,255,0.06)' }
-                            },
-                            x: {
-                                ticks: { color: 'rgba(255,255,255,0.4)' },
-                                grid: { color: 'rgba(255,255,255,0.06)' }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Sync manuelle
-            async function syncEstablishment() {
-                if (!ESTABLISHMENT_ID) return;
-
-                const btn = document.getElementById('sync-btn');
-                btn.textContent = 'Synchronisation…';
-                btn.disabled = true;
-
-                try {
-                    const res = await fetch(`/api/establishments/${ESTABLISHMENT_ID}/sync`, {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
-                    });
-                    const data = await res.json();
-                    alert(data.message);
-                    location.reload();
-                } catch (e) {
-                    alert('Erreur lors de la synchronisation.');
-                } finally {
-                    btn.disabled = false;
-                }
-            }
-        </script>
-        {% endblock %}
+{% block javascripts %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+	<script src="{{ asset('js/dashboard.js') }}"></script>
+{% endblock %}
