@@ -1,0 +1,5 @@
+{
+    "deploy": {
+        "startCommand": "php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true && exec frankenphp run --config /app/Caddyfile"
+    }
+}
