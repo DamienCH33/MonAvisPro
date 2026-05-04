@@ -44,6 +44,15 @@ class Review
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $ownerReply = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $googleReplyPublishedAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isPublishedToGoogle = false;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $googleReviewName = null;
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -153,6 +162,42 @@ class Review
     public function setOwnerReply(?string $ownerReply): self
     {
         $this->ownerReply = $ownerReply;
+
+        return $this;
+    }
+
+    public function getGoogleReplyPublishedAt(): ?\DateTimeImmutable
+    {
+        return $this->googleReplyPublishedAt;
+    }
+
+    public function setGoogleReplyPublishedAt(?\DateTimeImmutable $googleReplyPublishedAt): self
+    {
+        $this->googleReplyPublishedAt = $googleReplyPublishedAt;
+
+        return $this;
+    }
+
+    public function isPublishedToGoogle(): ?bool
+    {
+        return $this->isPublishedToGoogle;
+    }
+
+    public function setIsPublishedToGoogle(?bool $isPublishedToGoogle): self
+    {
+        $this->isPublishedToGoogle = $isPublishedToGoogle;
+
+        return $this;
+    }
+
+    public function getGoogleReviewName(): ?string
+    {
+        return $this->googleReviewName;
+    }
+
+    public function setGoogleReviewName(?string $googleReviewName): self
+    {
+        $this->googleReviewName = $googleReviewName;
 
         return $this;
     }
