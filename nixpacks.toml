@@ -1,5 +1,15 @@
 [phases.setup]
-nixPkgs = ["php84", "php84Extensions.pdo_pgsql"]
+nixPkgs = [
+  "php84",
+  "php84Extensions.pdo_pgsql",
+  "php84Extensions.iconv",
+  "php84Extensions.ctype"
+]
+
+[phases.install]
+cmds = [
+  "composer install --no-interaction --prefer-dist --optimize-autoloader"
+]
 
 [start]
-cmd = "php bin/console cache:clear --env=prod && php bin/console doctrine:migrations:migrate --no-interaction && php -S 0.0.0.0:$PORT -t public"
+cmd = "php bin/console doctrine:migrations:migrate --no-interaction && exec frankenphp run --config /app/Caddyfile"
