@@ -7,6 +7,7 @@
 		<meta name="description" content="Gérez vos avis Google, détectez les avis négatifs et générez des réponses automatiques grâce à l’IA. Améliorez votre e-réputation et votre note client."/>
 		<meta name="robots" content="index, follow"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
 		<title>
 			{% block title %}Mon Avis Pro
 			{% endblock %}
@@ -119,7 +120,26 @@
 						{# fin .rr-page #}
 					</div>
 					{# fin .rr-main-content #}
-			{% else %}
+				{% else %}
+					<footer style="position:relative;z-index:1;padding:40px 0;border-top:1px solid rgba(255,255,255,.08);margin-top:60px">
+						<div class="container">
+							<div class="row align-items-center">
+								<div class="col-12 col-md-4 text-center text-md-start mb-3 mb-md-0">
+									<img src="{{ asset('images/logo_monavispro.svg') }}" alt="MonAvisPro" height="28" style="opacity:.5">
+								</div>
+								<div class="col-12 col-md-4 text-center mb-3 mb-md-0" style="font-size:12px;color:rgba(255,255,255,.3)">
+									©
+									{{ "now"|date("Y") }}
+									Mon Avis Pro · Tous droits réservés
+								</div>
+								<div class="col-12 col-md-4 text-center text-md-end" style="font-size:12px">
+									<a href="mailto:contact@monavispro.fr" style="color:rgba(255,255,255,.4);text-decoration:none">Contact</a>
+									<span style="color:rgba(255,255,255,.15);margin:0 8px">·</span>
+									<a href="{{ path('app_login') }}" style="color:rgba(255,255,255,.4);text-decoration:none">Connexion</a>
+								</div>
+							</div>
+						</div>
+					</footer>
 				</div>
 				{# fin div public #}
 			{% endif %}
