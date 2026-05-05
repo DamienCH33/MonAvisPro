@@ -116,6 +116,7 @@ class AuthController extends AbstractController
         return $this->json($this->serializeUser($user));
     }
 
+    /** @return array{id: string|null, email: string|null, alertsEnabled: bool, createdAt: string} */
     private function serializeUser(User $user): array
     {
         return [
