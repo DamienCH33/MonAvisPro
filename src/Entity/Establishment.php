@@ -268,6 +268,7 @@ class Establishment
 
         return $this;
     }
+
     public function getGooglePlaceId(): ?string
     {
         return $this->googlePlaceId;

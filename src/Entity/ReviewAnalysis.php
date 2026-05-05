@@ -74,6 +74,7 @@ class ReviewAnalysis
     public function setPositiveThemes(array $positiveThemes): static
     {
         $this->positiveThemes = $positiveThemes;
+
         return $this;
     }
 
@@ -91,6 +92,7 @@ class ReviewAnalysis
     public function setNegativeThemes(array $negativeThemes): static
     {
         $this->negativeThemes = $negativeThemes;
+
         return $this;
     }
 
