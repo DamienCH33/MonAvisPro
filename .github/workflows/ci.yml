@@ -51,13 +51,13 @@ jobs:
               run: |
                   mkdir -p config/jwt
                   openssl genpkey -algorithm RSA \
-                    -out config/jwt/private.pem \
+                    -out config/jwt/private-test.pem \
                     -pkeyopt rsa_keygen_bits:4096 \
                     -pass pass:ci_passphrase
                   openssl rsa \
                     -pubout \
-                    -in config/jwt/private.pem \
-                    -out config/jwt/public.pem \
+                    -in config/jwt/private-test.pem \
+                    -out config/jwt/public-test.pem \
                     -passin pass:ci_passphrase
 
             - name: Setup database

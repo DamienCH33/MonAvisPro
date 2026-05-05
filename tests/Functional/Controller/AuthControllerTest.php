@@ -13,6 +13,9 @@ class AuthControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+
+        $connection = self::getContainer()->get('doctrine')->getConnection();
+        $connection->executeStatement('TRUNCATE TABLE "user" CASCADE');
     }
 
     private function postJson(string $url, array $data): Response
@@ -36,9 +39,11 @@ class AuthControllerTest extends WebTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->postJson('/api/auth/register', [
-            'email' => 'newuser_'.uniqid().'@test.fr',
+            'email' => 'test@test.fr',
             'password' => 'password123',
         ]);
+
+        $response->getContent();
 
         $this->assertSame(Response::HTTP_CREATED, $response->getStatusCode());
 
@@ -56,7 +61,7 @@ class AuthControllerTest extends WebTestCase
 
     public function testRegisterDuplicateEmail(): void
     {
-        $email = 'duplicate_'.uniqid().'@test.fr';
+        $email = 'duplicate_' . uniqid() . '@test.fr';
 
         $this->postJson('/api/auth/register', [
             'email' => $email,
@@ -93,7 +98,7 @@ class AuthControllerTest extends WebTestCase
     public function testRegisterPasswordTooShort(): void
     {
         $response = $this->postJson('/api/auth/register', [
-            'email' => 'short_'.uniqid().'@test.fr',
+            'email' => 'short_' . uniqid() . '@test.fr',
             'password' => '123',
         ]);
 
@@ -104,7 +109,7 @@ class AuthControllerTest extends WebTestCase
 
     public function testLoginSuccess(): void
     {
-        $email = 'logintest_'.uniqid().'@test.fr';
+        $email = 'logintest_' . uniqid() . '@test.fr';
 
         $this->postJson('/api/auth/register', [
             'email' => $email,
@@ -131,7 +136,7 @@ class AuthControllerTest extends WebTestCase
 
     public function testLoginWrongPassword(): void
     {
-        $email = 'wrongpass_'.uniqid().'@test.fr';
+        $email = 'wrongpass_' . uniqid() . '@test.fr';
 
         $this->postJson('/api/auth/register', [
             'email' => $email,
@@ -149,7 +154,7 @@ class AuthControllerTest extends WebTestCase
     public function testLoginUnknownEmail(): void
     {
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'inconnu_'.uniqid().'@test.fr',
+            'email' => 'inconnu_' . uniqid() . '@test.fr',
             'password' => 'password123',
         ]);
 
