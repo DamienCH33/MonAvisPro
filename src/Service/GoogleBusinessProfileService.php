@@ -15,12 +15,13 @@ class GoogleBusinessProfileService
         private readonly HttpClientInterface $httpClient,
         private readonly string $clientId,
         private readonly string $clientSecret,
-        private readonly string $redirectUri
-    ) {}
+        private readonly string $redirectUri,
+    ) {
+    }
 
     public function getAuthorizationUrl(string $state): string
     {
-        $params = http_build_query([
+        return self::OAUTH_URL.'?'.http_build_query([
             'client_id' => $this->clientId,
             'redirect_uri' => $this->redirectUri,
             'response_type' => 'code',
@@ -29,13 +30,12 @@ class GoogleBusinessProfileService
             'prompt' => 'consent',
             'state' => $state,
         ]);
-
-        return self::OAUTH_URL . '?' . $params;
     }
 
+    /** @return array<string, mixed> */
     public function exchangeCodeForToken(string $code): array
     {
-        $response = $this->httpClient->request('POST', self::TOKEN_URL, [
+        return $this->httpClient->request('POST', self::TOKEN_URL, [
             'body' => [
                 'code' => $code,
                 'client_id' => $this->clientId,
@@ -43,76 +43,67 @@ class GoogleBusinessProfileService
                 'redirect_uri' => $this->redirectUri,
                 'grant_type' => 'authorization_code',
             ],
-        ]);
-
-        return $response->toArray();
+        ])->toArray();
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function getAccounts(string $accessToken): array
     {
-        $response = $this->httpClient->request('GET', self::ACCOUNT_API_URL . '/accounts', [
-            'headers' => ['Authorization' => 'Bearer ' . $accessToken],
-        ]);
-
-        return $response->toArray()['accounts'] ?? [];
+        return $this->httpClient->request('GET', self::ACCOUNT_API_URL.'/accounts', [
+            'headers' => ['Authorization' => 'Bearer '.$accessToken],
+        ])->toArray()['accounts'] ?? [];
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function getLocations(string $accountId, string $accessToken): array
     {
-        $response = $this->httpClient->request(
+        return $this->httpClient->request(
             'GET',
-            self::BUSINESS_API_URL . '/' . $accountId . '/locations',
+            self::BUSINESS_API_URL.'/'.$accountId.'/locations',
             [
-                'headers' => ['Authorization' => 'Bearer ' . $accessToken],
+                'headers' => ['Authorization' => 'Bearer '.$accessToken],
                 'query' => ['readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri'],
             ]
-        );
-
-        return $response->toArray()['locations'] ?? [];
+        )->toArray()['locations'] ?? [];
     }
 
-    public function publishReply(
-        string $reviewName,
-        string $replyText,
-        string $accessToken
-    ): array {
-        $response = $this->httpClient->request(
+    /** @return array<string, mixed> */
+    public function publishReply(string $reviewName, string $replyText, string $accessToken): array
+    {
+        return $this->httpClient->request(
             'PUT',
-            self::BUSINESS_API_URL . '/' . $reviewName . '/reply',
+            self::BUSINESS_API_URL.'/'.$reviewName.'/reply',
             [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Authorization' => 'Bearer '.$accessToken,
                     'Content-Type' => 'application/json',
                 ],
                 'json' => ['comment' => $replyText],
             ]
-        );
-
-        return $response->toArray();
+        )->toArray();
     }
 
-    public function deleteReply(string $reviewName, string $accessToken): void
-    {
-        $this->httpClient->request(
-            'DELETE',
-            self::BUSINESS_API_URL . '/' . $reviewName . '/reply',
-            [
-                'headers' => ['Authorization' => 'Bearer ' . $accessToken],
-            ]
-        );
-    }
-
+    /** @return array<string, mixed> */
     public function refreshAccessToken(string $refreshToken): array
     {
-        $response = $this->httpClient->request('POST', self::TOKEN_URL, [
+        return $this->httpClient->request('POST', self::TOKEN_URL, [
             'body' => [
                 'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
                 'refresh_token' => $refreshToken,
                 'grant_type' => 'refresh_token',
             ],
-        ]);
+        ])->toArray();
+    }
 
-        return $response->toArray();
+    public function deleteReply(string $reviewName, string $accessToken): void
+    {
+        $this->httpClient->request(
+            'DELETE',
+            self::BUSINESS_API_URL.'/'.$reviewName.'/reply',
+            [
+                'headers' => ['Authorization' => 'Bearer '.$accessToken],
+            ]
+        );
     }
 }

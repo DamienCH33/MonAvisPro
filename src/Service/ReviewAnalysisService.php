@@ -13,11 +13,9 @@ class ReviewAnalysisService
         private LlmService $llmService,
         private ReviewRepository $reviewRepository,
         private EntityManagerInterface $em,
-    ) {}
+    ) {
+    }
 
-    /**
-     * Lance ou relance l'analyse LLM pour un établissement.
-     */
     public function analyze(Establishment $establishment): ?ReviewAnalysis
     {
         $reviews = $this->reviewRepository->findBy([
@@ -26,13 +24,13 @@ class ReviewAnalysisService
 
         $reviewsData = array_filter(
             array_map(
-                static fn($r): array => [
+                static fn ($r): array => [
                     'rating' => $r->getRating(),
                     'text' => $r->getText(),
                 ],
                 $reviews
             ),
-            static fn(array $r): bool => !empty($r['text'])
+            static fn (array $r): bool => !empty($r['text'])
         );
 
         if (empty($reviewsData)) {
@@ -53,12 +51,12 @@ class ReviewAnalysisService
             $this->em->persist($analysis);
         }
 
-        $positiveThemes = $this->normalizeThemes($result['positive_themes'] ?? []);
-        $negativeThemes = $this->normalizeThemes($result['negative_themes'] ?? []);
+        $positiveThemes = $this->normalizeThemes($result['positive_themes']);
+        $negativeThemes = $this->normalizeThemes($result['negative_themes']);
 
         $analysis->setPositiveThemes($positiveThemes);
         $analysis->setNegativeThemes($negativeThemes);
-        $analysis->setActionSuggestion($result['action_suggestion'] ?? '');
+        $analysis->setActionSuggestion($result['action_suggestion']);
         $analysis->setUpdatedAt(new \DateTimeImmutable());
 
         $this->em->flush();
@@ -67,20 +65,18 @@ class ReviewAnalysisService
     }
 
     /**
-     * Normalise les données LLM pour garantir un format propre
+     * @param array<int, array<string, mixed>> $themes
+     *
+     * @return array<int, array{theme: string, percentage: int, example: string|null}>
      */
     private function normalizeThemes(array $themes): array
     {
-        return array_values(array_filter(array_map(function ($theme) {
-            if (!is_array($theme)) {
-                return null;
-            }
-
+        return array_values(array_map(function ($theme) {
             return [
                 'theme' => $theme['theme'] ?? 'Inconnu',
                 'percentage' => isset($theme['percentage']) ? (int) $theme['percentage'] : 0,
                 'example' => $theme['example'] ?? null,
             ];
-        }, $themes)));
+        }, $themes));
     }
 }

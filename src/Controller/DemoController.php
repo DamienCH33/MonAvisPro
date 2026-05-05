@@ -13,12 +13,13 @@ class DemoController extends AbstractController
     #[Route('/demo', name: 'demo_login')]
     public function demoLogin(
         UserRepository $userRepository,
-        Security $security
+        Security $security,
     ): Response {
         $demoUser = $userRepository->findOneBy(['email' => 'demo@monavispro.fr']);
 
         if (!$demoUser) {
             $this->addFlash('error', 'Compte démo non disponible.');
+
             return $this->redirectToRoute('app_login');
         }
 

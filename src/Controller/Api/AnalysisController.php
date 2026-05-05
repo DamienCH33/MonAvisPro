@@ -44,7 +44,7 @@ class AnalysisController extends AbstractController
 
         if (null === $analysis) {
             return $this->json([
-                'error' => 'Impossible de générer l\'analyse. Pas assez d\'avis ou erreur LLM.',
+                'error' => 'Impossible de générer l\'analyse.',
             ], 422);
         }
 
@@ -60,7 +60,7 @@ class AnalysisController extends AbstractController
         $tone = $data['tone'] ?? 'cordial';
 
         if (!in_array($tone, ['cordial', 'formel', 'empathique'])) {
-            return $this->json(['error' => 'Ton invalide. Valeurs : cordial, formel, empathique.'], 422);
+            return $this->json(['error' => 'Ton invalide.'], 422);
         }
 
         $reply = $this->llmService->generateReply(
@@ -71,7 +71,7 @@ class AnalysisController extends AbstractController
         );
 
         if (null === $reply) {
-            return $this->json(['error' => 'Erreur lors de la génération de la réponse.'], 500);
+            return $this->json(['error' => 'Erreur génération'], 500);
         }
 
         return $this->json(['reply' => $reply]);
@@ -80,8 +80,8 @@ class AnalysisController extends AbstractController
     /**
      * @return array{
      *     id: string|null,
-     *     positiveThemes: string[],
-     *     negativeThemes: string[],
+     *     positiveThemes: list<string>,
+     *     negativeThemes: list<string>,
      *     actionSuggestion: string|null,
      *     updatedAt: string
      * }
@@ -90,8 +90,15 @@ class AnalysisController extends AbstractController
     {
         return [
             'id' => $analysis->getId()?->toRfc4122(),
-            'positiveThemes' => $analysis->getPositiveThemes(),
-            'negativeThemes' => $analysis->getNegativeThemes(),
+
+            'positiveThemes' => array_values(
+                array_map(fn ($t) => $t['theme'], $analysis->getPositiveThemes())
+            ),
+
+            'negativeThemes' => array_values(
+                array_map(fn ($t) => $t['theme'], $analysis->getNegativeThemes())
+            ),
+
             'actionSuggestion' => $analysis->getActionSuggestion(),
             'updatedAt' => $analysis->getUpdatedAt()?->format('c') ?? '',
         ];

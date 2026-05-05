@@ -22,7 +22,8 @@ class ReviewController extends AbstractController
         private EntityManagerInterface $em,
         private ReviewRepository $reviewRepository,
         private GoogleBusinessProfileService $googleService,
-    ) {}
+    ) {
+    }
 
     #[Route('/establishments/{id}/reviews', name: 'api_reviews_list', methods: ['GET'])]
     public function list(Establishment $establishment, Request $request): JsonResponse
@@ -81,7 +82,7 @@ class ReviewController extends AbstractController
             ->getResult();
 
         return $this->json([
-            'data' => array_map(fn(Review $r) => $this->serialize($r), $reviews),
+            'data' => array_map(fn (Review $r) => $this->serialize($r), $reviews),
             'pagination' => [
                 'page' => $page,
                 'limit' => $limit,
@@ -110,10 +111,10 @@ class ReviewController extends AbstractController
         }
 
         $total = count($reviews);
-        $sum = array_sum(array_map(fn(Review $r) => $r->getRating(), $reviews));
-        $positive = count(array_filter($reviews, fn(Review $r) => $r->getRating() >= 4));
-        $negative = count(array_filter($reviews, fn(Review $r) => $r->getRating() <= 2));
-        $unread = count(array_filter($reviews, fn(Review $r) => !$r->isRead()));
+        $sum = array_sum(array_map(fn (Review $r) => $r->getRating(), $reviews));
+        $positive = count(array_filter($reviews, fn (Review $r) => $r->getRating() >= 4));
+        $negative = count(array_filter($reviews, fn (Review $r) => $r->getRating() <= 2));
+        $unread = count(array_filter($reviews, fn (Review $r) => !$r->isRead()));
 
         $repartition = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         foreach ($reviews as $review) {
@@ -230,7 +231,7 @@ class ReviewController extends AbstractController
                     );
                     $establishment->setGoogleAccessToken($tokenData['access_token']);
                     $establishment->setGoogleTokenExpiresAt(
-                        (new \DateTimeImmutable())->modify('+' . ($tokenData['expires_in'] ?? 3600) . ' seconds')
+                        (new \DateTimeImmutable())->modify('+'.($tokenData['expires_in'] ?? 3600).' seconds')
                     );
                 }
 
@@ -244,9 +245,10 @@ class ReviewController extends AbstractController
                 $review->setGoogleReplyPublishedAt(new \DateTimeImmutable());
             } catch (\Exception $e) {
                 $this->em->flush();
+
                 return $this->json([
                     'success' => true,
-                    'warning' => 'Réponse sauvegardée localement mais non publiée sur Google : ' . $e->getMessage()
+                    'warning' => 'Réponse sauvegardée localement mais non publiée sur Google : '.$e->getMessage(),
                 ]);
             }
         }
@@ -276,7 +278,7 @@ class ReviewController extends AbstractController
                     );
                     $establishment->setGoogleAccessToken($tokenData['access_token']);
                     $establishment->setGoogleTokenExpiresAt(
-                        (new \DateTimeImmutable())->modify('+' . ($tokenData['expires_in'] ?? 3600) . ' seconds')
+                        (new \DateTimeImmutable())->modify('+'.($tokenData['expires_in'] ?? 3600).' seconds')
                     );
                 }
 
@@ -292,7 +294,7 @@ class ReviewController extends AbstractController
 
                 return $this->json([
                     'success' => true,
-                    'warning' => 'Réponse supprimée localement mais erreur Google : ' . $e->getMessage()
+                    'warning' => 'Réponse supprimée localement mais erreur Google : '.$e->getMessage(),
                 ]);
             }
         }

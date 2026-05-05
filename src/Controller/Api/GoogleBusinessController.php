@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Establishment;
+use App\Entity\User;
 use App\Service\GoogleBusinessProfileService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,8 +16,9 @@ class GoogleBusinessController extends AbstractController
 {
     public function __construct(
         private readonly GoogleBusinessProfileService $googleService,
-        private readonly EntityManagerInterface $em
-    ) {}
+        private readonly EntityManagerInterface $em,
+    ) {
+    }
 
     #[Route('/connect', name: 'google_business_connect')]
     public function connect(Request $request): Response
@@ -42,11 +44,13 @@ class GoogleBusinessController extends AbstractController
 
         if ($state !== $sessionState) {
             $this->addFlash('error', 'Erreur de sécurité : état invalide');
+
             return $this->redirectToRoute('dashboard');
         }
 
         if ($request->query->has('error')) {
             $this->addFlash('error', 'Connexion Google annulée');
+
             return $this->redirectToRoute('dashboard');
         }
 
@@ -62,6 +66,7 @@ class GoogleBusinessController extends AbstractController
 
             if (empty($accounts)) {
                 $this->addFlash('warning', 'Aucun compte Google Business trouvé pour ce compte Google');
+
                 return $this->redirectToRoute('dashboard');
             }
 
@@ -72,7 +77,8 @@ class GoogleBusinessController extends AbstractController
 
             return $this->redirectToRoute('google_business_select_location');
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de la connexion : ' . $e->getMessage());
+            $this->addFlash('error', 'Erreur lors de la connexion : '.$e->getMessage());
+
             return $this->redirectToRoute('dashboard');
         }
     }
@@ -87,6 +93,7 @@ class GoogleBusinessController extends AbstractController
 
         if (empty($accounts)) {
             $this->addFlash('warning', 'Session expirée, veuillez vous reconnecter');
+
             return $this->redirectToRoute('google_business_connect');
         }
 
@@ -102,6 +109,7 @@ class GoogleBusinessController extends AbstractController
 
             if (empty($allLocations)) {
                 $this->addFlash('warning', 'Aucun établissement trouvé sur vos comptes Google Business');
+
                 return $this->redirectToRoute('dashboard');
             }
 
@@ -109,7 +117,8 @@ class GoogleBusinessController extends AbstractController
                 'locations' => $allLocations,
             ]);
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de la récupération des établissements : ' . $e->getMessage());
+            $this->addFlash('error', 'Erreur lors de la récupération des établissements : '.$e->getMessage());
+
             return $this->redirectToRoute('dashboard');
         }
     }
@@ -119,59 +128,50 @@ class GoogleBusinessController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $locationData = $request->request->get('location_data');
-        $locationData = json_decode($locationData, true);
+        $locationDataRaw = $request->request->get('location_data');
 
-        if (!$locationData) {
-            $this->addFlash('error', 'Données manquantes');
-            return $this->redirectToRoute('google_business_select_location');
+        if (!is_string($locationDataRaw)) {
+            throw new \InvalidArgumentException('location_data invalide');
         }
 
-        $accessToken = $request->getSession()->get('google_access_token');
-        $refreshToken = $request->getSession()->get('google_refresh_token');
-        $expiresAt = $request->getSession()->get('google_token_expires_at');
+        $locationData = json_decode($locationDataRaw, true);
+
+        if (!is_array($locationData)) {
+            throw new \InvalidArgumentException('JSON invalide');
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw new \LogicException('User invalide');
+        }
+
+        $establishment = new Establishment();
+        $establishment->setOwner($user);
+
+        $establishment->setName($locationData['title'] ?? 'Sans nom');
 
         preg_match('/locations\/([^\/]+)$/', $locationData['name'], $matches);
         $placeId = $matches[1] ?? basename($locationData['name']);
 
-        try {
-            $establishment = new Establishment();
-            $establishment->setOwner($this->getUser());
-            $establishment->setName($locationData['title'] ?? 'Sans nom');
-            $establishment->setPlaceId($placeId);
-            $establishment->setGooglePlaceId($placeId);
+        $establishment->setPlaceId($placeId);
+        $establishment->setGooglePlaceId($placeId);
 
-            // Adresse
-            $address = $this->formatAddress($locationData['storefrontAddress'] ?? []);
-            $establishment->setAddress($address ?: 'Adresse non renseignée');
+        $address = $this->formatAddress($locationData['storefrontAddress'] ?? []);
+        $establishment->setAddress($address ?: 'Adresse non renseignée');
 
-            // Google OAuth
-            $establishment->setGoogleLocationId($locationData['name']);
-            $establishment->setGoogleAccountId($locationData['accountId']);
-            $establishment->setGoogleAccessToken($accessToken);
-            $establishment->setGoogleRefreshToken($refreshToken);
-            $establishment->setGoogleTokenExpiresAt(
-                (new \DateTimeImmutable())->setTimestamp($expiresAt)
-            );
+        $this->em->persist($establishment);
+        $this->em->flush();
 
-            $this->em->persist($establishment);
-            $this->em->flush();
-
-            $request->getSession()->remove('google_accounts');
-            $request->getSession()->remove('google_access_token');
-            $request->getSession()->remove('google_refresh_token');
-            $request->getSession()->remove('google_token_expires_at');
-            $request->getSession()->remove('google_oauth_state');
-
-            $this->addFlash('success', 'Établissement Google Business connecté avec succès !');
-
-            return $this->redirectToRoute('dashboard');
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de la sauvegarde : ' . $e->getMessage());
-            return $this->redirectToRoute('google_business_select_location');
-        }
+        return $this->redirectToRoute('dashboard');
     }
 
+    /**
+     * @param array{
+     *     addressLines?: string[],
+     *     postalCode?: string,
+     *     locality?: string
+     * } $address
+     */
     private function formatAddress(array $address): string
     {
         $parts = [];
@@ -180,8 +180,8 @@ class GoogleBusinessController extends AbstractController
             $parts[] = implode(', ', $address['addressLines']);
         }
 
-        if (isset($address['postalCode']) && isset($address['locality'])) {
-            $parts[] = $address['postalCode'] . ' ' . $address['locality'];
+        if (isset($address['postalCode'], $address['locality'])) {
+            $parts[] = $address['postalCode'].' '.$address['locality'];
         } elseif (isset($address['locality'])) {
             $parts[] = $address['locality'];
         }
