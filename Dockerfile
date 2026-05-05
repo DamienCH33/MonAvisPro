@@ -1,7 +1,7 @@
 FROM dunglas/frankenphp:php8.4-bookworm
 
-RUN apt-get update && apt-get install -y git unzip \
-    && install-php-extensions pdo_pgsql iconv ctype \
+RUN apt-get update && apt-get install -y git unzip libpq-dev \
+    && docker-php-ext-install pdo_pgsql \
     && apt-get clean
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -14,4 +14,4 @@ RUN composer install --optimize-autoloader --no-interaction
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "php bin/console cache:clear --env=prod --no-debug && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && exec frankenphp run --config /app/Caddyfile"]
+CMD php -m && php bin/console cache:clear --env=prod --no-debug && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && exec frankenphp run --config /app/Caddyfile
