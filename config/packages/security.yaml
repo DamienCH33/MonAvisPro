@@ -13,6 +13,11 @@ security:
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
 
+        auth:
+            pattern: ^/api/auth
+            stateless: true
+            security: false
+
         api:
             pattern: ^/api
             stateless: true
