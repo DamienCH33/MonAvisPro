@@ -18,7 +18,8 @@ class AuthController extends AbstractController
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $passwordHasher,
         private JWTTokenManagerInterface $jwtManager,
-    ) {}
+    ) {
+    }
 
     #[Route('/register', name: 'api_auth_register', methods: ['POST'])]
     public function register(Request $request): JsonResponse
@@ -32,7 +33,7 @@ class AuthController extends AbstractController
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        if ($email === '' || $password === '') {
+        if ('' === $email || '' === $password) {
             return $this->json(['error' => 'Email et mot de passe requis.'], 422);
         }
 
@@ -84,7 +85,7 @@ class AuthController extends AbstractController
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        if ($email === '' || $password === '') {
+        if ('' === $email || '' === $password) {
             return $this->json(['error' => 'Email et mot de passe requis.'], 422);
         }
 
