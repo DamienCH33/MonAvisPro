@@ -20,7 +20,7 @@ Les commerçants reçoivent des avis Google tous les jours mais découvrent souv
 
 ## Démo live
 
-🔗 **[monavispro.railway.app](https://monavispro.railway.app)** _(à venir)_
+🔗 **monavispro-production.up.railway.app
 
 Compte de démo : `demo@monavispro.fr` / `demo1234`
 
@@ -41,7 +41,7 @@ Compte de démo : `demo@monavispro.fr` / `demo1234`
 
 | Couche          | Technologie                               |
 | --------------- | ----------------------------------------- |
-| Backend         | Symfony 7, PHP 8.3                        |
+| Backend         | Symfony 7, PHP 8.4                        |
 | Base de données | PostgreSQL 16, Doctrine ORM               |
 | Auth            | JWT — LexikJWTAuthenticationBundle        |
 | IA              | OpenAI GPT-4o-mini via HttpClient Symfony |
