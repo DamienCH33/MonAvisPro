@@ -175,12 +175,3 @@ php bin/phpunit
 
 ---
 
-## Présentation en entretien
-
-> "J'ai construit MonAvisPro, un outil de gestion d'avis Google pour les petits commerces. Le problème : les outils existants coûtent 50 à 300€ par mois, hors budget pour un restaurateur ou un artisan. J'ai utilisé Symfony 7, une API REST avec JWT, l'API Google Places, un LLM pour analyser les tendances dans les avis et générer des réponses, Symfony Scheduler pour la surveillance automatique. C'est déployé en prod sur Railway."
-
----
-
-## Licence
-
-MIT
