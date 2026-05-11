@@ -5,6 +5,12 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![PHPStan](https://img.shields.io/badge/PHPStan-Level%207-2D1B4E?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-PHPUnit-3776AB?style=flat-square&logo=php&logoColor=white)
+![PHP CS Fixer](https://img.shields.io/badge/Code%20Style-PHP%20CS%20Fixer-8892BF?style=flat-square)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
+![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Production-success?style=flat-square)
 
 > Tableau de bord de gestion d'avis Google pour TPE et indépendants — surveillance automatique, alertes email et réponses IA en 1 clic.
 
@@ -14,13 +20,15 @@
 
 ## Le problème résolu
 
-Les commerçants reçoivent des avis Google tous les jours mais découvrent souvent un avis négatif des semaines après qu'il a été posté — sans jamais y avoir répondu. Les outils existants (BrightLocal, EmbedSocial) coûtent 50 à 300€/mois, hors budget pour un restaurateur ou un artisan. MonAvisPro comble ce gap : un tableau de bord simple, en français, pensé pour un gérant qui consacre 5 minutes par semaine à sa réputation en ligne.
+Les commerçants reçoivent des avis Google tous les jours mais découvrent souvent un avis négatif des semaines après qu'il a été posté — sans jamais y avoir répondu. Les outils existants (BrightLocal, EmbedSocial) coûtent 50 à 300€/mois, hors budget pour un restaurateur ou un artisan.
+
+MonAvisPro comble ce gap : un tableau de bord simple, en français, pensé pour un gérant qui consacre 5 minutes par semaine à sa réputation en ligne.
 
 ---
 
 ## Démo live
 
-🔗 **monavispro-production.up.railway.app
+🔗 **[monavispro-production.up.railway.app](https://monavispro-production.up.railway.app)**
 
 Compte de démo : `demo@monavispro.fr` / `demo1234`
 
@@ -39,18 +47,51 @@ Compte de démo : `demo@monavispro.fr` / `demo1234`
 
 ## Stack technique
 
-| Couche          | Technologie                               |
-| --------------- | ----------------------------------------- |
-| Backend         | Symfony 7, PHP 8.4                        |
-| Base de données | PostgreSQL 16, Doctrine ORM               |
-| Auth            | JWT — LexikJWTAuthenticationBundle        |
-| IA              | OpenAI GPT-4o-mini via HttpClient Symfony |
-| Avis Google     | Google Places API (New)                   |
-| Email           | Symfony Mailer + Mailtrap                 |
-| Scheduler       | Symfony Scheduler                         |
-| Frontend        | Twig, Bootstrap 5, Chart.js               |
-| Environnement   | Docker + Docker Compose                   |
-| Déploiement     | Railway.app                               |
+| Couche           | Technologie                                  |
+|------------------|----------------------------------------------|
+| Backend          | Symfony 7, PHP 8.4                           |
+| Base de données  | PostgreSQL 16, Doctrine ORM                  |
+| Auth             | JWT — LexikJWTAuthenticationBundle           |
+| IA               | OpenAI GPT-4o-mini via HttpClient Symfony    |
+| Avis Google      | Google Places API (New)                      |
+| Email            | Symfony Mailer + Mailtrap                    |
+| Scheduler        | Symfony Scheduler                            |
+| Frontend         | Twig, Bootstrap 5, Chart.js                  |
+| Environnement    | Docker + Docker Compose                      |
+| Déploiement      | Railway.app + FrankenPHP                     |
+
+### Choix techniques principaux
+
+- **Symfony 7 + PHP 8.4** pour bénéficier des typages stricts et des dernières fonctionnalités du langage
+- **PostgreSQL** plutôt que MySQL pour la robustesse des types JSON et la prise en charge native des fonctions analytiques (`TO_CHAR`, fenêtrage)
+- **JWT (Lexik)** pour l'authentification API stateless, complétée par une session Symfony pour les pages Twig authentifiées
+- **Symfony Scheduler** plutôt que cron Linux pour garder l'orchestration dans le code versionné et testable
+- **Railway + FrankenPHP** pour un déploiement reproductible et un démarrage rapide
+
+---
+
+## Qualité de code et CI
+
+Le projet est intégré dans une pipeline GitHub Actions exécutée à chaque `push` et `pull_request` sur `main` et `develop` :
+
+- **PHPUnit** — tests unitaires et fonctionnels sur une base PostgreSQL réelle (service `postgres:15-alpine` provisionné dans la CI)
+- **PHPStan niveau 7** — analyse statique avec l'extension Doctrine pour valider les types et les requêtes ORM
+- **PHP CS Fixer** — vérification du style de code (mode `--dry-run` dans la CI, échec en cas de non-conformité)
+
+L'environnement de test reproduit la production (PostgreSQL, JWT, variables d'environnement) pour éviter les écarts de comportement.
+
+---
+
+## Refactoring en cours
+
+Suite à un retour de la communauté PHP, j'ai entamé une refactorisation progressive du projet vers une architecture plus modulaire :
+
+- ✅ Introduction de DTO sur les endpoints API (Review, Establishment) pour découpler le contrat d'API de l'entité Doctrine
+- 🔄 Extraction de la logique métier des controllers vers des Use Cases dédiés
+- 📅 Séparation en Bounded Contexts (Reviews, Establishments, Auth)
+- 📅 Mise en place de Ports & Adapters pour isoler le domaine des dépendances externes (Google API, OpenAI, Mailer)
+
+Le code reflète une démarche d'apprentissage continue : chaque itération améliore la testabilité et la maintenabilité.
 
 ---
 
@@ -58,18 +99,25 @@ Compte de démo : `demo@monavispro.fr` / `demo1234`
 
 ```bash
 # 1. Cloner le projet
-git clone https://github.com/ton-username/monavispro.git && cd monavispro
+git clone https://github.com/DamienCH33/MonAvisPro.git && cd MonAvisPro
 
 # 2. Lancer l'environnement Docker
 docker compose up -d
 
 # 3. Installer les dépendances et migrer la base
-composer install && php bin/console doctrine:migrations:migrate --no-interaction
+composer install
+php bin/console doctrine:migrations:migrate --no-interaction
+
+# 4. Générer les clés JWT
+php bin/console lexik:jwt:generate-keypair
+
+# 5. Charger les données de démo (compte demo@monavispro.fr / demo1234)
+php bin/console doctrine:fixtures:load
 ```
 
-### Variables d'environnement requises
+### Variables d'environnement
 
-Crée un fichier `.env.local` à la racine :
+Copier `.env` vers `.env.local` et renseigner les vraies valeurs :
 
 ```env
 DATABASE_URL=postgresql://app:secret@postgres:5432/monavispro
@@ -80,20 +128,6 @@ GOOGLE_PLACES_API_KEY=AIza...
 OPENAI_API_KEY=sk-...
 MAILER_DSN=smtp://user:pass@sandbox.smtp.mailtrap.io:2525
 ```
-
-### Générer les clés JWT
-
-```bash
-php bin/console lexik:jwt:generate-keypair
-```
-
-### Charger les données de test
-
-```bash
-php bin/console doctrine:fixtures:load
-```
-
-Compte demo disponible : `demo@monavispro.fr` / `demo1234`
 
 ---
 
@@ -109,7 +143,9 @@ src/
 │   │   └── AnalysisController.php      ← Analyse LLM + génération réponse
 │   ├── DashboardController.php         ← Pages Twig authentifiées
 │   ├── HomeController.php              ← Landing page publique
-│   └── SecurityController.php         ← Login/logout session
+│   └── SecurityController.php          ← Login/logout session
+├── Dto/
+│   └── ReviewDTO.php                   ← Contrat d'API découplé de l'entité
 ├── Entity/
 │   ├── User.php
 │   ├── Establishment.php
@@ -132,46 +168,60 @@ src/
 
 ### Authentification
 
-| Méthode | Route                | Description                 |
-| ------- | -------------------- | --------------------------- |
-| POST    | `/api/auth/register` | Créer un compte             |
-| POST    | `/api/auth/login`    | Obtenir un JWT              |
-| GET     | `/api/me`            | Profil utilisateur connecté |
+| Méthode | Route                  | Description                  |
+|---------|------------------------|------------------------------|
+| POST    | `/api/auth/register`   | Créer un compte              |
+| POST    | `/api/auth/login`      | Obtenir un JWT               |
+| GET     | `/api/me`              | Profil utilisateur connecté  |
 
 ### Établissements
 
-| Méthode | Route                           | Description               |
-| ------- | ------------------------------- | ------------------------- |
-| GET     | `/api/establishments`           | Lister ses établissements |
-| POST    | `/api/establishments`           | Ajouter un établissement  |
-| GET     | `/api/establishments/{id}`      | Détail                    |
-| PATCH   | `/api/establishments/{id}`      | Modifier                  |
-| DELETE  | `/api/establishments/{id}`      | Supprimer                 |
-| POST    | `/api/establishments/{id}/sync` | Sync manuelle             |
+| Méthode | Route                                | Description                  |
+|---------|--------------------------------------|------------------------------|
+| GET     | `/api/establishments`                | Lister ses établissements    |
+| POST    | `/api/establishments`                | Ajouter un établissement     |
+| GET     | `/api/establishments/{id}`           | Détail                       |
+| PATCH   | `/api/establishments/{id}`           | Modifier                     |
+| DELETE  | `/api/establishments/{id}`           | Supprimer                    |
+| POST    | `/api/establishments/{id}/sync`      | Sync manuelle                |
 
 ### Avis
 
-| Méthode | Route                                    | Description                     |
-| ------- | ---------------------------------------- | ------------------------------- |
-| GET     | `/api/establishments/{id}/reviews`       | Liste avec filtres + pagination |
-| GET     | `/api/establishments/{id}/reviews/stats` | Stats + courbe                  |
-| PATCH   | `/api/reviews/{id}/read`                 | Marquer comme lu                |
-| POST    | `/api/reviews/{id}/generate-reply`       | Générer une réponse IA          |
+| Méthode | Route                                          | Description                       |
+|---------|------------------------------------------------|-----------------------------------|
+| GET     | `/api/establishments/{id}/reviews`             | Liste avec filtres + pagination   |
+| GET     | `/api/establishments/{id}/reviews/stats`       | Stats + courbe                    |
+| PATCH   | `/api/reviews/{id}/read`                       | Marquer comme lu                  |
+| POST    | `/api/reviews/{id}/generate-reply`             | Générer une réponse IA            |
 
 ### Analyse
 
-| Méthode | Route                                       | Description         |
-| ------- | ------------------------------------------- | ------------------- |
-| GET     | `/api/establishments/{id}/analysis`         | Récupérer l'analyse |
-| POST    | `/api/establishments/{id}/analysis/refresh` | Relancer l'analyse  |
+| Méthode | Route                                              | Description           |
+|---------|----------------------------------------------------|-----------------------|
+| GET     | `/api/establishments/{id}/analysis`                | Récupérer l'analyse   |
+| POST    | `/api/establishments/{id}/analysis/refresh`        | Relancer l'analyse    |
 
 ---
 
-## Lancer les tests
+## Lancer les tests en local
 
 ```bash
+# Tests unitaires et fonctionnels
 php bin/phpunit
+
+# Analyse statique
+vendor/bin/phpstan analyse src
+
+# Vérification du style de code
+vendor/bin/php-cs-fixer fix --dry-run --diff
 ```
 
 ---
 
+## Licence
+
+**Proprietary — All rights reserved.**
+
+Ce code est rendu public à des fins de démonstration de compétences techniques. Toute réutilisation, modification, redistribution ou exploitation commerciale est interdite sans accord préalable écrit de l'auteur.
+
+© 2026 Damien Chauveau
