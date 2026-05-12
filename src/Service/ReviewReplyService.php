@@ -17,7 +17,8 @@ class ReviewReplyService
     public function __construct(
         private readonly GoogleBusinessProfileService $googleService,
         private readonly EntityManagerInterface $em,
-    ) {}
+    ) {
+    }
 
     /**
      * Sauvegarde la réponse localement et la publie sur Google si possible.
@@ -53,7 +54,7 @@ class ReviewReplyService
 
             return [
                 'success' => true,
-                'warning' => 'Réponse sauvegardée localement mais non publiée sur Google : ' . $e->getMessage(),
+                'warning' => 'Réponse sauvegardée localement mais non publiée sur Google : '.$e->getMessage(),
             ];
         }
     }
@@ -79,7 +80,7 @@ class ReviewReplyService
                     (string) $review->getEstablishment()?->getGoogleAccessToken(),
                 );
             } catch (\Exception $e) {
-                $warning = 'Réponse supprimée localement mais erreur Google : ' . $e->getMessage();
+                $warning = 'Réponse supprimée localement mais erreur Google : '.$e->getMessage();
             }
         }
 
@@ -129,7 +130,7 @@ class ReviewReplyService
 
         $establishment->setGoogleAccessToken((string) $tokenData['access_token']);
         $establishment->setGoogleTokenExpiresAt(
-            (new \DateTimeImmutable())->modify('+' . $expiresIn . ' seconds')
+            (new \DateTimeImmutable())->modify('+'.$expiresIn.' seconds')
         );
     }
 }

@@ -23,7 +23,8 @@ class ReviewController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ReviewRepository $reviewRepository,
         private readonly ReviewReplyService $reviewReplyService,
-    ) {}
+    ) {
+    }
 
     #[Route('/establishments/{id}/reviews', name: 'api_reviews_list', methods: ['GET'])]
     public function list(Establishment $establishment, Request $request): JsonResponse
@@ -64,10 +65,10 @@ class ReviewController extends AbstractController
         }
 
         $total = count($reviews);
-        $sum = array_sum(array_map(static fn(Review $r) => $r->getRating(), $reviews));
-        $positive = count(array_filter($reviews, static fn(Review $r) => $r->getRating() >= 4));
-        $negative = count(array_filter($reviews, static fn(Review $r) => $r->getRating() <= 2));
-        $unread = count(array_filter($reviews, static fn(Review $r) => !$r->isRead()));
+        $sum = array_sum(array_map(static fn (Review $r) => $r->getRating(), $reviews));
+        $positive = count(array_filter($reviews, static fn (Review $r) => $r->getRating() >= 4));
+        $negative = count(array_filter($reviews, static fn (Review $r) => $r->getRating() <= 2));
+        $unread = count(array_filter($reviews, static fn (Review $r) => !$r->isRead()));
 
         $repartition = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         foreach ($reviews as $review) {

@@ -21,7 +21,8 @@ final readonly class ReviewDTO
         public bool $isRead,
         public ?string $googleReviewId,
         public ?string $ownerReply,
-    ) {}
+    ) {
+    }
 
     public static function fromEntity(Review $review): self
     {

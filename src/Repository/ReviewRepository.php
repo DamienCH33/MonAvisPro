@@ -114,7 +114,7 @@ class ReviewRepository extends ServiceEntityRepository
         $rows = $result->fetchAllAssociative();
 
         return array_map(
-            static fn(array $row): array => [
+            static fn (array $row): array => [
                 'month' => (string) ($row['month'] ?? ''),
                 'average' => (string) ($row['average'] ?? '0'),
                 'total' => (string) ($row['total'] ?? '0'),

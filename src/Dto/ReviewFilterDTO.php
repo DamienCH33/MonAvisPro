@@ -18,7 +18,8 @@ final readonly class ReviewFilterDTO
         public ?\DateTimeImmutable $publishedSince,
         public int $page,
         public int $limit,
-    ) {}
+    ) {
+    }
 
     public static function fromRequest(Request $request): self
     {
