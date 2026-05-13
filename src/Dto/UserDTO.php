@@ -16,7 +16,8 @@ final readonly class UserDTO
         public string $email,
         public bool $alertsEnabled,
         public string $createdAt,
-    ) {}
+    ) {
+    }
 
     public static function fromEntity(User $user): self
     {
