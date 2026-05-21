@@ -1,51 +1,153 @@
+{# templates/legal/privacy.html.twig #}
+
 {% extends 'base.html.twig' %}
 
-{% block title %}Politique de confidentialité{% endblock %}
+{% block title %}Politique de confidentialité · Mon Avis Pro
+{% endblock %}
+{% block page_title %}Confidentialité
+{% endblock %}
 
 {% block body %}
-<div class="container py-5" style="max-width: 800px;">
-    <div class="mb-3">
-        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
-            ← Retour
-        </a>
-    </div>
-    <h1>Politique de confidentialité</h1>
+	<div class="rr-legal">
 
-    <h2>1. Données collectées</h2>
-    <ul>
-        <li>Email</li>
-        <li>Données d’utilisation du service</li>
-        <li>Contenus fournis (avis, réponses)</li>
-    </ul>
+		<a href="{{ app.user ? path('app_dashboard') : path('app_home') }}" class="rr-legal-back">
+			Retour
+		</a>
 
-    <h2>2. Finalités</h2>
-    <p>Les données sont utilisées pour :</p>
-    <ul>
-        <li>Fournir le service</li>
-        <li>Améliorer les fonctionnalités</li>
-        <li>Assurer la sécurité</li>
-    </ul>
+		<div class="rr-legal-hero">
 
-    <h2>3. Base légale</h2>
-    <p>Le traitement repose sur le consentement de l’utilisateur et l’exécution du service.</p>
+			<h1>Politique de confidentialité</h1>
 
-    <h2>4. Conservation</h2>
-    <p>Les données sont conservées pendant la durée d’utilisation du compte.</p>
+			<p>
+				Gestion, stockage et protection des données personnelles utilisées par MonAvisPro.
+			</p>
 
-    <h2>5. Sécurité</h2>
-    <p>Des mesures techniques et organisationnelles sont mises en place pour protéger les données.</p>
+			<div class="rr-legal-meta">
+				Dernière mise à jour :
+				{{ "now"|date("d/m/Y") }}
+			</div>
+		</div>
 
-    <h2>6. Droits des utilisateurs</h2>
-    <p>Conformément au RGPD, vous pouvez :</p>
-    <ul>
-        <li>Accéder à vos données</li>
-        <li>Les modifier</li>
-        <li>Demander leur suppression</li>
-    </ul>
+		<div class="rr-legal-content">
 
-    <h2>7. Contact</h2>
-    <p>Email : contact@monavispro.fr</p>
+			<section class="rr-legal-card">
+				<h2>1. Éditeur du service</h2>
 
-    <p class="text-muted mt-4">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
-</div>
+				<p>
+					MonAvisPro est édité par Damien Chauveau dans le cadre d’un projet
+										                personnel de développement logiciel.
+				</p>
+
+				<p>
+					Contact :
+					<a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>2. Données collectées</h2>
+
+				<ul>
+					<li>Adresse e-mail</li>
+					<li>Mot de passe chiffré</li>
+					<li>Données Google Business Profile</li>
+					<li>Données techniques de connexion</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>3. Finalités du traitement</h2>
+
+				<ul>
+					<li>Gestion du compte utilisateur</li>
+					<li>Centralisation des avis Google</li>
+					<li>Analyse IA des avis</li>
+					<li>Sécurité et journalisation</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>4. Base légale</h2>
+
+				<ul>
+					<li>Exécution du contrat</li>
+					<li>Consentement utilisateur</li>
+					<li>Intérêt légitime de sécurité</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>5. Partage avec des tiers</h2>
+
+				<ul>
+					<li>Google LLC</li>
+					<li>OpenAI</li>
+					<li>Railway Corp.</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>6. Durée de conservation</h2>
+
+				<ul>
+					<li>Compte : jusqu’à suppression</li>
+					<li>Avis synchronisés : 90 jours maximum</li>
+					<li>Logs techniques : 30 jours</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>7. Sécurité</h2>
+
+				<ul>
+					<li>Mots de passe chiffrés</li>
+					<li>HTTPS/TLS</li>
+					<li>Accès serveur restreint</li>
+					<li>Tokens OAuth protégés</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>8. Vos droits</h2>
+
+				<p>
+					Vous disposez des droits d’accès, de rectification, d’effacement,
+										                d’opposition et de portabilité prévus par le RGPD.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>9. Révocation Google</h2>
+
+				<p>
+					L’accès Google Business Profile peut être révoqué à tout moment.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>10. Cookies</h2>
+
+				<p>
+					MonAvisPro utilise uniquement des cookies nécessaires à l’authentification.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>11. Conformité Google API</h2>
+
+				<p>
+					MonAvisPro respecte la Google API Services User Data Policy.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>12. Réclamation CNIL</h2>
+
+				<p>
+					En cas de litige, une réclamation peut être déposée auprès de la CNIL.
+				</p>
+			</section>
+
+		</div>
+	</div>
 {% endblock %}

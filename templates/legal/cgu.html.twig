@@ -1,52 +1,192 @@
+{# templates/legal/cgu.html.twig #}
+
 {% extends 'base.html.twig' %}
 
-{% block title %}Conditions Générales d’Utilisation{% endblock %}
+{% block title %}Conditions Générales d'Utilisation · Mon Avis Pro
+{% endblock %}
+{% block page_title %}CGU
+{% endblock %}
 
 {% block body %}
-<div class="container py-5" style="max-width: 800px;">
-    <div class="mb-3">
-        <a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
-            ← Retour
-        </a>
-    </div>
-    <h1>Conditions Générales d’Utilisation</h1>
+	<div class="rr-legal">
 
-    <p>Les présentes Conditions Générales d’Utilisation (CGU) régissent l’accès et l’utilisation du service Mon Avis
-        Pro.</p>
+		<a href="{{ app.user ? path('app_dashboard') : path('app_home') }}" class="rr-legal-back">
+			Retour
+		</a>
 
-    <h2>1. Présentation du service</h2>
-    <p>Mon Avis Pro est une plateforme permettant d’analyser des avis clients et de générer des réponses assistées par
-        intelligence artificielle.</p>
+		<div class="rr-legal-hero">
 
-    <h2>2. Création de compte</h2>
-    <p>L’utilisateur doit fournir des informations exactes. Il est responsable de la confidentialité de ses
-        identifiants.</p>
+			<h1>Conditions Générales d’Utilisation</h1>
 
-    <h2>3. Utilisation du service</h2>
-    <p>L’utilisateur s’engage à ne pas utiliser le service à des fins illégales, frauduleuses ou portant atteinte à des
-        tiers.</p>
+			<p>
+				Conditions applicables à l’utilisation du service MonAvisPro,
+								            plateforme SaaS de gestion d’e-réputation et d’analyse d’avis Google.
+			</p>
 
-    <h2>4. Intelligence artificielle</h2>
-    <p>Les réponses générées par l’intelligence artificielle sont fournies à titre indicatif. L’utilisateur reste seul
-        responsable de leur utilisation et de leur publication.</p>
+			<div class="rr-legal-meta">
+				Dernière mise à jour :
+				{{ "now"|date("d/m/Y") }}
+			</div>
+		</div>
 
-    <h2>5. Responsabilité</h2>
-    <p>Le service est fourni “en l’état”. L’éditeur ne garantit pas l’exactitude des analyses ou des réponses générées.
-    </p>
+		<div class="rr-legal-grid">
 
-    <h2>6. Données</h2>
-    <p>L’utilisateur est responsable des données qu’il soumet (avis, contenus). Il garantit disposer des droits
-        nécessaires.</p>
+			<aside class="rr-legal-nav">
+				<div class="rr-legal-nav-card">
+					<div class="rr-legal-nav-title">
+						Navigation
+					</div>
 
-    <h2>7. Suspension / résiliation</h2>
-    <p>L’éditeur peut suspendre ou supprimer un compte en cas de non-respect des présentes CGU.</p>
+					<a href="#service">Service</a>
+					<a href="#compte">Compte</a>
+					<a href="#google">Google</a>
+					<a href="#ia">Intelligence artificielle</a>
+					<a href="#responsabilite">Responsabilité</a>
+					<a href="#donnees">Données</a>
+					<a href="#juridique">Juridique</a>
+				</div>
+			</aside>
 
-    <h2>8. Évolution du service</h2>
-    <p>Le service peut être modifié ou interrompu à tout moment.</p>
+			<div class="rr-legal-content">
 
-    <h2>9. Droit applicable</h2>
-    <p>Les présentes CGU sont soumises au droit français.</p>
+				<section class="rr-legal-card" id="service">
+					<h2>1. Présentation du service</h2>
 
-    <p class="text-muted mt-4">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
-</div>
+					<p>
+						MonAvisPro est une plateforme SaaS de gestion d’e-réputation permettant :
+					</p>
+
+					<ul>
+						<li>De centraliser les avis Google Business Profile</li>
+						<li>D’analyser automatiquement le sentiment des avis via IA</li>
+						<li>D’assister la rédaction de réponses professionnelles</li>
+					</ul>
+				</section>
+
+				<section class="rr-legal-card" id="compte">
+					<h2>2. Création de compte</h2>
+
+					<p>
+						L’utilisateur doit fournir des informations exactes et à jour lors
+												                    de la création de son compte.
+					</p>
+
+					<p>
+						Il reste responsable de la confidentialité de ses identifiants
+												                    ainsi que des actions réalisées depuis son compte.
+					</p>
+				</section>
+
+				<section class="rr-legal-card">
+					<h2>3. Utilisation du service</h2>
+
+					<ul>
+						<li>Ne pas utiliser le service à des fins illégales ou frauduleuses</li>
+						<li>Ne pas contourner les limitations techniques du service</li>
+						<li>Respecter les conditions d’utilisation de Google</li>
+						<li>Ne pas publier de contenu trompeur ou diffamatoire</li>
+					</ul>
+				</section>
+
+				<section class="rr-legal-card" id="google">
+					<h2>4. Connexion Google Business Profile</h2>
+
+					<p>
+						MonAvisPro utilise OAuth 2.0 afin de connecter un compte Google Business Profile.
+					</p>
+
+					<ul>
+						<li>Accès uniquement aux données nécessaires au fonctionnement du service</li>
+						<li>Révocation possible à tout moment depuis Google ou MonAvisPro</li>
+						<li>Aucune publication automatique sans validation utilisateur</li>
+					</ul>
+
+					<p>
+						Les traitements sont détaillés dans la
+						<a href="{{ path('app_privacy') }}">politique de confidentialité</a>.
+					</p>
+				</section>
+
+				<section class="rr-legal-card" id="ia">
+					<h2>5. Intelligence artificielle</h2>
+
+					<p>
+						Les analyses et réponses générées via GPT-4o-mini sont fournies
+												                    à titre indicatif uniquement.
+					</p>
+
+					<ul>
+						<li>L’utilisateur reste responsable des contenus publiés</li>
+						<li>Les suggestions IA doivent être vérifiées avant publication</li>
+						<li>Aucune garantie d’exactitude n’est fournie</li>
+					</ul>
+				</section>
+
+				<section class="rr-legal-card" id="responsabilite">
+					<h2>6. Responsabilité</h2>
+
+					<p>
+						Le service est fourni « en l’état », sans garantie de disponibilité continue.
+					</p>
+
+					<ul>
+						<li>Interruptions techniques possibles</li>
+						<li>Dépendance à des services tiers (Google, OpenAI, Railway)</li>
+						<li>Absence de garantie sur les résultats générés par IA</li>
+					</ul>
+				</section>
+
+				<section class="rr-legal-card">
+					<h2>7. Propriété intellectuelle</h2>
+
+					<p>
+						Le code source, l’interface, les marques et logos du service
+												                    restent la propriété exclusive de l’éditeur.
+					</p>
+				</section>
+
+				<section class="rr-legal-card" id="donnees">
+					<h2>8. Données personnelles</h2>
+
+					<p>
+						Le traitement des données personnelles est régi par notre
+						<a href="{{ path('app_privacy') }}">politique de confidentialité</a>.
+					</p>
+				</section>
+
+				<section class="rr-legal-card">
+					<h2>9. Suspension et résiliation</h2>
+
+					<p>
+						Un compte peut être suspendu en cas de non-respect des présentes CGU.
+					</p>
+				</section>
+
+				<section class="rr-legal-card">
+					<h2>10. Évolution du service</h2>
+
+					<p>
+						MonAvisPro peut évoluer, être modifié ou interrompu à tout moment.
+					</p>
+				</section>
+
+				<section class="rr-legal-card">
+					<h2>11. Modification des CGU</h2>
+
+					<p>
+						Les présentes conditions peuvent être mises à jour à tout moment.
+					</p>
+				</section>
+
+				<section class="rr-legal-card" id="juridique">
+					<h2>12. Droit applicable</h2>
+
+					<p>
+						Les présentes CGU sont soumises au droit français.
+					</p>
+				</section>
+
+			</div>
+		</div>
+	</div>
 {% endblock %}

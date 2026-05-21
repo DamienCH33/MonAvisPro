@@ -1,0 +1,110 @@
+{# templates/legal/legal-notice.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Mentions légales · Mon Avis Pro
+{% endblock %}
+{% block page_title %}Mentions légales
+{% endblock %}
+
+{% block body %}
+	<div class="rr-legal">
+
+		<a href="{{ app.user ? path('app_dashboard') : path('app_home') }}" class="rr-legal-back">
+			Retour
+		</a>
+
+		<div class="rr-legal-hero">
+
+			<h1>Mentions légales</h1>
+
+			<p>
+				Informations relatives à l’éditeur, l’hébergement et la propriété intellectuelle du service.
+			</p>
+
+			<div class="rr-legal-meta">
+				Dernière mise à jour :
+				{{ "now"|date("d/m/Y") }}
+			</div>
+		</div>
+
+		<div class="rr-legal-content">
+
+			<section class="rr-legal-card">
+				<h2>1. Éditeur du site</h2>
+
+				<p>
+					<strong>Damien Chauveau</strong><br>
+					Projet personnel de développement logiciel<br>
+					Villenave d'Ornon, France
+				</p>
+
+				<p>
+					Contact :
+					<a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>2. Directeur de publication</h2>
+
+				<p>
+					Damien Chauveau.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>3. Hébergement</h2>
+
+				<p>
+					<strong>Railway Corp.</strong><br>
+					San Francisco, CA, USA
+				</p>
+
+				<p>
+					<a href="https://railway.app" target="_blank" rel="noopener">
+						railway.app
+					</a>
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>4. Propriété intellectuelle</h2>
+
+				<p>
+					L’ensemble des éléments composant MonAvisPro est protégé
+															                par le droit de la propriété intellectuelle.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>5. Services tiers</h2>
+
+				<ul>
+					<li>Google Business Profile API</li>
+					<li>OpenAI API</li>
+				</ul>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>6. Données personnelles</h2>
+
+				<p>
+					Les traitements de données sont décrits dans la
+					<a href="{{ path('app_privacy') }}">politique de confidentialité</a>.
+				</p>
+			</section>
+
+			<section class="rr-legal-card">
+				<h2>7. Contact</h2>
+
+				<p>
+					<a href="mailto:contact@monavispro.fr">
+						contact@monavispro.fr
+					</a>
+				</p>
+			</section>
+
+		</div>
+	</div>
+{% endblock %}
