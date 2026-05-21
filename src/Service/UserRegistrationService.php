@@ -19,7 +19,8 @@ class UserRegistrationService
         private readonly EntityManagerInterface $em,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws EmailAlreadyUsedException si un compte existe déjà avec cet email

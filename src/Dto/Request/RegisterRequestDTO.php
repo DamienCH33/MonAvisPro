@@ -25,7 +25,8 @@ final readonly class RegisterRequestDTO
         public string $password,
 
         public bool $alertsEnabled = true,
-    ) {}
+    ) {
+    }
 
     public static function fromRequest(Request $request): self
     {

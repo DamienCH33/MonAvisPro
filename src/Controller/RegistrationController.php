@@ -18,7 +18,8 @@ class RegistrationController extends AbstractController
 {
     public function __construct(
         private readonly UserRegistrationService $userRegistrationService,
-    ) {}
+    ) {
+    }
 
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, Security $security): Response

@@ -18,7 +18,8 @@ final readonly class LoginRequestDTO
 
         #[Assert\NotBlank(message: 'Email et mot de passe requis.')]
         public string $password,
-    ) {}
+    ) {
+    }
 
     public static function fromRequest(Request $request): self
     {
