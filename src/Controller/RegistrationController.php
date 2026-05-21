@@ -1,21 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EmailAlreadyUsedException;
+use App\Service\UserRegistrationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RegistrationController extends AbstractController
 {
+    public function __construct(
+        private readonly UserRegistrationService $userRegistrationService,
+    ) {}
+
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, Security $security): Response
     {
         if ($this->getParameter('app.demo_mode')) {
             throw $this->createAccessDeniedException('Inscription désactivée en mode démonstration.');
@@ -26,13 +32,18 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string */
+            /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            try {
+                $this->userRegistrationService->registerFromForm($user, $plainPassword);
+            } catch (EmailAlreadyUsedException $e) {
+                $this->addFlash('error', $e->getMessage());
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+                return $this->render('security/register.html.twig', [
+                    'registrationForm' => $form,
+                ]);
+            }
 
             return $security->login($user, 'form_login', 'main');
         }
