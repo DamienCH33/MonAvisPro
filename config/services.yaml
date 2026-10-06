@@ -1,5 +1,13 @@
 parameters:
     app.demo_mode: "%env(bool:APP_DEMO_MODE)%"
+    # Inscription publique fermée par défaut (comptes créés par l'administrateur).
+    env(APP_REGISTRATION_ENABLED): "0"
+    app.registration_enabled: "%env(bool:APP_REGISTRATION_ENABLED)%"
+    # Clé de chiffrement des jetons Google (32 octets en base64). Repli sur APP_SECRET si absente.
+    env(APP_ENCRYPTION_KEY): ""
+    # Par défaut aucun proxy de confiance ; sur Railway : TRUSTED_PROXIES=REMOTE_ADDR
+    env(TRUSTED_PROXIES): "127.0.0.1"
+    env(MAILER_FROM): "MonAvisPro <noreply@monavispro.fr>"
 
 services:
     _defaults:
@@ -16,6 +24,11 @@ services:
     App\Service\LlmService:
         arguments:
             $apiKey: "%env(OPENAI_API_KEY)%"
+
+    App\Service\TokenCipher:
+        arguments:
+            $encryptionKey: "%env(APP_ENCRYPTION_KEY)%"
+            $appSecret: "%env(APP_SECRET)%"
 
     App\Service\GoogleBusinessProfileService:
         arguments:

@@ -33,7 +33,6 @@ class AlertEmailService
         ]);
 
         $email = (new Email())
-            ->from('noreply@monavispro.fr')
             ->to($owner->getEmail())
             ->subject(sprintf(
                 '⚠️ Avis négatif — %s — %d/5 étoiles',

@@ -22,7 +22,7 @@
 						<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta rr-btn-lg">
 							Tester la démo en 1 clic
 						</a>
-						{% if not app_demo_mode %}
+						{% if app_registration_enabled and not app_demo_mode %}
 							<a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
 								Créer un compte
 							</a>

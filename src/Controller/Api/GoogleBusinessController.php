@@ -4,7 +4,9 @@ namespace App\Controller\Api;
 
 use App\Entity\Establishment;
 use App\Entity\User;
+use App\Security\DemoAccountGuard;
 use App\Service\GoogleBusinessProfileService;
+use App\Service\GoogleTokenManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,13 +19,20 @@ class GoogleBusinessController extends AbstractController
     public function __construct(
         private readonly GoogleBusinessProfileService $googleService,
         private readonly EntityManagerInterface $em,
+        private readonly GoogleTokenManager $tokenManager,
     ) {
     }
 
     #[Route('/connect', name: 'google_business_connect')]
-    public function connect(Request $request): Response
+    public function connect(Request $request, DemoAccountGuard $demoGuard): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if ($demoGuard->isDemo($this->getUser())) {
+            $this->addFlash('warning', 'La connexion Google est désactivée sur le compte démo.');
+
+            return $this->redirectToRoute('dashboard');
+        }
 
         $state = bin2hex(random_bytes(16));
         $request->getSession()->set('google_oauth_state', $state);
@@ -39,10 +48,11 @@ class GoogleBusinessController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $state = $request->query->get('state');
-        $sessionState = $request->getSession()->get('google_oauth_state');
+        $state = (string) $request->query->get('state');
+        $sessionState = (string) $request->getSession()->get('google_oauth_state');
+        $request->getSession()->remove('google_oauth_state');
 
-        if ($state !== $sessionState) {
+        if ('' === $sessionState || !hash_equals($sessionState, $state)) {
             $this->addFlash('error', 'Erreur de sécurité : état invalide');
 
             return $this->redirectToRoute('dashboard');
@@ -77,7 +87,7 @@ class GoogleBusinessController extends AbstractController
 
             return $this->redirectToRoute('google_business_select_location');
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de la connexion : '.$e->getMessage());
+            $this->addFlash('error', 'La connexion à Google a échoué. Réessayez dans quelques instants.');
 
             return $this->redirectToRoute('dashboard');
         }
@@ -117,7 +127,7 @@ class GoogleBusinessController extends AbstractController
                 'locations' => $allLocations,
             ]);
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de la récupération des établissements : '.$e->getMessage());
+            $this->addFlash('error', 'Impossible de récupérer vos établissements Google. Vérifiez les accès de votre compte.');
 
             return $this->redirectToRoute('dashboard');
         }
@@ -127,6 +137,12 @@ class GoogleBusinessController extends AbstractController
     public function saveLocation(Request $request): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if (!$this->isCsrfTokenValid('google_save_location', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Formulaire expiré, recommencez.');
+
+            return $this->redirectToRoute('google_business_select_location');
+        }
 
         $locationDataRaw = $request->request->get('location_data');
 
@@ -188,14 +204,14 @@ class GoogleBusinessController extends AbstractController
         $establishment->setGoogleAccountId($accountId);
         $establishment->setGoogleLocationId($locationName);
 
-        // Jetons de la connexion Google : sans eux, impossible de lire tous les avis ni de publier les réponses.
-        $establishment->setGoogleAccessToken($accessToken);
+        // Jetons de la connexion Google (chiffrés) : sans eux, impossible de lire tous les avis ni de publier.
         $refreshToken = $session->get('google_refresh_token');
-        if (is_string($refreshToken) && '' !== $refreshToken) {
-            $establishment->setGoogleRefreshToken($refreshToken);
-        }
-        $expiresAt = (int) $session->get('google_token_expires_at', time() + 3600);
-        $establishment->setGoogleTokenExpiresAt((new \DateTimeImmutable())->setTimestamp($expiresAt));
+        $this->tokenManager->storeTokens(
+            $establishment,
+            $accessToken,
+            is_string($refreshToken) ? $refreshToken : null,
+            (int) $session->get('google_token_expires_at', time() + 3600),
+        );
 
         $address = $this->formatAddress(is_array($locationData['storefrontAddress'] ?? null) ? $locationData['storefrontAddress'] : []);
         $establishment->setAddress($address ?: 'Adresse non renseignée');

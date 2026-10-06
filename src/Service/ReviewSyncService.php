@@ -75,8 +75,7 @@ class ReviewSyncService
                 $review->setGoogleReviewId($reviewId);
                 $review->setGoogleReviewName(is_string($reviewData['name'] ?? null) ? $reviewData['name'] : null);
                 $review->setGoogleAuthor($this->authorName($reviewData));
-                $photo = $reviewData['reviewer']['profilePhotoUrl'] ?? null;
-                $review->setGoogleAuthorPhoto(is_string($photo) ? $photo : null);
+                $review->setGoogleAuthorPhoto($this->safePhotoUrl($reviewData['reviewer']['profilePhotoUrl'] ?? null));
                 $review->setRating($rating);
                 $review->setText($this->originalText($reviewData['comment'] ?? null));
                 $review->setPublishedAt($this->parseDate($reviewData['createTime'] ?? null));
@@ -140,7 +139,7 @@ class ReviewSyncService
             $review->setEstablishment($establishment);
             $review->setGoogleReviewId($reviewData['googleReviewId']);
             $review->setGoogleAuthor($reviewData['googleAuthor']);
-            $review->setGoogleAuthorPhoto($reviewData['googleAuthorPhoto']);
+            $review->setGoogleAuthorPhoto($this->safePhotoUrl($reviewData['googleAuthorPhoto']));
             $review->setRating($rating);
             $review->setText($reviewData['text'] ?? '');
             $review->setPublishedAt($reviewData['publishedAt']);
@@ -195,6 +194,16 @@ class ReviewSyncService
             $review->setOwnerReply($googleReply);
             $review->setIsPublishedToGoogle(true);
         }
+    }
+
+    /** Photo de profil : uniquement une URL https (jamais javascript:, data:…). */
+    private function safePhotoUrl(mixed $url): ?string
+    {
+        if (!is_string($url) || mb_strlen($url) > 500 || 'https' !== parse_url($url, PHP_URL_SCHEME)) {
+            return null;
+        }
+
+        return $url;
     }
 
     /** @param array<string, mixed> $reviewData */

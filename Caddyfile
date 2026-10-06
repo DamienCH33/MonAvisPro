@@ -4,5 +4,9 @@
 
 :8080 {
 	root * /app/public
+
+	# Les en-têtes de sécurité sont ajoutés par l'application (SecurityHeadersSubscriber).
+	header -Server
+
 	php_server
 }

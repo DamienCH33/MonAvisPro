@@ -1209,3 +1209,95 @@ body.modal-open .modal * {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.2);
 }
+
+/* ---- CORRECTIF : masquer le menu mobile sur grand écran même sans Bootstrap ---- */
+@media (min-width: 992px) {
+    #sidebarOffcanvas { display: none !important; }
+}
+
+/* ---- PASTILLE BLEUE (non lu) ---- */
+.rr-pill-blue {
+    background: rgba(99, 179, 237, 0.12);
+    color: #63b3ed;
+    border: 1px solid rgba(99, 179, 237, 0.25);
+}
+
+/* ---- BOÎTE « À TRAITER » (multi-établissements) ---- */
+.rr-inbox-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.rr-inbox-group {
+    background: var(--rr-card);
+    border: 1px solid var(--rr-bd);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
+
+.rr-inbox-group-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--rr-bd);
+}
+
+.rr-inbox-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--rr-t1);
+    text-decoration: none;
+}
+.rr-inbox-name:hover { color: var(--rr-green); }
+
+.rr-inbox-row {
+    display: grid;
+    grid-template-columns: 92px 150px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--rr-t2);
+    transition: var(--rr-tr);
+}
+.rr-inbox-row:hover { background: rgba(255, 255, 255, 0.035); }
+.rr-inbox-row-neg { box-shadow: inset 3px 0 0 var(--rr-red); }
+
+.rr-inbox-stars { font-size: 13px; letter-spacing: 1px; }
+.rr-inbox-author { font-size: 13px; font-weight: 600; color: var(--rr-t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rr-inbox-text { font-size: 13px; color: var(--rr-t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rr-inbox-date { font-size: 11px; color: var(--rr-t3); white-space: nowrap; }
+.rr-inbox-more { font-size: 12px; color: var(--rr-t3); padding: 8px 10px 2px; }
+
+@media (max-width: 767.98px) {
+    .rr-inbox-row {
+        grid-template-columns: 1fr auto;
+        row-gap: 4px;
+    }
+    .rr-inbox-text { grid-column: 1 / -1; white-space: normal; }
+}
+
+/* ---- ÉTAT VIDE ---- */
+.rr-empty-state { text-align: center; padding: 48px 24px; }
+.rr-empty-icon {
+    width: 56px; height: 56px; line-height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(93, 202, 165, 0.12);
+    color: var(--rr-green);
+    font-size: 26px;
+}
+.rr-empty-title { font-size: 17px; font-weight: 700; color: var(--rr-t1); margin-bottom: 6px; }
+.rr-empty-text { font-size: 14px; color: var(--rr-t3); max-width: 420px; margin: 0 auto; }
+
+/* ---- FILTRE : statut de réponse ---- */
+.rr-pag-gap { color: var(--rr-t3); padding: 0 4px; }
+.rr-pag-info { font-size: 12px; color: var(--rr-t3); }

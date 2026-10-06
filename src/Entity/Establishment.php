@@ -73,6 +73,10 @@ class Establishment
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $replySignature = null;
 
+    /** E-mail du commerçant, destinataire du bilan mensuel (facultatif). */
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $clientEmail = null;
+
     /** Consignes propres au commerce (sujets à éviter, infos à rappeler, prénom du gérant…). */
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $replyInstructions = null;
@@ -361,5 +365,17 @@ class Establishment
         return null !== $this->googleAccessToken
             && null !== $this->googleAccountId
             && null !== $this->googleLocationId;
+    }
+
+    public function getClientEmail(): ?string
+    {
+        return $this->clientEmail;
+    }
+
+    public function setClientEmail(?string $clientEmail): static
+    {
+        $this->clientEmail = $clientEmail;
+
+        return $this;
     }
 }

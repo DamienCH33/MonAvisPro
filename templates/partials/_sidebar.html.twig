@@ -19,6 +19,19 @@
     Tableau de bord
 </a>
 
+{% set pending = inbox_count() %}
+<a href="{{ path('inbox') }}"
+   class="rr-nav-item {% if route == 'inbox' %}active{% endif %}">
+    <svg class="rr-nav-icon" viewBox="0 0 16 16" fill="none">
+        <path d="M2 9l2-6h8l2 6v4H2V9z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M2 9h3.5l1 1.5h3l1-1.5H14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    À traiter
+    {% if pending > 0 %}
+        <span class="rr-nav-badge">{{ pending > 99 ? '99+' : pending }}</span>
+    {% endif %}
+</a>
+
 {% if current_id %}
 <a href="{{ path('reviews_list', {id: current_id}) }}"
    class="rr-nav-item {% if route == 'reviews_list' %}active{% endif %}">
@@ -78,7 +91,7 @@
         <div class="rr-avatar">{{ app.user.email|first|upper }}</div>
         <div>
             <div class="rr-user-name">{{ app.user.email|split('@')[0] }}</div>
-            <div class="rr-user-plan">Plan gratuit</div>
+            <div class="rr-user-plan">{{ establishments is defined ? establishments|length : 0 }} établissement{{ establishments is defined and establishments|length > 1 ? 's' }}</div>
         </div>
     </div>
 </div>

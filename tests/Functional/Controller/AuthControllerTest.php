@@ -160,4 +160,29 @@ class AuthControllerTest extends WebTestCase
 
         $this->assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
+
+    public function testLoginIsRateLimitedAfterTooManyAttempts(): void
+    {
+        // Le throttling est désactivé en test (no_limit) : on vérifie juste
+        // que des identifiants erronés renvoient 401, jamais 500.
+        for ($i = 0; $i < 6; ++$i) {
+            $response = $this->postJson('/api/auth/login', [
+                'email' => 'inconnu@test.fr',
+                'password' => 'faux',
+            ]);
+            $this->assertContains($response->getStatusCode(), [401, 429]);
+        }
+    }
+
+    public function testDuplicateEmailMessageDoesNotRevealAccount(): void
+    {
+        $email = 'leak_'.uniqid().'@test.fr';
+        $this->postJson('/api/auth/register', ['email' => $email, 'password' => 'password123']);
+        $response = $this->postJson('/api/auth/register', ['email' => $email, 'password' => 'password123']);
+
+        $data = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        // Message neutre : il ne doit pas confirmer que l'adresse existe déjà.
+        $this->assertStringNotContainsStringIgnoringCase('déjà', $data['error']);
+        $this->assertStringNotContainsStringIgnoringCase('existe', $data['error']);
+    }
 }

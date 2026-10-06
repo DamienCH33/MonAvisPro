@@ -1,0 +1,72 @@
+{% set months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'] %}
+{% set month_label = months[month|date('n') - 1] ~ ' ' ~ month|date('Y') %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vos avis Google en {{ month_label }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden">
+                    <tr>
+                        <td style="background:#0b1020;padding:24px 32px">
+                            <div style="color:#5dcaa5;font-size:12px;font-weight:bold;letter-spacing:.06em;text-transform:uppercase">Bilan mensuel</div>
+                            <div style="color:#ffffff;font-size:20px;font-weight:bold;margin-top:6px">{{ establishment.name }}</div>
+                            <div style="color:#9ca3af;font-size:14px;margin-top:4px">Vos avis Google en {{ month_label }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:28px 32px">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="33%" align="center" style="background:#f9fafb;border-radius:8px;padding:14px 8px">
+                                        <div style="font-size:26px;font-weight:bold">{{ stats.newCount }}</div>
+                                        <div style="font-size:12px;color:#6b7280">nouveaux avis</div>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="31%" align="center" style="background:#f9fafb;border-radius:8px;padding:14px 8px">
+                                        <div style="font-size:26px;font-weight:bold">{{ stats.newAverage is not null ? stats.newAverage|number_format(1, ',') : '—' }}</div>
+                                        <div style="font-size:12px;color:#6b7280">note du mois</div>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="32%" align="center" style="background:#f9fafb;border-radius:8px;padding:14px 8px">
+                                        <div style="font-size:26px;font-weight:bold">{{ stats.repliedCount }}</div>
+                                        <div style="font-size:12px;color:#6b7280">réponses publiées</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size:15px;line-height:1.6;margin:24px 0 0">
+                                {% if stats.newCount == 0 %}
+                                    Pas de nouvel avis ce mois-ci. Pensez au QR code en caisse : les clients satisfaits laissent un avis quand on le leur propose.
+                                {% elseif stats.repliedCount >= stats.newCount %}
+                                    Tous vos nouveaux avis ont reçu une réponse. Les clients qui hésitent le voient.
+                                {% else %}
+                                    {{ stats.repliedCount }} avis sur {{ stats.newCount }} ont reçu une réponse ce mois-ci.
+                                {% endif %}
+                                {% if stats.negativeCount > 0 %}
+                                    {{ stats.negativeCount }} avis négatif{{ stats.negativeCount > 1 ? 's' }} {{ stats.negativeCount > 1 ? 'ont' : 'a' }} été traité{{ stats.negativeCount > 1 ? 's' }} avec une réponse adaptée.
+                                {% endif %}
+                            </p>
+
+                            <p style="font-size:14px;color:#6b7280;line-height:1.6;margin:16px 0 0">
+                                Depuis le début : {{ stats.totalCount }} avis
+                                {%- if stats.overallAverage is not null %}, note moyenne {{ stats.overallAverage|number_format(1, ',') }}/5{% endif %}.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#f9fafb;padding:16px 32px;font-size:12px;color:#9ca3af">
+                            Bilan envoyé chaque début de mois par votre gestionnaire d'avis. Une question : répondez simplement à ce mail.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -11,7 +11,7 @@ final class Version20261006090000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Réglages de réponse aux avis par établissement (vouvoiement, ton, signature, consignes)';
+        return 'Réglages de réponse aux avis par établissement (vouvoiement, ton, signature, consignes) et e-mail du commerçant';
     }
 
     public function up(Schema $schema): void
@@ -20,6 +20,7 @@ final class Version20261006090000 extends AbstractMigration
         $this->addSql("ALTER TABLE establishment ADD COLUMN IF NOT EXISTS reply_tone VARCHAR(20) DEFAULT 'cordial' NOT NULL");
         $this->addSql('ALTER TABLE establishment ADD COLUMN IF NOT EXISTS reply_signature VARCHAR(120) DEFAULT NULL');
         $this->addSql('ALTER TABLE establishment ADD COLUMN IF NOT EXISTS reply_instructions TEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE establishment ADD COLUMN IF NOT EXISTS client_email VARCHAR(180) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
@@ -28,5 +29,6 @@ final class Version20261006090000 extends AbstractMigration
         $this->addSql('ALTER TABLE establishment DROP COLUMN IF EXISTS reply_tone');
         $this->addSql('ALTER TABLE establishment DROP COLUMN IF EXISTS reply_signature');
         $this->addSql('ALTER TABLE establishment DROP COLUMN IF EXISTS reply_instructions');
+        $this->addSql('ALTER TABLE establishment DROP COLUMN IF EXISTS client_email');
     }
 }

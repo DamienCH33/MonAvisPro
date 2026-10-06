@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}À traiter — MonAvisPro{% endblock %}
+{% block page_title %}À traiter{% endblock %}
+
+{% block body %}
+	<div class="rr-inbox-head">
+		<div>
+			<div class="rr-page-title">{{ total }} avis sans réponse</div>
+			<div class="rr-page-sub">Tous vos établissements, les avis négatifs en premier.</div>
+		</div>
+	</div>
+
+	{% if groups is empty %}
+		<div class="rr-card rr-card-lg rr-empty-state">
+			<div class="rr-empty-icon">✓</div>
+			<div class="rr-empty-title">Tout est à jour</div>
+			<div class="rr-empty-text">Aucun avis n'attend de réponse. Les nouveaux avis arrivent à chaque synchronisation.</div>
+		</div>
+	{% endif %}
+
+	{% for group in groups %}
+		{% set establishment = group.establishment %}
+		<section class="rr-inbox-group">
+			<div class="rr-inbox-group-head">
+				<a href="{{ path('dashboard_establishment', {id: establishment.id}) }}" class="rr-inbox-name">{{ establishment.name }}</a>
+				<span class="rr-pill rr-pill-yellow">{{ group.reviews|length }} à répondre</span>
+				<a href="{{ path('reviews_list', {id: establishment.id, status: 'unanswered'}) }}" class="rr-btn rr-btn-primary rr-btn-sm ms-auto">Répondre</a>
+			</div>
+
+			{% for review in group.reviews|slice(0, 5) %}
+				<a href="{{ path('reviews_list', {id: establishment.id, status: 'unanswered'}) }}#review-{{ review.id }}" class="rr-inbox-row {{ review.rating <= 2 ? 'rr-inbox-row-neg' }}">
+					<span class="{{ review.rating >= 4 ? 'rr-stars' : 'rr-stars-neg' }} rr-inbox-stars">{% for i in 1..5 %}{{ i <= review.rating ? '★' : '☆' }}{% endfor %}</span>
+					<span class="rr-inbox-author">{{ review.googleAuthor }}</span>
+					<span class="rr-inbox-text">{{ review.text ? (review.text|length > 110 ? review.text|slice(0, 110) ~ '…' : review.text) : 'Note sans commentaire' }}</span>
+					<span class="rr-inbox-date">{{ review.publishedAt|date('d/m/Y') }}</span>
+				</a>
+			{% endfor %}
+
+			{% if group.reviews|length > 5 %}
+				<div class="rr-inbox-more">+ {{ group.reviews|length - 5 }} autre{{ group.reviews|length - 5 > 1 ? 's' }}</div>
+			{% endif %}
+		</section>
+	{% endfor %}
+{% endblock %}
