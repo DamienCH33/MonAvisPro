@@ -39,9 +39,12 @@ Compte de démo : `demo@monavispro.fr` / `demo1234`
 - **Surveillance automatique** — synchronisation des avis Google toutes les 6h via Symfony Scheduler
 - **Alertes email immédiates** — notification dès qu'un avis ≤ 2★ est détecté
 - **Analyse thématique IA** — extraction des thèmes récurrents dans les avis positifs et négatifs
-- **Génération de réponses** — 3 tons disponibles (cordial, formel, empathique) via OpenAI GPT-4o-mini
-- **Dashboard interactif** — courbe d'évolution de la note, répartition par étoile, filtres et pagination
-- **API REST complète** — authentification JWT, endpoints sécurisés par ownership
+- **Génération de réponses** — personnalisée par établissement (vouvoiement/tutoiement, ton, signature, consignes), relue avant publication, via OpenAI GPT-4o-mini
+- **Connexion Google Business Profile** — synchronisation de **tous** les avis d'une fiche et publication des réponses directement sur Google (OAuth 2.0, jetons chiffrés)
+- **Boîte « À traiter »** — tous les avis sans réponse, tous établissements confondus, les négatifs en premier
+- **Bilan mensuel au commerçant** — e-mail automatique de suivi (avis, note, réponses)
+- **Dashboard interactif** — courbe d'évolution de la note, répartition par étoile, filtres (note, période, à répondre/répondu) et pagination
+- **API REST complète** — authentification JWT, endpoints sécurisés par ownership, limitation de débit
 
 ---
 
@@ -53,8 +56,8 @@ Compte de démo : `demo@monavispro.fr` / `demo1234`
 | Base de données  | PostgreSQL 16, Doctrine ORM                  |
 | Auth             | JWT — LexikJWTAuthenticationBundle           |
 | IA               | OpenAI GPT-4o-mini via HttpClient Symfony    |
-| Avis Google      | Google Places API (New)                      |
-| Email            | Symfony Mailer + Mailtrap                    |
+| Avis Google      | Google Business Profile API (OAuth) + Places |
+| Email            | Symfony Mailer (expéditeur configurable)     |
 | Scheduler        | Symfony Scheduler                            |
 | Frontend         | Twig, Bootstrap 5, Chart.js                  |
 | Environnement    | Docker + Docker Compose                      |
@@ -79,6 +82,21 @@ Le projet est intégré dans une pipeline GitHub Actions exécutée à chaque `p
 - **PHP CS Fixer** — vérification du style de code (mode `--dry-run` dans la CI, échec en cas de non-conformité)
 
 L'environnement de test reproduit la production (PostgreSQL, JWT, variables d'environnement) pour éviter les écarts de comportement.
+
+---
+
+## Sécurité
+
+Pensé pour héberger les fiches Google de vrais clients :
+
+- **Secrets hors du dépôt** — les clés JWT sont générées au démarrage du conteneur ; les jetons OAuth Google sont **chiffrés en base** (libsodium `secretbox`)
+- **En-têtes HTTP de sécurité** sur toutes les réponses — CSP, `X-Frame-Options: DENY`, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- **Limitation de débit** — connexion (5 / 15 min + throttling du pare-feu), inscription (3 / h), génération IA (60 / h, 10 / h pour la démo)
+- **Cloisonnement par propriétaire** — chaque accès à un établissement ou un avis passe par un Voter ; routes limitées aux UUID
+- **Anti-XSS** — le contenu des avis (fourni par Google) est systématiquement échappé côté client, les photos de profil restreintes au `https`
+- **CSRF** sur les formulaires sensibles, **state OAuth** comparé en temps constant
+- **Pas d'énumération de comptes** — message neutre à l'inscription, inscription publique fermée par défaut (`APP_REGISTRATION_ENABLED`)
+- **Compte démo en lecture seule** — ni création, ni suppression, ni connexion Google
 
 ---
 
@@ -121,13 +139,22 @@ Copier `.env` vers `.env.local` et renseigner les vraies valeurs :
 
 ```env
 DATABASE_URL=postgresql://app:secret@postgres:5432/monavispro
-JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-JWT_PASSPHRASE=your_passphrase
+JWT_PASSPHRASE=une_phrase_secrete_robuste        # les clés sont générées au 1er démarrage
 GOOGLE_PLACES_API_KEY=AIza...
 OPENAI_API_KEY=sk-...
+# Connexion Google Business Profile (avis + réponses)
+GOOGLE_OAUTH_CLIENT_ID=...
+GOOGLE_OAUTH_CLIENT_SECRET=...
+GOOGLE_OAUTH_REDIRECT_URI=https://votre-domaine/google/callback
 MAILER_DSN=smtp://user:pass@sandbox.smtp.mailtrap.io:2525
+MAILER_FROM="MonAvisPro <noreply@votre-domaine>"
+# Chiffrement des jetons Google : 32 octets en base64 (sinon dérivé d'APP_SECRET)
+APP_ENCRYPTION_KEY=                                # openssl rand -base64 32
+APP_REGISTRATION_ENABLED=0                         # 1 pour ouvrir l'inscription
+TRUSTED_PROXIES=REMOTE_ADDR                        # derrière le proxy Railway
 ```
+
+> **Déploiement (Railway) :** après fusion, ajouter `APP_ENCRYPTION_KEY` (`openssl rand -base64 32`) et `TRUSTED_PROXIES=REMOTE_ADDR`. Activer la *Google My Business API* (avis) dans Google Cloud, en plus des APIs Business Information et Account Management.
 
 ---
 
@@ -157,9 +184,19 @@ src/
 │   ├── LlmService.php                  ← HttpClient → OpenAI
 │   ├── ReviewAnalysisService.php       ← Analyse thématique
 │   └── AlertEmailService.php           ← Mailer alertes négatives
+├── Security/
+│   ├── Voter/EstablishmentVoter.php    ← Cloisonnement par propriétaire
+│   └── DemoAccountGuard.php            ← Restrictions du compte démo
+├── EventSubscriber/
+│   └── SecurityHeadersSubscriber.php   ← En-têtes HTTP de sécurité
+├── Service/
+│   ├── GoogleBusinessProfileService.php ← OAuth + avis/réponses (API v4)
+│   ├── GoogleTokenManager.php          ← Jetons Google chiffrés + refresh
+│   └── TokenCipher.php                 ← Chiffrement libsodium
 └── Scheduler/
     ├── SyncReviewsTask.php             ← Sync automatique toutes les 6h
-    └── WeeklyReportTask.php            ← Rapport lundi 8h
+    ├── WeeklyReportTask.php            ← Rapport interne du lundi
+    └── MonthlyClientReportTask.php     ← Bilan mensuel au commerçant
 ```
 
 ---
