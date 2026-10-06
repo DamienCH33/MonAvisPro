@@ -116,6 +116,14 @@
                            value="{{ current_establishment.replySignature }}">
                 </div>
 
+                <div class="col-12 col-md-6">
+                    <label class="rr-label" for="client-email">E-mail du commerçant (bilan mensuel)</label>
+                    <input type="email" class="rr-input" id="client-email" maxlength="180"
+                           placeholder="contact@commerce.fr"
+                           value="{{ current_establishment.clientEmail }}">
+                    <div class="rr-hint">Le 1er de chaque mois, il reçoit le bilan de ses avis. Laisser vide pour ne rien envoyer.</div>
+                </div>
+
                 <div class="col-12">
                     <label class="rr-label" for="reply-instructions">Consignes pour ce commerce</label>
                     <textarea class="rr-input" id="reply-instructions" rows="4" maxlength="1000"
@@ -199,6 +207,7 @@ async function saveReplySettings() {
             replyTone:         document.getElementById('reply-tone').value,
             replySignature:    document.getElementById('reply-signature').value,
             replyInstructions: document.getElementById('reply-instructions').value,
+            clientEmail:       document.getElementById('client-email').value,
         })
     });
 

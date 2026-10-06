@@ -10,10 +10,12 @@ async function loadReviews(page = 1) {
 
     const rating = document.getElementById("filter-rating").value;
     const period = document.getElementById("filter-period").value;
+    const status = document.getElementById("filter-status")?.value || "";
 
     let url = `/api/establishments/${ESTABLISHMENT_ID}/reviews?page=${page}`;
-    if (rating) url += `&rating=${rating}`;
-    if (period !== "all") url += `&period=${period}`;
+    if (rating) url += `&rating=${encodeURIComponent(rating)}`;
+    if (period !== "all") url += `&period=${encodeURIComponent(period)}`;
+    if (status) url += `&status=${encodeURIComponent(status)}`;
 
     const res = await fetch(url, {
         headers: { Authorization: "Bearer " + JWT_TOKEN },
@@ -69,8 +71,35 @@ async function loadInitial() {
     loadReviews(1);
 }
 
+/**
+ * Échappe une valeur avant de l'insérer dans du HTML.
+ * Le texte des avis vient de Google et peut contenir du code malveillant.
+ */
+function esc(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+/** N'accepte que les photos servies en https (pas de javascript:, data:…). */
+function safeImageUrl(url) {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === "https:" ? parsed.href : null;
+    } catch {
+        return null;
+    }
+}
+
+const REVIEW_ID_PATTERN = /^[0-9a-f-]{36}$/i;
+let reviewsById = {};
+
 function renderReviews(reviews) {
     const container = document.getElementById("reviews-container");
+    reviewsById = {};
 
     if (reviews.length === 0) {
         container.innerHTML = '<div class="rr-empty">Aucun avis trouvé.</div>';
@@ -78,91 +107,144 @@ function renderReviews(reviews) {
     }
 
     container.innerHTML = reviews
-        .map(
-            (r) => `
-        <div class="rr-card ${r.rating <= 2 ? "rr-card-neg" : ""} ${!r.isRead ? "rr-card-unread" : ""} mb-3" id="review-${r.id}">
-            <div class="d-flex align-items-start justify-content-between gap-3">
+        .filter((r) => REVIEW_ID_PATTERN.test(r.id))
+        .map((r) => {
+            reviewsById[r.id] = r;
+            const rating = Math.min(5, Math.max(1, parseInt(r.rating, 10) || 1));
+            const author = r.googleAuthor || "Client";
+            const photo = safeImageUrl(r.googleAuthorPhoto);
+            const date = new Date(r.publishedAt);
+            const dateLabel = isNaN(date) ? "" : date.toLocaleDateString("fr-FR");
+
+            return `
+        <article class="rr-card rr-review ${rating <= 2 ? "rr-card-neg" : ""} ${!r.isRead ? "rr-card-unread" : ""} mb-3" id="review-${r.id}">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                 <div class="d-flex align-items-center gap-2">
                     ${
-                        r.googleAuthorPhoto
-                            ? `<img src="${r.googleAuthorPhoto}" width="36" height="36" style="border-radius:50%;object-fit:cover" alt="">`
-                            : `<div class="rr-avatar" style="width:36px;height:36px;font-size:12px">${r.googleAuthor[0].toUpperCase()}</div>`
+                        photo
+                            ? `<img src="${esc(photo)}" width="36" height="36" class="rr-review-photo" alt="" referrerpolicy="no-referrer">`
+                            : `<div class="rr-avatar rr-review-photo">${esc(author.charAt(0).toUpperCase())}</div>`
                     }
                     <div>
-                        <div style="font-size:13px;font-weight:600;color:var(--rr-t1)">${r.googleAuthor}</div>
-                        <div style="font-size:11px;color:var(--rr-t3)">${new Date(r.publishedAt).toLocaleDateString("fr-FR")}</div>
+                        <div class="rr-review-author">${esc(author)}</div>
+                        <div class="rr-review-date">${esc(dateLabel)}</div>
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <span class="${r.rating >= 4 ? "rr-stars" : "rr-stars-neg"}">
-                        ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="${rating >= 4 ? "rr-stars" : "rr-stars-neg"}" aria-label="${rating} sur 5">
+                        ${"★".repeat(rating)}${"☆".repeat(5 - rating)}
                     </span>
-                    ${r.rating <= 2 ? `<span class="rr-pill rr-pill-red">Négatif</span>` : ""}
-                    ${!r.isRead ? `<span class="rr-pill rr-pill-yellow">Non lu</span>` : ""}
+                    ${rating <= 2 ? `<span class="rr-pill rr-pill-red">Négatif</span>` : ""}
+                    ${r.ownerReply ? `<span class="rr-pill rr-pill-green">Répondu</span>` : `<span class="rr-pill rr-pill-yellow">À répondre</span>`}
+                    ${!r.isRead ? `<span class="rr-pill rr-pill-blue">Non lu</span>` : ""}
                 </div>
             </div>
 
-            ${r.text ? `<div style="font-size:13px;color:var(--rr-t2);margin-top:10px;line-height:1.6">${r.text}</div>` : ""}
+            ${r.text ? `<p class="rr-review-text">${esc(r.text)}</p>` : ""}
 
             ${
                 r.ownerReply
                     ? `
-                <div class="rr-reply-zone" style="display:block">
+                <div class="rr-reply-zone">
                     <div class="rr-reply-label">Votre réponse</div>
-                    <div class="rr-reply-text">${r.ownerReply}</div>
+                    <div class="rr-reply-text">${esc(r.ownerReply)}</div>
                     <div class="d-flex gap-2 mt-2">
-                        <button type="button" onclick="editReply('${r.id}', \`${r.ownerReply}\`)" class="rr-btn rr-btn-secondary rr-btn-sm">Modifier</button>
-                        <button type="button" onclick="deleteReply('${r.id}')" class="rr-btn rr-btn-danger rr-btn-sm">Supprimer</button>
+                        <button type="button" data-action="edit-reply" data-id="${r.id}" class="rr-btn rr-btn-secondary rr-btn-sm">Modifier</button>
+                        <button type="button" data-action="delete-reply" data-id="${r.id}" class="rr-btn rr-btn-danger rr-btn-sm">Supprimer</button>
                     </div>
                 </div>
             `
                     : ""
             }
 
-            <div class="d-flex gap-2 mt-3">
-                <button type="button" onclick="openReplyModal('${r.id}')" class="rr-btn rr-btn-primary rr-btn-sm">
-                    ✨ Générer une réponse
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+                <button type="button" data-action="open-reply" data-id="${r.id}" class="rr-btn rr-btn-primary rr-btn-sm">
+                    ✨ ${r.ownerReply ? "Nouvelle proposition" : "Proposer une réponse"}
                 </button>
                 ${
                     !r.isRead
-                        ? `<button type="button" onclick="markAsRead('${r.id}')" class="rr-btn rr-btn-secondary rr-btn-sm">Marquer comme lu</button>`
-                        : `<button type="button" onclick="markAsUnread('${r.id}')" class="rr-btn rr-btn-secondary rr-btn-sm">Marquer non lu</button>`
+                        ? `<button type="button" data-action="mark-read" data-id="${r.id}" class="rr-btn rr-btn-secondary rr-btn-sm">Marquer comme lu</button>`
+                        : `<button type="button" data-action="mark-unread" data-id="${r.id}" class="rr-btn rr-btn-secondary rr-btn-sm">Marquer non lu</button>`
                 }
             </div>
-        </div>
-    `,
-        )
+        </article>
+    `;
+        })
         .join("");
 }
 
+// Un seul écouteur pour tous les boutons des avis (pas de JavaScript dans le HTML généré).
+document.getElementById("reviews-container")?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button || !REVIEW_ID_PATTERN.test(button.dataset.id)) {
+        return;
+    }
+
+    const id = button.dataset.id;
+    switch (button.dataset.action) {
+        case "open-reply":
+            openReplyModal(id);
+            break;
+        case "edit-reply":
+            editReply(id, reviewsById[id]?.ownerReply ?? "");
+            break;
+        case "delete-reply":
+            deleteReply(id);
+            break;
+        case "mark-read":
+            markAsRead(id);
+            break;
+        case "mark-unread":
+            markAsUnread(id);
+            break;
+    }
+});
+
 function renderPagination(pagination) {
     const container = document.getElementById("pagination-container");
+    const page = parseInt(pagination.page, 10) || 1;
+    const totalPages = parseInt(pagination.totalPages, 10) || 1;
+    const total = parseInt(pagination.total, 10) || 0;
 
-    if (pagination.totalPages <= 1) {
+    if (totalPages <= 1) {
         container.style.display = "none";
         return;
     }
 
     container.style.display = "flex";
 
+    // Fenêtre de pages autour de la page courante, avec la première et la dernière.
+    const pages = new Set([1, totalPages]);
+    for (let p = page - 2; p <= page + 2; p++) {
+        if (p >= 1 && p <= totalPages) pages.add(p);
+    }
+    const sorted = [...pages].sort((a, b) => a - b);
+
+    let buttons = "";
+    let previous = 0;
+    for (const p of sorted) {
+        if (p - previous > 1) buttons += `<span class="rr-pag-gap">…</span>`;
+        buttons += `<button type="button" class="rr-pag-btn ${p === page ? "rr-pag-active" : "rr-pag-inactive"}" data-page="${p}">${p}</button>`;
+        previous = p;
+    }
+
     container.innerHTML = `
-        <span style="font-size:12px;color:var(--rr-t3)">
-            Page ${pagination.page} / ${pagination.totalPages} — ${pagination.total} avis
-        </span>
+        <span class="rr-pag-info">Page ${page} / ${totalPages} — ${total} avis</span>
         <div class="rr-pag">
-            ${pagination.page > 1 ? `<button class="rr-pag-btn rr-pag-inactive" onclick="loadReviews(${pagination.page - 1})">←</button>` : ""}
-            ${Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                .map(
-                    (p) => `
-                <button class="rr-pag-btn ${p === pagination.page ? "rr-pag-active" : "rr-pag-inactive"}" onclick="loadReviews(${p})">${p}</button>
-            `,
-                )
-                .join("")}
-            ${pagination.page < pagination.totalPages ? `<button class="rr-pag-btn rr-pag-inactive" onclick="loadReviews(${pagination.page + 1})">→</button>` : ""}
+            ${page > 1 ? `<button type="button" class="rr-pag-btn rr-pag-inactive" data-page="${page - 1}" aria-label="Page précédente">←</button>` : ""}
+            ${buttons}
+            ${page < totalPages ? `<button type="button" class="rr-pag-btn rr-pag-inactive" data-page="${page + 1}" aria-label="Page suivante">→</button>` : ""}
         </div>
     `;
 }
+
+document.getElementById("pagination-container")?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-page]");
+    if (button) {
+        loadReviews(parseInt(button.dataset.page, 10));
+    }
+});
 
 async function markAsRead(reviewId) {
     await fetch(`/api/reviews/${reviewId}/read`, {

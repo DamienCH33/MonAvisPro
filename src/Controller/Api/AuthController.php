@@ -13,9 +13,11 @@ use App\Service\EmailAlreadyUsedException;
 use App\Service\UserRegistrationService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -28,12 +30,24 @@ class AuthController extends AbstractController
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly JWTTokenManagerInterface $jwtManager,
         private readonly ValidatorInterface $validator,
+        private readonly RateLimiterFactoryInterface $apiLoginLimiter,
+        private readonly RateLimiterFactoryInterface $registrationLimiter,
+        #[Autowire('%app.registration_enabled%')]
+        private readonly bool $registrationEnabled,
     ) {
     }
 
     #[Route('/register', name: 'api_auth_register', methods: ['POST'])]
     public function register(Request $request): JsonResponse
     {
+        if (!$this->registrationEnabled) {
+            return $this->json(['error' => 'Les inscriptions sont fermées.'], 403);
+        }
+
+        if (!$this->registrationLimiter->create((string) $request->getClientIp())->consume()->isAccepted()) {
+            return $this->json(['error' => 'Trop de tentatives, réessayez plus tard.'], 429);
+        }
+
         $dto = RegisterRequestDTO::fromRequest($request);
         $errors = $this->validator->validate($dto);
 
@@ -43,8 +57,9 @@ class AuthController extends AbstractController
 
         try {
             $user = $this->userRegistrationService->register($dto);
-        } catch (EmailAlreadyUsedException $e) {
-            return $this->json(['error' => $e->getMessage()], 422);
+        } catch (EmailAlreadyUsedException) {
+            // Message neutre : ne pas confirmer qu'une adresse a déjà un compte.
+            return $this->json(['error' => 'Inscription impossible avec ces informations.'], 422);
         }
 
         return $this->json([
@@ -64,11 +79,18 @@ class AuthController extends AbstractController
             return $this->json(['error' => $errors[0]->getMessage()], 422);
         }
 
+        $limiter = $this->apiLoginLimiter->create($request->getClientIp().'|'.mb_strtolower((string) $dto->email));
+        if (!$limiter->consume()->isAccepted()) {
+            return $this->json(['error' => 'Trop de tentatives, réessayez dans quelques minutes.'], 429);
+        }
+
         $user = $this->userRepository->findOneBy(['email' => $dto->email]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $dto->password)) {
             return $this->json(['error' => 'Identifiants invalides.'], 401);
         }
+
+        $limiter->reset();
 
         return $this->json([
             'message' => 'Connexion réussie.',

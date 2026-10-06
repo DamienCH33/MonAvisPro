@@ -29,6 +29,7 @@
                 </a>
             {% else %}
                 <form method="post" action="{{ path('google_business_save_location') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('google_save_location') }}">
                     
                     <div class="mb-4">
                         {% for location in locations %}

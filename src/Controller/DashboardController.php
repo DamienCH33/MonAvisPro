@@ -9,6 +9,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route('/dashboard')]
 class DashboardController extends AbstractController
@@ -99,7 +100,36 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'dashboard_establishment')]
+    #[Route('/a-traiter', name: 'inbox')]
+    public function inbox(): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $establishments = $this->establishmentRepository->findBy(['owner' => $user], ['name' => 'ASC']);
+        $reviews = $this->reviewRepository->findUnansweredForOwner($user, 100);
+
+        $groups = [];
+        foreach ($reviews as $review) {
+            $establishment = $review->getEstablishment();
+            if (null === $establishment) {
+                continue;
+            }
+            $key = (string) $establishment->getId();
+            $groups[$key] ??= ['establishment' => $establishment, 'reviews' => []];
+            $groups[$key]['reviews'][] = $review;
+        }
+
+        return $this->render('dashboard/inbox.html.twig', [
+            'establishments' => $establishments,
+            'current_establishment' => null,
+            'groups' => $groups,
+            'total' => $this->reviewRepository->countUnansweredForOwner($user),
+            'unread_count' => 0,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'dashboard_establishment', requirements: ['id' => Requirement::UUID])]
     public function establishment(string $id): Response
     {
         /** @var User $user */
@@ -178,7 +208,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/reviews', name: 'reviews_list')]
+    #[Route('/{id}/reviews', name: 'reviews_list', requirements: ['id' => Requirement::UUID])]
     public function reviews(string $id): Response
     {
         /** @var User $user */
@@ -204,7 +234,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/analysis', name: 'analysis')]
+    #[Route('/{id}/analysis', name: 'analysis', requirements: ['id' => Requirement::UUID])]
     public function analysis(string $id): Response
     {
         /** @var User $user */
@@ -227,7 +257,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/settings', name: 'settings')]
+    #[Route('/{id}/settings', name: 'settings', requirements: ['id' => Requirement::UUID])]
     public function settings(string $id): Response
     {
         /** @var User $user */

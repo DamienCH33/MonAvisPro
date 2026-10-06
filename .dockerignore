@@ -1,0 +1,8 @@
+.git
+.env.local
+.env.*.local
+var/
+vendor/
+config/jwt/*.pem
+tests/
+.phpunit.cache

@@ -65,8 +65,7 @@ class WeeklyReportTask
             ]);
 
             $email = (new Email())
-                ->from('noreply@monavispro.fr')
-                ->to($user->getEmail())
+                    ->to($user->getEmail())
                 ->subject('📊 Votre rapport hebdomadaire MonAvisPro')
                 ->html($html);
 

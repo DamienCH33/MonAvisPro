@@ -24,8 +24,8 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, Security $security): Response
     {
-        if ($this->getParameter('app.demo_mode')) {
-            throw $this->createAccessDeniedException('Inscription désactivée en mode démonstration.');
+        if ($this->getParameter('app.demo_mode') || !$this->getParameter('app.registration_enabled')) {
+            throw $this->createNotFoundException('Les inscriptions sont fermées.');
         }
 
         $user = new User();

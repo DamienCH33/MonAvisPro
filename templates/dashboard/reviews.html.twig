@@ -22,6 +22,12 @@
 		<option value="30j">30 derniers jours</option>
 		<option value="90j">90 derniers jours</option>
 	</select>
+
+	<select class="rr-select" id="filter-status" onchange="loadReviews()">
+		<option value="">Toutes les réponses</option>
+		<option value="unanswered" {{ app.request.query.get('status') == 'unanswered' ? 'selected' }}>À répondre</option>
+		<option value="answered">Déjà répondu</option>
+	</select>
 {% endblock %}
 
 {% block body %}

@@ -2,11 +2,31 @@
 framework:
     secret: "%env(APP_SECRET)%"
 
+    # Derrière le proxy de Railway : vraie IP du visiteur (limites de débit) et détection du HTTPS.
+    trusted_proxies: "%env(TRUSTED_PROXIES)%"
+    trusted_headers: ["x-forwarded-for", "x-forwarded-proto", "x-forwarded-port"]
+
     rate_limiter:
-        api:
-            policy: "fixed_window"
-            limit: 4
-            interval: "1 minute"
+        # Connexion par l'API : 5 essais par quart d'heure (par IP + email)
+        api_login:
+            policy: "sliding_window"
+            limit: 5
+            interval: "15 minutes"
+        # Création de compte : 3 par heure et par IP
+        registration:
+            policy: "sliding_window"
+            limit: 3
+            interval: "1 hour"
+        # Appels à l'IA (réponses et analyses) : 60 par heure et par utilisateur
+        ai_generation:
+            policy: "token_bucket"
+            limit: 60
+            rate: { interval: "1 hour", amount: 60 }
+        # Compte démo public : 10 appels IA par heure et par IP
+        demo_ai:
+            policy: "sliding_window"
+            limit: 10
+            interval: "1 hour"
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
@@ -17,5 +37,10 @@ framework:
 when@test:
     framework:
         test: true
+        rate_limiter:
+            api_login: { policy: "no_limit" }
+            registration: { policy: "no_limit" }
+            ai_generation: { policy: "no_limit" }
+            demo_ai: { policy: "no_limit" }
         session:
             storage_factory_id: session.storage.factory.mock_file
