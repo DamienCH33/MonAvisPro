@@ -82,6 +82,54 @@
         </div>
     </div>
 
+    {# ── Réponses aux avis ── #}
+    <div class="col-12">
+        <div class="rr-card rr-card-lg">
+            <div class="rr-section-title">Réponses aux avis</div>
+            <div class="rr-hint mb-3">
+                Ces réglages s'appliquent à chaque réponse proposée par l'IA pour cet établissement.
+                Vous relisez toujours la réponse avant de la publier.
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12 col-md-4">
+                    <label class="rr-label" for="reply-formality">Adresse au client</label>
+                    <select class="rr-input" id="reply-formality">
+                        <option value="vous" {{ current_establishment.replyFormality == 'vous' ? 'selected' }}>Vouvoiement</option>
+                        <option value="tu" {{ current_establishment.replyFormality == 'tu' ? 'selected' }}>Tutoiement</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="rr-label" for="reply-tone">Ton par défaut</label>
+                    <select class="rr-input" id="reply-tone">
+                        <option value="cordial" {{ current_establishment.replyTone == 'cordial' ? 'selected' }}>Cordial</option>
+                        <option value="formel" {{ current_establishment.replyTone == 'formel' ? 'selected' }}>Formel</option>
+                        <option value="empathique" {{ current_establishment.replyTone == 'empathique' ? 'selected' }}>Empathique</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="rr-label" for="reply-signature">Signature</label>
+                    <input type="text" class="rr-input" id="reply-signature" maxlength="120"
+                           placeholder="L'équipe du Fournil Béglais"
+                           value="{{ current_establishment.replySignature }}">
+                </div>
+
+                <div class="col-12">
+                    <label class="rr-label" for="reply-instructions">Consignes pour ce commerce</label>
+                    <textarea class="rr-input" id="reply-instructions" rows="4" maxlength="1000"
+                              placeholder="Ex. : signer avec le prénom du gérant, Paul. Rappeler que la boulangerie est fermée le lundi. Ne jamais parler des prix.">{{ current_establishment.replyInstructions }}</textarea>
+                    <div class="rr-hint">1 000 caractères maximum. Ce que l'IA doit savoir, rappeler ou éviter.</div>
+                </div>
+            </div>
+
+            <button onclick="saveReplySettings()" class="rr-btn rr-btn-primary mt-3" id="save-reply-btn">
+                Enregistrer les réglages de réponse
+            </button>
+        </div>
+    </div>
+
     {# ── Danger zone ── #}
     <div class="col-12">
         <div class="rr-danger-zone">
@@ -131,6 +179,37 @@ async function saveSettings() {
         showFlash('Modifications enregistrées.', 'success');
     } else {
         showFlash('Erreur lors de la sauvegarde.', 'error');
+    }
+}
+
+// Réglages de réponse
+async function saveReplySettings() {
+    const btn = document.getElementById('save-reply-btn');
+    btn.textContent = 'Enregistrement…';
+    btn.disabled    = true;
+
+    const res = await fetch(`/api/establishments/${ESTABLISHMENT_ID}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': 'Bearer ' + JWT_TOKEN,
+            'Content-Type':  'application/json'
+        },
+        body: JSON.stringify({
+            replyFormality:    document.getElementById('reply-formality').value,
+            replyTone:         document.getElementById('reply-tone').value,
+            replySignature:    document.getElementById('reply-signature').value,
+            replyInstructions: document.getElementById('reply-instructions').value,
+        })
+    });
+
+    btn.disabled    = false;
+    btn.textContent = 'Enregistrer les réglages de réponse';
+
+    if (res.ok) {
+        showFlash('Réglages de réponse enregistrés.', 'success');
+    } else {
+        const data = await res.json().catch(() => ({}));
+        showFlash(data.error || 'Erreur lors de la sauvegarde.', 'error');
     }
 }
 

@@ -56,18 +56,27 @@ class AnalysisController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $review->getEstablishment());
 
-        $data = json_decode($request->getContent(), true);
-        $tone = $data['tone'] ?? 'cordial';
+        $establishment = $review->getEstablishment();
+        if (null === $establishment) {
+            return $this->json(['error' => 'Avis sans établissement.'], 422);
+        }
 
-        if (!in_array($tone, ['cordial', 'formel', 'empathique'])) {
+        $data = json_decode($request->getContent(), true);
+        $tone = is_array($data) && isset($data['tone']) ? $data['tone'] : $establishment->getReplyTone();
+
+        if (!in_array($tone, Establishment::TONES, true)) {
             return $this->json(['error' => 'Ton invalide.'], 422);
         }
 
         $reply = $this->llmService->generateReply(
-            $review->getEstablishment()->getName(),
-            $review->getRating(),
+            (string) $establishment->getName(),
+            (int) $review->getRating(),
             $review->getText(),
-            $tone
+            $tone,
+            $establishment->getReplyFormality(),
+            $establishment->getReplySignature(),
+            $establishment->getReplyInstructions(),
+            $review->getGoogleAuthor(),
         );
 
         if (null === $reply) {

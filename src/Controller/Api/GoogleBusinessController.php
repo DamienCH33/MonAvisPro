@@ -113,7 +113,7 @@ class GoogleBusinessController extends AbstractController
                 return $this->redirectToRoute('dashboard');
             }
 
-            return $this->render('google_business/select_location.html.twig', [
+            return $this->render('google/select_location.html.twig', [
                 'locations' => $allLocations,
             ]);
         } catch (\Exception $e) {
@@ -145,22 +145,64 @@ class GoogleBusinessController extends AbstractController
             throw new \LogicException('User invalide');
         }
 
-        $establishment = new Establishment();
-        $establishment->setOwner($user);
+        $locationName = is_string($locationData['name'] ?? null) ? $locationData['name'] : '';
+        $accountId = is_string($locationData['accountId'] ?? null) ? $locationData['accountId'] : null;
 
-        $establishment->setName($locationData['title'] ?? 'Sans nom');
+        if (!preg_match('#^locations/[^/]+$#', $locationName) || null === $accountId) {
+            $this->addFlash('error', 'Établissement Google invalide, recommencez la connexion.');
 
-        preg_match('/locations\/([^\/]+)$/', $locationData['name'], $matches);
-        $placeId = $matches[1] ?? basename($locationData['name']);
+            return $this->redirectToRoute('dashboard');
+        }
 
-        $establishment->setPlaceId($placeId);
+        $session = $request->getSession();
+        $accessToken = $session->get('google_access_token');
+        if (!is_string($accessToken) || '' === $accessToken) {
+            $this->addFlash('warning', 'Session Google expirée, veuillez vous reconnecter');
+
+            return $this->redirectToRoute('google_business_connect');
+        }
+
+        // Identifiant Google Maps (ChIJ…) si Google le fournit, sinon l'identifiant de la fiche.
+        $mapsPlaceId = $locationData['metadata']['placeId'] ?? null;
+        $placeId = is_string($mapsPlaceId) && '' !== $mapsPlaceId
+            ? $mapsPlaceId
+            : substr($locationName, strlen('locations/'));
+
+        $establishment = $this->em->getRepository(Establishment::class)->findOneBy(['placeId' => $placeId]);
+
+        if (null !== $establishment && $establishment->getOwner() !== $user) {
+            $this->addFlash('error', 'Cet établissement est déjà relié à un autre compte MonAvisPro.');
+
+            return $this->redirectToRoute('dashboard');
+        }
+
+        if (null === $establishment) {
+            $establishment = new Establishment();
+            $establishment->setOwner($user);
+            $establishment->setPlaceId($placeId);
+            $this->em->persist($establishment);
+        }
+
+        $establishment->setName(is_string($locationData['title'] ?? null) ? $locationData['title'] : 'Sans nom');
         $establishment->setGooglePlaceId($placeId);
+        $establishment->setGoogleAccountId($accountId);
+        $establishment->setGoogleLocationId($locationName);
 
-        $address = $this->formatAddress($locationData['storefrontAddress'] ?? []);
+        // Jetons de la connexion Google : sans eux, impossible de lire tous les avis ni de publier les réponses.
+        $establishment->setGoogleAccessToken($accessToken);
+        $refreshToken = $session->get('google_refresh_token');
+        if (is_string($refreshToken) && '' !== $refreshToken) {
+            $establishment->setGoogleRefreshToken($refreshToken);
+        }
+        $expiresAt = (int) $session->get('google_token_expires_at', time() + 3600);
+        $establishment->setGoogleTokenExpiresAt((new \DateTimeImmutable())->setTimestamp($expiresAt));
+
+        $address = $this->formatAddress(is_array($locationData['storefrontAddress'] ?? null) ? $locationData['storefrontAddress'] : []);
         $establishment->setAddress($address ?: 'Adresse non renseignée');
 
-        $this->em->persist($establishment);
         $this->em->flush();
+
+        $this->addFlash('success', 'Établissement relié à Google Business. Lancez une synchronisation pour récupérer tous les avis.');
 
         return $this->redirectToRoute('dashboard');
     }

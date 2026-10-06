@@ -101,6 +101,11 @@ class EstablishmentController extends AbstractController
             $establishment->setAlertsEnabled((bool) $data['alertsEnabled']);
         }
 
+        $error = $this->applyReplySettings($establishment, is_array($data) ? $data : []);
+        if (null !== $error) {
+            return $this->json(['error' => $error], 422);
+        }
+
         $this->em->flush();
 
         return $this->json($this->serialize($establishment));
@@ -132,6 +137,59 @@ class EstablishmentController extends AbstractController
     }
 
     /**
+     * Applique les réglages de réponse envoyés par l'écran Paramètres.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return string|null message d'erreur, ou null si tout est valide
+     */
+    private function applyReplySettings(Establishment $establishment, array $data): ?string
+    {
+        if (array_key_exists('replyFormality', $data)) {
+            if (!in_array($data['replyFormality'], Establishment::FORMALITIES, true)) {
+                return 'Choisissez « vous » ou « tu ».';
+            }
+            $establishment->setReplyFormality($data['replyFormality']);
+        }
+
+        if (array_key_exists('replyTone', $data)) {
+            if (!in_array($data['replyTone'], Establishment::TONES, true)) {
+                return 'Ton invalide.';
+            }
+            $establishment->setReplyTone($data['replyTone']);
+        }
+
+        if (array_key_exists('replySignature', $data)) {
+            $signature = $this->cleanText($data['replySignature']);
+            if (null !== $signature && mb_strlen($signature) > 120) {
+                return 'La signature ne doit pas dépasser 120 caractères.';
+            }
+            $establishment->setReplySignature($signature);
+        }
+
+        if (array_key_exists('replyInstructions', $data)) {
+            $instructions = $this->cleanText($data['replyInstructions']);
+            if (null !== $instructions && mb_strlen($instructions) > 1000) {
+                return 'Les consignes ne doivent pas dépasser 1 000 caractères.';
+            }
+            $establishment->setReplyInstructions($instructions);
+        }
+
+        return null;
+    }
+
+    private function cleanText(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim(strip_tags($value));
+
+        return '' === $value ? null : $value;
+    }
+
+    /**
      * @return array{
      *     id: string|null,
      *     name: string,
@@ -140,7 +198,12 @@ class EstablishmentController extends AbstractController
      *     alertsEnabled: bool,
      *     lastSyncAt: string|null,
      *     createdAt: string,
-     *     reviewsCount: int
+     *     reviewsCount: int,
+     *     googleConnected: bool,
+     *     replyFormality: string,
+     *     replyTone: string,
+     *     replySignature: string|null,
+     *     replyInstructions: string|null
      * }
      */
     private function serialize(Establishment $e): array
@@ -154,6 +217,11 @@ class EstablishmentController extends AbstractController
             'lastSyncAt' => $e->getLastSyncAt()?->format('c'),
             'createdAt' => $e->getCreatedAt()?->format('c') ?? '',
             'reviewsCount' => $e->getReviews()->count(),
+            'googleConnected' => $e->isConnectedToGoogleBusiness(),
+            'replyFormality' => $e->getReplyFormality(),
+            'replyTone' => $e->getReplyTone(),
+            'replySignature' => $e->getReplySignature(),
+            'replyInstructions' => $e->getReplyInstructions(),
         ];
     }
 }

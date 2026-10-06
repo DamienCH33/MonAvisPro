@@ -1,6 +1,8 @@
 let currentPage = 1;
 let currentReviewId = null;
-let currentTone = "cordial";
+let currentTone =
+    document.querySelector("[data-default-tone]")?.dataset.defaultTone ||
+    "cordial";
 let targetReviewId = null;
 
 async function loadReviews(page = 1) {
@@ -245,6 +247,11 @@ async function publishReply() {
     if (!res.ok) {
         alert("Erreur lors de la publication");
         return;
+    }
+
+    const result = await res.json().catch(() => ({}));
+    if (result.warning) {
+        alert(result.warning);
     }
 
     const modal = bootstrap.Modal.getInstance(
