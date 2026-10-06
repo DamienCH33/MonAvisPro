@@ -46,11 +46,13 @@
 				<div class="modal-body p-4">
 					<div class="mb-3">
 						<label class="rr-label">Ton de la réponse</label>
-						<div class="rr-tabs">
-							<button type="button" class="rr-tab active" onclick="setTone('cordial', this)">Cordial</button>
-							<button type="button" class="rr-tab" onclick="setTone('formel', this)">Formel</button>
-							<button type="button" class="rr-tab" onclick="setTone('empathique', this)">Empathique</button>
+						{% set default_tone = current_establishment.replyTone ?? 'cordial' %}
+						<div class="rr-tabs" data-default-tone="{{ default_tone }}">
+							<button type="button" class="rr-tab {{ default_tone == 'cordial' ? 'active' }}" onclick="setTone('cordial', this)">Cordial</button>
+							<button type="button" class="rr-tab {{ default_tone == 'formel' ? 'active' }}" onclick="setTone('formel', this)">Formel</button>
+							<button type="button" class="rr-tab {{ default_tone == 'empathique' ? 'active' }}" onclick="setTone('empathique', this)">Empathique</button>
 						</div>
+						<div class="rr-hint mt-1">Vouvoiement, signature et consignes : onglet Paramètres.</div>
 					</div>
 
 					<div id="reply-result" style="display:none">

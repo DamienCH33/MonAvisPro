@@ -10,6 +10,8 @@ class GoogleBusinessProfileService
     private const TOKEN_URL = 'https://oauth2.googleapis.com/token';
     private const BUSINESS_API_URL = 'https://mybusinessbusinessinformation.googleapis.com/v1';
     private const ACCOUNT_API_URL = 'https://mybusinessaccountmanagement.googleapis.com/v1';
+    // Les avis et leurs réponses restent sur l'API v4 (My Business).
+    private const REVIEWS_API_URL = 'https://mybusiness.googleapis.com/v4';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -62,9 +64,37 @@ class GoogleBusinessProfileService
             self::BUSINESS_API_URL.'/'.$accountId.'/locations',
             [
                 'headers' => ['Authorization' => 'Bearer '.$accessToken],
-                'query' => ['readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri'],
+                'query' => ['readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri,metadata'],
             ]
         )->toArray()['locations'] ?? [];
+    }
+
+    /**
+     * Une page d'avis d'un établissement (50 maximum), avec les réponses déjà publiées.
+     *
+     * @param string $accountId  ex. « accounts/123 »
+     * @param string $locationId ex. « locations/456 »
+     *
+     * @return array{reviews?: list<array<string, mixed>>, nextPageToken?: string, totalReviewCount?: int, averageRating?: float}
+     */
+    public function listReviews(string $accountId, string $locationId, string $accessToken, ?string $pageToken = null): array
+    {
+        $query = ['pageSize' => 50, 'orderBy' => 'updateTime desc'];
+        if (null !== $pageToken) {
+            $query['pageToken'] = $pageToken;
+        }
+
+        /** @var array{reviews?: list<array<string, mixed>>, nextPageToken?: string, totalReviewCount?: int, averageRating?: float} $data */
+        $data = $this->httpClient->request(
+            'GET',
+            self::REVIEWS_API_URL.'/'.$accountId.'/'.$locationId.'/reviews',
+            [
+                'headers' => ['Authorization' => 'Bearer '.$accessToken],
+                'query' => $query,
+            ]
+        )->toArray();
+
+        return $data;
     }
 
     /** @return array<string, mixed> */
@@ -72,7 +102,7 @@ class GoogleBusinessProfileService
     {
         return $this->httpClient->request(
             'PUT',
-            self::BUSINESS_API_URL.'/'.$reviewName.'/reply',
+            self::REVIEWS_API_URL.'/'.$reviewName.'/reply',
             [
                 'headers' => [
                     'Authorization' => 'Bearer '.$accessToken,
@@ -100,7 +130,7 @@ class GoogleBusinessProfileService
     {
         $this->httpClient->request(
             'DELETE',
-            self::BUSINESS_API_URL.'/'.$reviewName.'/reply',
+            self::REVIEWS_API_URL.'/'.$reviewName.'/reply',
             [
                 'headers' => ['Authorization' => 'Bearer '.$accessToken],
             ]

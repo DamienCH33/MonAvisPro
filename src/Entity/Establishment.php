@@ -58,6 +58,25 @@ class Establishment
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $googleTokenExpiresAt = null;
 
+    public const FORMALITIES = ['vous', 'tu'];
+    public const TONES = ['cordial', 'formel', 'empathique'];
+
+    /** Vouvoiement ou tutoiement dans les réponses aux avis. */
+    #[ORM\Column(length: 4, options: ['default' => 'vous'])]
+    private string $replyFormality = 'vous';
+
+    /** Ton proposé par défaut lors de la génération d'une réponse. */
+    #[ORM\Column(length: 20, options: ['default' => 'cordial'])]
+    private string $replyTone = 'cordial';
+
+    /** Signature ajoutée à la fin de chaque réponse (ex. « L'équipe du Fournil Béglais »). */
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $replySignature = null;
+
+    /** Consignes propres au commerce (sujets à éviter, infos à rappeler, prénom du gérant…). */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $replyInstructions = null;
+
     /**
      * @var Collection<int, Review>
      */
@@ -279,5 +298,68 @@ class Establishment
         $this->googlePlaceId = $googlePlaceId;
 
         return $this;
+    }
+
+    public function getReplyFormality(): string
+    {
+        return $this->replyFormality;
+    }
+
+    public function setReplyFormality(string $replyFormality): static
+    {
+        if (!in_array($replyFormality, self::FORMALITIES, true)) {
+            throw new \InvalidArgumentException('Formalité invalide : '.$replyFormality);
+        }
+
+        $this->replyFormality = $replyFormality;
+
+        return $this;
+    }
+
+    public function getReplyTone(): string
+    {
+        return $this->replyTone;
+    }
+
+    public function setReplyTone(string $replyTone): static
+    {
+        if (!in_array($replyTone, self::TONES, true)) {
+            throw new \InvalidArgumentException('Ton invalide : '.$replyTone);
+        }
+
+        $this->replyTone = $replyTone;
+
+        return $this;
+    }
+
+    public function getReplySignature(): ?string
+    {
+        return $this->replySignature;
+    }
+
+    public function setReplySignature(?string $replySignature): static
+    {
+        $this->replySignature = $replySignature;
+
+        return $this;
+    }
+
+    public function getReplyInstructions(): ?string
+    {
+        return $this->replyInstructions;
+    }
+
+    public function setReplyInstructions(?string $replyInstructions): static
+    {
+        $this->replyInstructions = $replyInstructions;
+
+        return $this;
+    }
+
+    public function isConnectedToGoogleBusiness(): bool
+    {
+        return null !== $this->googleAccessToken
+            && null !== $this->googleAccountId
+            && null !== $this->googleLocationId;
     }
 }
