@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Dto\ReviewFilterDTO;
 use App\Entity\Establishment;
 use App\Entity\Review;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -82,6 +83,12 @@ class ReviewRepository extends ServiceEntityRepository
             $qb->andWhere('r.publishedAt >= :from')->setParameter('from', $filter->publishedSince);
         }
 
+        if ('unanswered' === $filter->replyStatus) {
+            $qb->andWhere('r.ownerReply IS NULL');
+        } elseif ('answered' === $filter->replyStatus) {
+            $qb->andWhere('r.ownerReply IS NOT NULL');
+        }
+
         return $qb;
     }
 
@@ -138,5 +145,81 @@ class ReviewRepository extends ServiceEntityRepository
             ->orderBy('r.publishedAt', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Chiffres d'une période pour le bilan mensuel du commerçant.
+     *
+     * @return array{newCount: int, newAverage: float|null, repliedCount: int, negativeCount: int, totalCount: int, overallAverage: float|null}
+     */
+    public function getPeriodStats(Establishment $establishment, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        /** @var array{newCount: int|string, newAverage: string|float|null, repliedCount: int|string, negativeCount: int|string} $period */
+        $period = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id) AS newCount')
+            ->addSelect('AVG(r.rating) AS newAverage')
+            ->addSelect('SUM(CASE WHEN r.ownerReply IS NOT NULL THEN 1 ELSE 0 END) AS repliedCount')
+            ->addSelect('SUM(CASE WHEN r.rating <= 2 THEN 1 ELSE 0 END) AS negativeCount')
+            ->where('r.establishment = :establishment')
+            ->andWhere('r.publishedAt >= :from')
+            ->andWhere('r.publishedAt < :to')
+            ->setParameter('establishment', $establishment)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getSingleResult();
+
+        /** @var array{totalCount: int|string, overallAverage: string|float|null} $overall */
+        $overall = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id) AS totalCount')
+            ->addSelect('AVG(r.rating) AS overallAverage')
+            ->where('r.establishment = :establishment')
+            ->setParameter('establishment', $establishment)
+            ->getQuery()
+            ->getSingleResult();
+
+        return [
+            'newCount' => (int) $period['newCount'],
+            'newAverage' => null !== $period['newAverage'] ? round((float) $period['newAverage'], 1) : null,
+            'repliedCount' => (int) $period['repliedCount'],
+            'negativeCount' => (int) $period['negativeCount'],
+            'totalCount' => (int) $overall['totalCount'],
+            'overallAverage' => null !== $overall['overallAverage'] ? round((float) $overall['overallAverage'], 1) : null,
+        ];
+    }
+
+    /**
+     * Avis sans réponse de tous les établissements d'un utilisateur (boîte « À traiter »).
+     *
+     * @return list<Review>
+     */
+    public function findUnansweredForOwner(User $owner, int $limit = 100): array
+    {
+        /** @var list<Review> $reviews */
+        $reviews = $this->createQueryBuilder('r')
+            ->join('r.establishment', 'e')
+            ->addSelect('e')
+            ->where('e.owner = :owner')
+            ->andWhere('r.ownerReply IS NULL')
+            ->setParameter('owner', $owner)
+            ->orderBy('r.rating', 'ASC')
+            ->addOrderBy('r.publishedAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return $reviews;
+    }
+
+    public function countUnansweredForOwner(User $owner): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->join('r.establishment', 'e')
+            ->where('e.owner = :owner')
+            ->andWhere('r.ownerReply IS NULL')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

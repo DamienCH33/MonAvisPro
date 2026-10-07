@@ -17,6 +17,7 @@ class ReviewReplyService
     public function __construct(
         private readonly GoogleBusinessProfileService $googleService,
         private readonly EntityManagerInterface $em,
+        private readonly GoogleTokenManager $tokenManager,
     ) {
     }
 
@@ -32,16 +33,21 @@ class ReviewReplyService
         if (!$this->canInteractWithGoogle($review)) {
             $this->em->flush();
 
-            return ['success' => true];
+            return [
+                'success' => true,
+                'warning' => 'Réponse enregistrée dans MonAvisPro, mais pas publiée : cet établissement n\'est pas relié à Google Business. Copiez-la et publiez-la depuis la fiche Google.',
+            ];
         }
 
         try {
-            $this->refreshTokenIfExpired($review->getEstablishment());
+            /** @var Establishment $establishment checked by canInteractWithGoogle() */
+            $establishment = $review->getEstablishment();
+            $accessToken = $this->tokenManager->getValidAccessToken($establishment);
 
             $this->googleService->publishReply(
                 (string) $review->getGoogleReviewName(),
                 $replyText,
-                (string) $review->getEstablishment()?->getGoogleAccessToken(),
+                (string) $accessToken,
             );
 
             $review->setIsPublishedToGoogle(true);
@@ -73,11 +79,13 @@ class ReviewReplyService
 
         if ($shouldDeleteOnGoogle) {
             try {
-                $this->refreshTokenIfExpired($review->getEstablishment());
+                /** @var Establishment $establishment checked by canInteractWithGoogle() */
+                $establishment = $review->getEstablishment();
+                $accessToken = $this->tokenManager->getValidAccessToken($establishment);
 
                 $this->googleService->deleteReply(
                     (string) $review->getGoogleReviewName(),
-                    (string) $review->getEstablishment()?->getGoogleAccessToken(),
+                    (string) $accessToken,
                 );
             } catch (\Exception $e) {
                 $warning = 'Réponse supprimée localement mais erreur Google : '.$e->getMessage();
@@ -104,33 +112,5 @@ class ReviewReplyService
         return null !== $establishment
             && null !== $establishment->getGoogleAccessToken()
             && null !== $review->getGoogleReviewName();
-    }
-
-    /**
-     * Rafraîchit le token d'accès Google si celui-ci a expiré.
-     */
-    private function refreshTokenIfExpired(?Establishment $establishment): void
-    {
-        if (null === $establishment) {
-            return;
-        }
-
-        $expiresAt = $establishment->getGoogleTokenExpiresAt();
-        if (null === $expiresAt || $expiresAt > new \DateTimeImmutable()) {
-            return;
-        }
-
-        $refreshToken = $establishment->getGoogleRefreshToken();
-        if (null === $refreshToken) {
-            return;
-        }
-
-        $tokenData = $this->googleService->refreshAccessToken($refreshToken);
-        $expiresIn = (int) ($tokenData['expires_in'] ?? 3600);
-
-        $establishment->setGoogleAccessToken((string) $tokenData['access_token']);
-        $establishment->setGoogleTokenExpiresAt(
-            (new \DateTimeImmutable())->modify('+'.$expiresIn.' seconds')
-        );
     }
 }

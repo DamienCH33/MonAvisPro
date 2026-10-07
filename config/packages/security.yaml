@@ -14,7 +14,7 @@ security:
             security: false
 
         auth:
-            pattern: ^/api/auth
+            pattern: ^/api/auth/(login|register)$
             stateless: true
             security: false
 
@@ -34,15 +34,21 @@ security:
                 password_parameter: _password
                 default_target_path: dashboard
                 enable_csrf: true
+            # 5 essais ratés par quart d'heure, par IP et par email
+            login_throttling:
+                max_attempts: 5
+                interval: "15 minutes"
             logout:
                 path: app_logout
                 target: app_home
+                enable_csrf: true
 
     access_control:
-        - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/register$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/dashboard, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/google, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/, roles: PUBLIC_ACCESS }
 
 when@test:

@@ -33,6 +33,10 @@ class GooglePlacesService
      */
     public function getPlaceDetails(string $placeId): ?array
     {
+        if (!preg_match('/^[A-Za-z0-9_-]{10,255}$/', $placeId)) {
+            return null;
+        }
+
         try {
             $response = $this->httpClient->request(
                 'GET',

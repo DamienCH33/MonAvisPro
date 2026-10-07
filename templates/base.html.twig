@@ -58,7 +58,7 @@
 							</span>
 						</div>
 						<div class="d-flex align-items-center gap-2"> {% block topbar_actions %}{% endblock %}
-							<a href=" {{ path('app_logout') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
+							<a href="{{ logout_path('main') }}" class="rr-btn rr-btn-secondary rr-btn-sm">
 								Déconnexion
 							</a>
 						</div>
@@ -93,7 +93,7 @@
 								{% block public_nav %}
 									<div class="d-flex align-items-center gap-2">
 										<a href="{{ path('app_login') }}" class="rr-btn rr-btn-secondary rr-btn-sm">Connexion</a>
-										{% if not app_demo_mode %}
+										{% if app_registration_enabled and not app_demo_mode %}
 											<a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta rr-btn-lg">
 												Démarrer gratuitement
 											</a>
