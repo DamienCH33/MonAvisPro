@@ -1,110 +1,44 @@
-{# templates/legal/legal-notice.html.twig #}
-
 {% extends 'base.html.twig' %}
 
-{% block title %}Mentions légales · Mon Avis Pro
-{% endblock %}
-{% block page_title %}Mentions légales
-{% endblock %}
+{% block title %}Mentions légales — MonAvisPro{% endblock %}
+{% block page_title %}Mentions légales{% endblock %}
 
 {% block body %}
-	<div class="rr-legal">
+	<article class="rr-legal">
+		<a href="{{ app.user ? path('dashboard') : path('app_home') }}" class="rr-legal-back">Retour</a>
 
-		<a href="{{ app.user ? path('app_dashboard') : path('app_home') }}" class="rr-legal-back">
-			Retour
-		</a>
+		<h1>Mentions légales</h1>
+		<p class="rr-legal-meta">Dernière mise à jour : 8 octobre 2026</p>
 
-		<div class="rr-legal-hero">
+		<h2>Éditeur</h2>
+		<p>
+			<strong>Damien Chauveau</strong>, entrepreneur individuel<br>
+			Bègles (Gironde), France<br>
+			SIRET : en cours d'attribution<br>
+			TVA non applicable, article 293 B du Code général des impôts<br>
+			E-mail : <a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>
+		</p>
+		<p>Directeur de la publication : Damien Chauveau.</p>
 
-			<h1>Mentions légales</h1>
+		<h2>Hébergement</h2>
+		<p>
+			Railway Corporation, San Francisco (Californie, États-Unis)<br>
+			Site : <a href="https://railway.com" rel="noopener">railway.com</a>
+		</p>
 
-			<p>
-				Informations relatives à l’éditeur, l’hébergement et la propriété intellectuelle du service.
-			</p>
+		<h2>Services utilisés</h2>
+		<ul>
+			<li>Google Business Profile (Google LLC) : lecture des avis et publication des réponses, avec votre autorisation.</li>
+			<li>OpenAI : rédaction des propositions de réponse et analyse des avis.</li>
+		</ul>
 
-			<div class="rr-legal-meta">
-				Dernière mise à jour :
-				{{ "now"|date("d/m/Y") }}
-			</div>
-		</div>
+		<h2>Propriété intellectuelle</h2>
+		<p>Le code, l'interface, les textes et le logo de MonAvisPro appartiennent à l'éditeur. Toute reproduction sans autorisation est interdite. Les avis Google affichés restent la propriété de leurs auteurs.</p>
 
-		<div class="rr-legal-content">
+		<h2>Données personnelles</h2>
+		<p>Les traitements de données sont décrits dans la <a href="{{ path('app_privacy') }}">politique de confidentialité</a>.</p>
 
-			<section class="rr-legal-card">
-				<h2>1. Éditeur du site</h2>
-
-				<p>
-					<strong>Damien Chauveau</strong><br>
-					Projet personnel de développement logiciel<br>
-					Villenave d'Ornon, France
-				</p>
-
-				<p>
-					Contact :
-					<a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>2. Directeur de publication</h2>
-
-				<p>
-					Damien Chauveau.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>3. Hébergement</h2>
-
-				<p>
-					<strong>Railway Corp.</strong><br>
-					San Francisco, CA, USA
-				</p>
-
-				<p>
-					<a href="https://railway.app" target="_blank" rel="noopener">
-						railway.app
-					</a>
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>4. Propriété intellectuelle</h2>
-
-				<p>
-					L’ensemble des éléments composant MonAvisPro est protégé
-															                par le droit de la propriété intellectuelle.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>5. Services tiers</h2>
-
-				<ul>
-					<li>Google Business Profile API</li>
-					<li>OpenAI API</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>6. Données personnelles</h2>
-
-				<p>
-					Les traitements de données sont décrits dans la
-					<a href="{{ path('app_privacy') }}">politique de confidentialité</a>.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>7. Contact</h2>
-
-				<p>
-					<a href="mailto:contact@monavispro.fr">
-						contact@monavispro.fr
-					</a>
-				</p>
-			</section>
-
-		</div>
-	</div>
+		<h2>Contact</h2>
+		<p>Pour toute question : <a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>.</p>
+	</article>
 {% endblock %}

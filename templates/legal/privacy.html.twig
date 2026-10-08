@@ -1,153 +1,55 @@
-{# templates/legal/privacy.html.twig #}
-
 {% extends 'base.html.twig' %}
 
-{% block title %}Politique de confidentialité · Mon Avis Pro
-{% endblock %}
-{% block page_title %}Confidentialité
-{% endblock %}
+{% block title %}Politique de confidentialité — MonAvisPro{% endblock %}
+{% block page_title %}Confidentialité{% endblock %}
 
 {% block body %}
-	<div class="rr-legal">
+	<article class="rr-legal">
+		<a href="{{ app.user ? path('dashboard') : path('app_home') }}" class="rr-legal-back">Retour</a>
 
-		<a href="{{ app.user ? path('app_dashboard') : path('app_home') }}" class="rr-legal-back">
-			Retour
-		</a>
+		<h1>Politique de confidentialité</h1>
+		<p class="rr-legal-meta">Dernière mise à jour : 8 octobre 2026</p>
 
-		<div class="rr-legal-hero">
+		<h2>Responsable du traitement</h2>
+		<p>Damien Chauveau, entrepreneur individuel, éditeur de MonAvisPro. Contact : <a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>.</p>
 
-			<h1>Politique de confidentialité</h1>
+		<h2>Données traitées</h2>
+		<ul>
+			<li><strong>Votre compte</strong> : adresse e-mail et mot de passe (stocké sous forme de hachage, jamais en clair).</li>
+			<li><strong>Vos établissements</strong> : nom, adresse, réglages de réponse, e-mail de destination du bilan mensuel si vous en indiquez un.</li>
+			<li><strong>Connexion Google</strong> : identifiants de vos fiches et jetons d'accès Google, chiffrés en base.</li>
+			<li><strong>Avis Google</strong> : nom affiché de l'auteur, note, texte, date, et vos réponses.</li>
+			<li><strong>Données techniques</strong> : adresse IP et journaux de connexion, utilisés pour la sécurité (limitation des tentatives de connexion).</li>
+		</ul>
 
-			<p>
-				Gestion, stockage et protection des données personnelles utilisées par MonAvisPro.
-			</p>
+		<h2>Pourquoi</h2>
+		<ul>
+			<li>Fournir le service : afficher vos avis, proposer et publier vos réponses, envoyer alertes et bilans (exécution du contrat).</li>
+			<li>Sécuriser le service et prévenir les abus (intérêt légitime).</li>
+		</ul>
 
-			<div class="rr-legal-meta">
-				Dernière mise à jour :
-				{{ "now"|date("d/m/Y") }}
-			</div>
-		</div>
+		<h2>Avec qui</h2>
+		<ul>
+			<li><strong>Google LLC</strong> : lecture des avis et publication des réponses, uniquement pour les fiches que vous connectez.</li>
+			<li><strong>OpenAI</strong> : le texte de l'avis, la note, le nom de l'établissement et vos consignes de réponse sont envoyés pour rédiger une proposition ou une analyse.</li>
+			<li><strong>Railway Corporation</strong> : hébergement de l'application et de la base de données.</li>
+			<li>Le prestataire d'envoi d'e-mails, pour les alertes, bilans et réinitialisations de mot de passe.</li>
+		</ul>
+		<p>Google, OpenAI et Railway sont situés aux États-Unis. Ces transferts reposent sur les garanties prévues par le RGPD (clauses contractuelles types ou cadre de protection des données UE–États-Unis, selon le prestataire). Aucune donnée n'est vendue ni utilisée à des fins publicitaires.</p>
 
-		<div class="rr-legal-content">
+		<h2>Combien de temps</h2>
+		<ul>
+			<li>Compte, établissements et avis : tant que votre compte existe. Supprimer un établissement supprime ses avis dans MonAvisPro (rien n'est supprimé sur Google).</li>
+			<li>Après une demande de suppression du compte : effacement sous 30 jours.</li>
+		</ul>
 
-			<section class="rr-legal-card">
-				<h2>1. Éditeur du service</h2>
+		<h2>Vos droits</h2>
+		<p>Vous pouvez demander l'accès, la rectification, l'effacement ou la portabilité de vos données, ou vous opposer à un traitement, en écrivant à <a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>. Réponse sous un mois. Vous pouvez aussi saisir la <a href="https://www.cnil.fr/fr/plaintes" rel="noopener">CNIL</a>.</p>
 
-				<p>
-					MonAvisPro est édité par Damien Chauveau dans le cadre d’un projet
-										                personnel de développement logiciel.
-				</p>
+		<h2>Accès Google</h2>
+		<p>Vous pouvez retirer à tout moment l'accès de MonAvisPro à votre compte Google depuis la page <a href="https://myaccount.google.com/permissions" rel="noopener">Applications tierces</a> de votre compte Google. L'utilisation des données obtenues via les API Google respecte la <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, y compris ses exigences d'utilisation limitée.</p>
 
-				<p>
-					Contact :
-					<a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>2. Données collectées</h2>
-
-				<ul>
-					<li>Adresse e-mail</li>
-					<li>Mot de passe chiffré</li>
-					<li>Données Google Business Profile</li>
-					<li>Données techniques de connexion</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>3. Finalités du traitement</h2>
-
-				<ul>
-					<li>Gestion du compte utilisateur</li>
-					<li>Centralisation des avis Google</li>
-					<li>Analyse IA des avis</li>
-					<li>Sécurité et journalisation</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>4. Base légale</h2>
-
-				<ul>
-					<li>Exécution du contrat</li>
-					<li>Consentement utilisateur</li>
-					<li>Intérêt légitime de sécurité</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>5. Partage avec des tiers</h2>
-
-				<ul>
-					<li>Google LLC</li>
-					<li>OpenAI</li>
-					<li>Railway Corp.</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>6. Durée de conservation</h2>
-
-				<ul>
-					<li>Compte : jusqu’à suppression</li>
-					<li>Avis synchronisés : 90 jours maximum</li>
-					<li>Logs techniques : 30 jours</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>7. Sécurité</h2>
-
-				<ul>
-					<li>Mots de passe chiffrés</li>
-					<li>HTTPS/TLS</li>
-					<li>Accès serveur restreint</li>
-					<li>Tokens OAuth protégés</li>
-				</ul>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>8. Vos droits</h2>
-
-				<p>
-					Vous disposez des droits d’accès, de rectification, d’effacement,
-										                d’opposition et de portabilité prévus par le RGPD.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>9. Révocation Google</h2>
-
-				<p>
-					L’accès Google Business Profile peut être révoqué à tout moment.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>10. Cookies</h2>
-
-				<p>
-					MonAvisPro utilise uniquement des cookies nécessaires à l’authentification.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>11. Conformité Google API</h2>
-
-				<p>
-					MonAvisPro respecte la Google API Services User Data Policy.
-				</p>
-			</section>
-
-			<section class="rr-legal-card">
-				<h2>12. Réclamation CNIL</h2>
-
-				<p>
-					En cas de litige, une réclamation peut être déposée auprès de la CNIL.
-				</p>
-			</section>
-
-		</div>
-	</div>
+		<h2>Cookies</h2>
+		<p>MonAvisPro n'utilise que les cookies nécessaires à la connexion (session et « rester connecté »). Aucun cookie publicitaire ni de mesure d'audience.</p>
+	</article>
 {% endblock %}

@@ -1,4 +1,5 @@
 parameters:
+    app.asset_version_fallback: "dev"
     app.demo_mode: "%env(bool:APP_DEMO_MODE)%"
     # Inscription publique fermée par défaut (comptes créés par l'administrateur).
     env(APP_REGISTRATION_ENABLED): "0"

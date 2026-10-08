@@ -2,138 +2,193 @@
 
 {% block title %}MonAvisPro — Répondez à vos avis Google en quelques secondes{% endblock %}
 
+{% block stylesheets %}
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+	<link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+{% endblock %}
+
 {% set can_register = app_registration_enabled and not app_demo_mode %}
 
-{% block body %}
-	<section class="rr-landing-hero">
-		<div class="container">
-			<div class="row align-items-center g-5">
-				<div class="col-12 col-lg-6 text-center text-lg-start">
-					<h1 class="rr-landing-title">Répondez à tous vos avis Google, sans y passer vos soirées.</h1>
-					<p class="rr-landing-sub mx-auto mx-lg-0">
-						MonAvisPro rassemble les avis de vos commerces, vous prévient dès qu'un client est mécontent et vous propose une réponse dans votre ton. Vous relisez, vous publiez.
-					</p>
-					<div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
-						{% if can_register %}
-							<a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta">Créer mon compte gratuit</a>
-							<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-secondary rr-btn-lg">Voir la démo</a>
-						{% else %}
-							<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta">Essayer la démo</a>
-							<a href="mailto:contact@monavispro.fr" class="rr-btn rr-btn-secondary rr-btn-lg">Nous contacter</a>
-						{% endif %}
-					</div>
-					<p class="rr-hint mt-3">Démo sans inscription, avec de faux avis : rien n'est publié sur Google.</p>
-				</div>
+{% block public_nav %}
+	<nav class="lp-nav" aria-label="Compte">
+		<a href="{{ path('app_login') }}" class="lp-btn lp-btn-ghost">Connexion</a>
+		{% if app_registration_enabled and not app_demo_mode %}
+			<a href="{{ path('app_register') }}" class="lp-btn lp-btn-main">Créer un compte</a>
+		{% endif %}
+	</nav>
+{% endblock %}
 
-				<div class="col-12 col-lg-6" aria-hidden="true">
-					<div class="rr-preview">
-						<div class="rr-review mb-0">
-							<div class="rr-review-head">
-								<span class="rr-rating rr-rating-neg">★ 2/5</span>
-								<span class="rr-review-author">Isabelle F.</span>
-								<span class="rr-review-meta">il y a 2 heures</span>
-							</div>
-							<p class="rr-review-text">Les viennoiseries sont bonnes mais une seule personne en caisse le dimanche matin, la file était interminable.</p>
-							<div class="rr-reply-zone is-open">
-								<span class="rr-reply-label">Réponse proposée</span>
-								<p class="rr-reply-text">Bonjour Isabelle, merci pour votre retour et désolés pour cette attente. Dès ce week-end, une deuxième personne sera en caisse le dimanche matin. Au plaisir de vous revoir !
-L'équipe de la Boulangerie du Coin</p>
-								<div class="rr-review-actions">
-									<span class="rr-btn rr-btn-primary">Publier sur Google</span>
-									<span class="rr-btn rr-btn-secondary">Modifier</span>
-								</div>
+{% block body %}
+<div class="lp">
+
+	{# ───────────── Haut de page : l'instant où l'avis tombe ───────────── #}
+	<section class="lp-hero">
+		<div class="lp-wrap lp-hero-grid">
+			<div class="lp-hero-copy">
+				<h1 class="lp-h1">Un client vient de laisser une étoile. Votre réponse est déjà prête.</h1>
+				<p class="lp-lead">
+					MonAvisPro reçoit vos avis Google, vous prévient quand un client est mécontent et rédige une réponse dans le ton de votre commerce. Vous relisez, vous publiez&nbsp;: trente secondes au lieu d'une soirée.
+				</p>
+				<div class="lp-actions">
+					{% if can_register %}
+						<a href="{{ path('app_register') }}" class="lp-btn lp-btn-main">Créer mon compte gratuit</a>
+						<a href="{{ path('demo_login') }}" class="lp-btn lp-btn-ghost">Essayer la démo</a>
+					{% else %}
+						<a href="{{ path('demo_login') }}" class="lp-btn lp-btn-main">Essayer la démo</a>
+						<a href="mailto:contact@monavispro.fr?subject=MonAvisPro%20pour%20mon%20commerce" class="lp-btn lp-btn-ghost">Demander un accès</a>
+					{% endif %}
+				</div>
+				<p class="lp-note">La démo s'ouvre sans inscription, sur deux commerces fictifs. Rien n'est publié sur Google.</p>
+			</div>
+
+			<div class="lp-stage" aria-hidden="true" data-role="stage">
+				<div class="lp-phone">
+					<div class="lp-phone-bar">
+						<span class="lp-phone-title">À traiter</span>
+						<span class="lp-phone-count" data-role="count">3</span>
+					</div>
+
+					<div class="lp-notif" data-step="notif">
+						<span class="lp-notif-dot"></span>
+						Nouvel avis · Boulangerie du Coin
+					</div>
+
+					<article class="lp-card" data-step="review">
+						<div class="lp-card-head">
+							<span class="lp-stars lp-stars-low">★<span>★★★★</span></span>
+							<strong>François M.</strong>
+							<span class="lp-muted">à l'instant</span>
+						</div>
+						<p class="lp-card-text">Plus de 45 minutes pour récupérer une commande réservée depuis deux semaines. Personne ne nous a prévenus. Décevant.</p>
+
+						<div class="lp-reply" data-step="reply">
+							<p class="lp-reply-label" data-role="reply-label">Rédaction de la réponse…</p>
+							<p class="lp-reply-text"><span data-role="typed"></span><span class="lp-caret"></span></p>
+							<div class="lp-reply-actions">
+								<span class="lp-fake-btn" data-role="publish">Publier sur Google</span>
+								<span class="lp-fake-btn lp-fake-ghost">Modifier</span>
 							</div>
 						</div>
-					</div>
+					</article>
+
+					<div class="lp-toast" data-step="toast">Réponse publiée sur Google</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="rr-landing-section" aria-labelledby="how-title">
-		<div class="container">
-			<h2 class="rr-landing-h2" id="how-title">Comment ça marche</h2>
-			<ol class="row g-3 list-unstyled">
-				<li class="col-12 col-md-4">
-					<div class="rr-card h-100">
-						<span class="rr-step-num mb-3" aria-hidden="true">1</span>
-						<h3 class="rr-feature-title">Connectez votre fiche Google</h3>
-						<p class="rr-feature-text">En deux minutes, avec votre compte Google. Aucun mot de passe transmis, accès révocable à tout moment.</p>
-					</div>
+	{# ───────────── Même avis, trois tons (interactif) ───────────── #}
+	<section class="lp-section" aria-labelledby="tones-title">
+		<div class="lp-wrap lp-tones">
+			<div class="lp-tones-intro">
+				<h2 class="lp-h2" id="tones-title">Pas une réponse type. La vôtre.</h2>
+				<p class="lp-text">Vous choisissez le vouvoiement ou le tutoiement, le ton, la signature, et les consignes à respecter. Essayez sur le même avis&nbsp;:</p>
+				<div class="lp-tone-picker" role="tablist" aria-label="Ton de la réponse">
+					<button type="button" role="tab" class="lp-tone" aria-selected="true" aria-controls="tone-panel" data-tone="cordial">Cordial</button>
+					<button type="button" role="tab" class="lp-tone" aria-selected="false" aria-controls="tone-panel" data-tone="formel" tabindex="-1">Formel</button>
+					<button type="button" role="tab" class="lp-tone" aria-selected="false" aria-controls="tone-panel" data-tone="empathique" tabindex="-1">Empathique</button>
+				</div>
+			</div>
+
+			<div class="lp-tone-demo">
+				<div class="lp-quote">
+					<span class="lp-stars lp-stars-mid">★★★<span>★★</span></span>
+					<p>Le pain est bon, mais le dimanche matin l'accueil manque de sourire.</p>
+					<span class="lp-muted">Valérie S. · Boulangerie du Coin</span>
+				</div>
+				<div class="lp-answer" id="tone-panel" role="tabpanel" aria-live="polite">
+					<p data-tone-text="cordial">Bonjour Valérie, merci pour votre retour et ravis que notre pain vous plaise ! Nous avons bien noté pour le dimanche matin : toute l'équipe va y veiller. À très vite.<br>L'équipe de la Boulangerie du Coin</p>
+					<p data-tone-text="formel" hidden>Madame, nous vous remercions de votre avis. Nous avons transmis votre remarque concernant l'accueil du dimanche matin à l'ensemble de notre équipe afin d'y remédier. Nous espérons avoir le plaisir de vous accueillir à nouveau.<br>La direction de la Boulangerie du Coin</p>
+					<p data-tone-text="empathique" hidden>Bonjour Valérie, merci d'avoir pris le temps d'écrire. Un accueil sans sourire, ce n'est pas ce que nous voulons pour vous, surtout un dimanche. Nous en avons parlé en équipe et nous serons ravis de vous le prouver lors de votre prochaine visite.<br>L'équipe de la Boulangerie du Coin</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	{# ───────────── Les trois étapes (vraie séquence) ───────────── #}
+	<section class="lp-section" aria-labelledby="how-title">
+		<div class="lp-wrap">
+			<h2 class="lp-h2" id="how-title">En place en deux minutes</h2>
+			<ol class="lp-steps">
+				<li>
+					<span class="lp-step-n">1</span>
+					<h3 class="lp-h3">Connectez votre fiche Google</h3>
+					<p class="lp-text">Avec votre compte Google, en quelques clics. Aucun mot de passe transmis, accès retirable à tout moment.</p>
 				</li>
-				<li class="col-12 col-md-4">
-					<div class="rr-card h-100">
-						<span class="rr-step-num mb-3" aria-hidden="true">2</span>
-						<h3 class="rr-feature-title">Recevez vos avis au même endroit</h3>
-						<p class="rr-feature-text">Tous vos commerces, triés par urgence. Un e-mail vous prévient dès qu'un avis de 1 ou 2 étoiles arrive.</p>
-					</div>
+				<li>
+					<span class="lp-step-n">2</span>
+					<h3 class="lp-h3">Vos avis arrivent seuls</h3>
+					<p class="lp-text">Toutes les six heures, triés par urgence. Un e-mail vous prévient dès qu'un avis d'une ou deux étoiles tombe.</p>
 				</li>
-				<li class="col-12 col-md-4">
-					<div class="rr-card h-100">
-						<span class="rr-step-num mb-3" aria-hidden="true">3</span>
-						<h3 class="rr-feature-title">Répondez en un clic</h3>
-						<p class="rr-feature-text">L'IA propose une réponse dans le ton de votre commerce. Vous la relisez, la modifiez si besoin, et elle part sur Google.</p>
-					</div>
+				<li>
+					<span class="lp-step-n">3</span>
+					<h3 class="lp-h3">Vous relisez, vous publiez</h3>
+					<p class="lp-text">La réponse est rédigée. Vous la gardez, la modifiez ou l'écrivez vous-même. Rien ne part sans votre clic.</p>
 				</li>
 			</ol>
 		</div>
 	</section>
 
-	<section class="rr-landing-section" aria-labelledby="features-title">
-		<div class="container">
-			<h2 class="rr-landing-h2" id="features-title">Ce que vous y gagnez</h2>
-			<div class="row g-3">
-				<div class="col-12 col-md-6">
-					<div class="rr-card h-100">
-						<h3 class="rr-feature-title">Vos réponses vous ressemblent</h3>
-						<p class="rr-feature-text">Vouvoiement ou tutoiement, ton cordial ou formel, signature, consignes à respecter (« fermé le lundi », « jamais de remboursement par écrit »). L'IA suit vos règles.</p>
-					</div>
+	{# ───────────── Pour qui ───────────── #}
+	<section class="lp-section" aria-labelledby="who-title">
+		<div class="lp-wrap lp-who">
+			<h2 class="lp-h2" id="who-title">Fait pour ceux qui n'ont pas le temps</h2>
+			<div class="lp-who-grid">
+				<div>
+					<h3 class="lp-h3">Vous tenez un commerce</h3>
+					<p class="lp-text">Boulangerie, salon, restaurant, garage, cabinet : vos clients lisent les avis avant de pousser la porte. Répondre à chacun montre que quelqu'un écoute, sans y laisser vos soirées.</p>
 				</div>
-				<div class="col-12 col-md-6">
-					<div class="rr-card h-100">
-						<h3 class="rr-feature-title">Vous savez quoi améliorer</h3>
-						<p class="rr-feature-text">L'analyse fait ressortir ce que vos clients apprécient, ce qui revient dans les critiques, et une action concrète pour la semaine.</p>
-					</div>
+				<div>
+					<h3 class="lp-h3">Vous gérez plusieurs adresses</h3>
+					<p class="lp-text">Tous les avis de toutes vos boutiques dans une seule liste. Chaque commerce garde sa signature et ses consignes, et le 1er du mois un bilan part par e-mail.</p>
 				</div>
-				<div class="col-12 col-md-6">
-					<div class="rr-card h-100">
-						<h3 class="rr-feature-title">Plusieurs commerces, une seule boîte</h3>
-						<p class="rr-feature-text">Gérant de plusieurs boutiques ou prestataire pour vos clients : tous les avis arrivent dans la même liste, et chaque commerce garde ses réglages.</p>
-					</div>
-				</div>
-				<div class="col-12 col-md-6">
-					<div class="rr-card h-100">
-						<h3 class="rr-feature-title">Un bilan chaque mois</h3>
-						<p class="rr-feature-text">Le 1er du mois, un e-mail récapitule la note, les nouveaux avis et les réponses. Pratique pour suivre l'évolution ou rendre compte à un client.</p>
-					</div>
+				<div>
+					<h3 class="lp-h3">Vous le faites pour vos clients</h3>
+					<p class="lp-text">Agence ou indépendant, vous répondez pour le compte de commerçants. Le bilan mensuel leur montre ce qui a été fait, sans tableau à remplir.</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="rr-landing-section" aria-labelledby="faq-title">
-		<div class="container rr-faq">
-			<h2 class="rr-landing-h2" id="faq-title">Questions fréquentes</h2>
-			<details class="rr-card mb-2">
-				<summary>Est-ce que l'IA publie des réponses sans moi ?</summary>
-				<p class="rr-feature-text mt-3 mb-0">Non. Chaque réponse est une proposition : vous la lisez, la modifiez si besoin, puis cliquez sur « Publier ». Rien ne part sur Google sans votre validation.</p>
+	{# ───────────── Questions ───────────── #}
+	<section class="lp-section" aria-labelledby="faq-title">
+		<div class="lp-wrap lp-faq">
+			<h2 class="lp-h2" id="faq-title">Les questions qu'on nous pose</h2>
+			<details>
+				<summary>L'IA publie-t-elle des réponses sans moi ?</summary>
+				<p class="lp-text">Non. Chaque réponse est une proposition. Elle part sur Google uniquement quand vous cliquez sur « Publier ».</p>
 			</details>
-			<details class="rr-card mb-2">
+			<details>
 				<summary>Que voit MonAvisPro de mon compte Google ?</summary>
-				<p class="rr-feature-text mt-3 mb-0">Uniquement les fiches d'établissement que vous choisissez et leurs avis. L'accès passe par la connexion officielle de Google et se retire en un clic depuis votre compte Google.</p>
+				<p class="lp-text">Les fiches d'établissement que vous choisissez et leurs avis, rien d'autre. La connexion passe par la page officielle de Google et se retire en un clic depuis votre compte.</p>
 			</details>
-			<details class="rr-card mb-2">
-				<summary>Je n'ai pas de fiche Google, est-ce utile ?</summary>
-				<p class="rr-feature-text mt-3 mb-0">Il faut d'abord créer votre fiche sur Google Business Profile (gratuit). Une fois validée par Google, vous la connectez à MonAvisPro.</p>
+			<details>
+				<summary>Je n'ai pas encore de fiche Google.</summary>
+				<p class="lp-text">Créez-la gratuitement sur Google Business Profile. Une fois validée par Google, vous la connectez ici en deux minutes.</p>
+			</details>
+			<details>
+				<summary>Et si la réponse proposée ne me plaît pas ?</summary>
+				<p class="lp-text">Changez de ton en un clic, demandez un autre texte, ou écrivez la réponse vous-même dans la même case.</p>
 			</details>
 		</div>
 	</section>
 
-	<section class="rr-landing-section text-center">
-		<div class="container">
-			<h2 class="rr-landing-h2">Voyez par vous-même</h2>
-			<p class="rr-landing-sub">La démo contient deux commerces fictifs et leurs avis. Testez la réponse proposée par l'IA en un clic.</p>
-			<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta">Essayer la démo</a>
+	{# ───────────── Fin ───────────── #}
+	<section class="lp-end">
+		<div class="lp-wrap">
+			<p class="lp-end-stars" aria-hidden="true">★★★★★</p>
+			<h2 class="lp-h2">Le prochain avis arrive peut-être ce soir.</h2>
+			<div class="lp-actions lp-actions-center">
+				{% if can_register %}
+					<a href="{{ path('app_register') }}" class="lp-btn lp-btn-main">Créer mon compte gratuit</a>
+				{% endif %}
+				<a href="{{ path('demo_login') }}" class="lp-btn {{ can_register ? 'lp-btn-ghost' : 'lp-btn-main' }}">Essayer la démo</a>
+			</div>
 		</div>
 	</section>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('js/landing.js') }}"></script>
 {% endblock %}

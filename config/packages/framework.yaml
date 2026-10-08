@@ -2,6 +2,12 @@
 framework:
     secret: "%env(APP_SECRET)%"
 
+    # Version ajoutée à chaque fichier CSS/JS (style.css?v=…) : un déploiement
+    # invalide le cache des navigateurs. Railway fournit le commit déployé.
+    assets:
+        version: "%env(default:app.asset_version_fallback:RAILWAY_GIT_COMMIT_SHA)%"
+        version_format: "%%s?v=%%s"
+
     # Derrière le proxy de Railway : vraie IP du visiteur (limites de débit) et détection du HTTPS.
     trusted_proxies: "%env(TRUSTED_PROXIES)%"
     trusted_headers: ["x-forwarded-for", "x-forwarded-proto", "x-forwarded-port"]
