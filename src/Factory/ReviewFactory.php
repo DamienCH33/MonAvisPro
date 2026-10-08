@@ -43,25 +43,34 @@ final class ReviewFactory extends PersistentProxyObjectFactory
 
     protected function defaults(): array|callable
     {
-        $rating = self::faker()->numberBetween(1, 5);
-
-        $text = match (true) {
-            $rating >= 4 => self::faker()->randomElement(self::POSITIVE_REVIEWS),
-            $rating <= 2 => self::faker()->randomElement(self::NEGATIVE_REVIEWS),
-            default => self::faker()->randomElement(self::NEUTRAL_REVIEWS),
-        };
+        $faker = \Faker\Factory::create('fr_FR');
 
         return [
             'establishment' => EstablishmentFactory::new(),
-            'googleAuthor' => self::faker()->name(),
-            'googleAuthorPhoto' => self::faker()->boolean(70)
-                ? 'https://i.pravatar.cc/40?u='.self::faker()->uuid()
-                : null,
-            'rating' => $rating,
-            'text' => self::faker()->boolean(90) ? $text : null,
+            'googleAuthor' => $faker->firstName().' '.$faker->lastName(),
+            'googleAuthorPhoto' => null,
+            'rating' => self::faker()->numberBetween(1, 5),
             'publishedAt' => self::faker()->dateTimeBetween('-3 months', 'now'),
             'googleReviewId' => 'ChZI'.self::faker()->unique()->bothify('??##??##??##??##??##'),
             'isRead' => self::faker()->boolean(40),
         ];
+    }
+
+    protected function initialize(): static
+    {
+        // Le texte dépend de la note finale (y compris quand la note est imposée par l'appelant).
+        return $this->beforeInstantiate(static function (array $attributes): array {
+            if (!\array_key_exists('text', $attributes)) {
+                $rating = (int) $attributes['rating'];
+                $pool = match (true) {
+                    $rating >= 4 => self::POSITIVE_REVIEWS,
+                    $rating <= 2 => self::NEGATIVE_REVIEWS,
+                    default => self::NEUTRAL_REVIEWS,
+                };
+                $attributes['text'] = self::faker()->boolean(90) ? self::faker()->randomElement($pool) : null;
+            }
+
+            return $attributes;
+        });
     }
 }

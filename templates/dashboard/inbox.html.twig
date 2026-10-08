@@ -6,40 +6,63 @@
 {% block body %}
 	<div class="rr-inbox-head">
 		<div>
-			<div class="rr-page-title">{{ total }} avis sans réponse</div>
-			<div class="rr-page-sub">Tous vos établissements, les avis négatifs en premier.</div>
+			<h1 class="rr-page-title" data-role="inbox-title" data-total="{{ total }}">
+				{% if total > 0 %}{{ total }} avis attend{{ total > 1 ? 'ent' }} une réponse{% else %}Tout est à jour{% endif %}
+			</h1>
+			<p class="rr-page-sub">Les plus mauvaises notes d'abord. Une réponse rapide limite l'effet d'un avis négatif.</p>
 		</div>
 	</div>
 
-	{% if groups is empty %}
+	{% if reviews is empty %}
 		<div class="rr-card rr-card-lg rr-empty-state">
-			<div class="rr-empty-icon">✓</div>
-			<div class="rr-empty-title">Tout est à jour</div>
-			<div class="rr-empty-text">Aucun avis n'attend de réponse. Les nouveaux avis arrivent à chaque synchronisation.</div>
-		</div>
-	{% endif %}
-
-	{% for group in groups %}
-		{% set establishment = group.establishment %}
-		<section class="rr-inbox-group">
-			<div class="rr-inbox-group-head">
-				<a href="{{ path('dashboard_establishment', {id: establishment.id}) }}" class="rr-inbox-name">{{ establishment.name }}</a>
-				<span class="rr-pill rr-pill-yellow">{{ group.reviews|length }} à répondre</span>
-				<a href="{{ path('reviews_list', {id: establishment.id, status: 'unanswered'}) }}" class="rr-btn rr-btn-primary rr-btn-sm ms-auto">Répondre</a>
-			</div>
-
-			{% for review in group.reviews|slice(0, 5) %}
-				<a href="{{ path('reviews_list', {id: establishment.id, status: 'unanswered'}) }}#review-{{ review.id }}" class="rr-inbox-row {{ review.rating <= 2 ? 'rr-inbox-row-neg' }}">
-					<span class="{{ review.rating >= 4 ? 'rr-stars' : 'rr-stars-neg' }} rr-inbox-stars">{% for i in 1..5 %}{{ i <= review.rating ? '★' : '☆' }}{% endfor %}</span>
-					<span class="rr-inbox-author">{{ review.googleAuthor }}</span>
-					<span class="rr-inbox-text">{{ review.text ? (review.text|length > 110 ? review.text|slice(0, 110) ~ '…' : review.text) : 'Note sans commentaire' }}</span>
-					<span class="rr-inbox-date">{{ review.publishedAt|date('d/m/Y') }}</span>
-				</a>
-			{% endfor %}
-
-			{% if group.reviews|length > 5 %}
-				<div class="rr-inbox-more">+ {{ group.reviews|length - 5 }} autre{{ group.reviews|length - 5 > 1 ? 's' }}</div>
+			<div class="rr-empty-icon" aria-hidden="true">✓</div>
+			<h2 class="rr-empty-title">Aucun avis en attente</h2>
+			<p class="rr-empty-text">
+				{% if establishments is empty %}
+					Ajoutez votre premier établissement pour retrouver ici les avis auxquels répondre.
+				{% else %}
+					Les nouveaux avis arrivent automatiquement toutes les 6 heures.
+				{% endif %}
+			</p>
+			{% if establishments is empty %}
+				<a href="{{ path('establishment_new') }}" class="rr-btn rr-btn-primary rr-btn-lg mt-4">Ajouter un établissement</a>
 			{% endif %}
-		</section>
-	{% endfor %}
+		</div>
+	{% else %}
+		<div class="rr-inbox-toolbar">
+			<div class="rr-chips" role="group" aria-label="Filtrer par note">
+				<button type="button" class="rr-chip" data-filter="all" aria-pressed="true">Tous · <span data-count="all">{{ counts.all }}</span></button>
+				<button type="button" class="rr-chip" data-filter="neg" aria-pressed="false">Négatifs (1–2★) · <span data-count="neg">{{ counts.neg }}</span></button>
+				<button type="button" class="rr-chip" data-filter="mid" aria-pressed="false">Moyens (3★) · <span data-count="mid">{{ counts.mid }}</span></button>
+				<button type="button" class="rr-chip" data-filter="pos" aria-pressed="false">Positifs (4–5★) · <span data-count="pos">{{ counts.pos }}</span></button>
+			</div>
+			{% if establishments|length > 1 %}
+				<label class="rr-select-wrap">Établissement
+					<select class="rr-select" data-role="establishment-filter">
+						<option value="">Tous</option>
+						{% for establishment in establishments %}
+							<option value="{{ establishment.id }}">{{ establishment.name }}</option>
+						{% endfor %}
+					</select>
+				</label>
+			{% endif %}
+		</div>
+
+		<div data-role="inbox-list">
+			{% for review in reviews %}
+				{% include 'partials/_review_card.html.twig' with {review: review, show_establishment: establishments|length > 1} only %}
+			{% endfor %}
+		</div>
+
+		<p class="rr-empty" data-role="filter-empty" hidden>Aucun avis pour ce filtre.</p>
+
+		{% if total > reviews|length %}
+			<p class="rr-hint">Les {{ reviews|length }} avis les plus urgents sont affichés. Les suivants apparaîtront au fur et à mesure.</p>
+		{% endif %}
+	{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('js/review-reply.js') }}"></script>
+	<script src="{{ asset('js/inbox.js') }}"></script>
 {% endblock %}

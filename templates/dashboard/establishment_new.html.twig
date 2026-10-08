@@ -1,116 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un établissement — MonAvisPro
-{% endblock %}
-{% block page_title %}Ajouter un établissement
-{% endblock %}
+{% block title %}Ajouter un commerce — MonAvisPro{% endblock %}
+{% block page_title %}Ajouter un commerce{% endblock %}
 
 {% block body %}
-	<div class="row justify-content-center">
-		<div class="col-12 col-lg-7">
+	<div class="rr-onboarding">
+		<h1 class="rr-page-title">Connectez votre fiche Google</h1>
+		<p class="rr-page-sub mb-4">Deux minutes, une seule fois. Ensuite, vos avis arrivent ici et vous y répondez sans ouvrir Google.</p>
 
-			<div class="rr-card rr-card-lg">
-
-				<div class="text-center mb-4">
-					<div style="font-size: 4rem; color: #4285F4;">
-						<i class="bi bi-google"></i>
-					</div>
-					<div class="rr-page-title mb-2">Connectez votre Google Business Profile</div>
-					<div class="rr-page-sub">
-						Gérez vos avis Google directement depuis MonAvisPro
-					</div>
+		<ol class="rr-steps">
+			<li class="rr-step">
+				<span class="rr-step-num" aria-hidden="true">1</span>
+				<div>
+					<p class="rr-step-title">Choisissez votre compte Google</p>
+					<p class="rr-step-text">Celui qui gère votre fiche d'établissement (Google Business Profile).</p>
 				</div>
-
-				<div class="rr-card mb-4" style="background: var(--rr-bg-card); padding: 1.5rem;">
-					<h6 style="font-weight: 600; margin-bottom: 1rem;">
-						Ce que vous pourrez faire :
-					</h6>
-					<div class="mb-2">
-						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
-						<strong>Répondre en un clic</strong>
-						: Publiez vos réponses directement sur Google
-					</div>
-					<div class="mb-2">
-						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
-						<strong>Modifier et supprimer</strong>
-						: Gérez vos réponses comme bon vous semble
-					</div>
-					<div class="mb-2">
-						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
-						<strong>Sécurité garantie</strong>
-						: Impossible de gérer un établissement qui ne vous appartient pas
-					</div>
-					<div class="mb-2">
-						<i class="bi bi-check-circle-fill" style="color: var(--rr-green);"></i>
-						<strong>Synchronisation auto</strong>
-						: Vos informations toujours à jour
-					</div>
+			</li>
+			<li class="rr-step">
+				<span class="rr-step-num" aria-hidden="true">2</span>
+				<div>
+					<p class="rr-step-title">Autorisez MonAvisPro</p>
+					<p class="rr-step-text">Google vous demande votre accord. Aucun mot de passe n'est transmis, et vous pouvez retirer l'accès à tout moment depuis votre compte Google.</p>
 				</div>
-
-				<div class="rr-card mb-4" style="background: var(--rr-bg-card); padding: 1.5rem; border-left: 4px solid var(--rr-green);">
-					<div class="d-flex align-items-start">
-						<i class="bi bi-shield-check" style="font-size: 2rem; color: var(--rr-green); margin-right: 1rem; flex-shrink: 0;"></i>
-						<div>
-							<h6 style="font-weight: 600; margin-bottom: 0.5rem;">
-								<i class="bi bi-lock-fill text-success"></i>
-								Connexion 100% sécurisée OAuth 2.0
-							</h6>
-							<p class="mb-2" style="font-size: 0.95rem;">
-								Google va vous demander d'autoriser MonAvisPro à accéder à votre Google Business Profile.
-							</p>
-							<p class="mb-2" style="font-size: 0.95rem;">
-								C'est la
-								<strong>méthode officielle et recommandée par Google</strong>.
-							</p>
-							<ul style="font-size: 0.9rem; margin-bottom: 0; padding-left: 1.2rem;">
-								<li>
-									<strong>Aucun mot de passe</strong>
-									n'est jamais stocké sur nos serveurs</li>
-								<li>Vous gardez
-									<strong>le contrôle total</strong>
-									: révocable à tout moment depuis votre compte Google</li>
-								<li>Accès
-									<strong>limité et auditable</strong>
-									: MonAvisPro ne peut accéder qu'aux avis de VOS établissements</li>
-								<li>Conforme
-									<strong>RGPD</strong>
-									: vos données restent chez Google, nous n'accédons qu'aux informations nécessaires</li>
-							</ul>
-						</div>
-					</div>
+			</li>
+			<li class="rr-step">
+				<span class="rr-step-num" aria-hidden="true">3</span>
+				<div>
+					<p class="rr-step-title">Sélectionnez votre commerce</p>
+					<p class="rr-step-text">Vos avis sont récupérés aussitôt, puis toutes les 6 heures.</p>
 				</div>
+			</li>
+		</ol>
 
-				<div class="alert alert-info mb-4">
-					<i class="bi bi-info-circle"></i>
-					<strong>Comment ça marche ?</strong><br>
-					<small>
-						1. Cliquez sur "Connecter avec Google" ci-dessous<br>
-						2. Choisissez votre compte Google professionnel<br>
-						3. Autorisez MonAvisPro (vous pouvez révoquer à tout moment)<br>
-						4. Sélectionnez l'établissement à connecter<br>
-						5. C'est prêt ! Vous pouvez désormais répondre aux avis depuis MonAvisPro
-					</small>
-				</div>
-
-				<div class="d-flex gap-2">
-					<a href="{{ path('google_business_connect') }}" class="rr-btn rr-btn-primary rr-btn-lg flex-grow-1 text-center">
-						<i class="bi bi-google"></i>
-						Connecter avec Google
-					</a>
-					<a href="{{ path('dashboard') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
-						Annuler
-					</a>
-				</div>
-
-				<div class="rr-hint mt-4 text-center">
-					Vous n'avez pas de Google Business Profile ?
-					<a href="https://business.google.com/" target="_blank" style="color:var(--rr-green)">
-						Créez-en un gratuitement
-					</a>
-				</div>
-
-			</div>
-
+		<div class="d-flex flex-wrap gap-2 mt-4">
+			<a href="{{ path('google_business_connect') }}" class="rr-btn rr-btn-primary rr-btn-lg">Connecter avec Google</a>
+			<a href="{{ path('dashboard') }}" class="rr-btn rr-btn-ghost rr-btn-lg">Plus tard</a>
 		</div>
+
+		<p class="rr-hint mt-4">
+			Pas encore de fiche Google ?
+			<a href="https://business.google.com/" target="_blank" rel="noopener" class="rr-link">Créez-la gratuitement sur Google</a>, puis revenez ici.
+		</p>
 	</div>
 {% endblock %}
