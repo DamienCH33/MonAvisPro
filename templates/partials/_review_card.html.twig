@@ -1,0 +1,31 @@
+{# Carte d'avis avec réponse intégrée.
+   Paramètres : review (Review), show_establishment (bool, défaut false) #}
+{% set rating = review.rating %}
+{% set bucket = rating <= 2 ? 'neg' : (rating == 3 ? 'mid' : 'pos') %}
+{% set establishment = review.establishment %}
+{% set author = review.googleAuthor ?: 'Client Google' %}
+<article class="rr-review"
+         id="review-{{ review.id }}"
+         data-review-id="{{ review.id }}"
+         data-tone="{{ establishment.replyTone }}"
+         data-bucket="{{ bucket }}"
+         data-establishment="{{ establishment.id }}">
+    <div class="rr-review-head">
+        <span class="rr-rating rr-rating-{{ bucket }}" aria-label="Note : {{ rating }} sur 5">★ {{ rating }}/5</span>
+        <span class="rr-review-author">{{ author }}</span>
+        <span class="rr-review-meta">
+            {% if show_establishment|default(false) %}{{ establishment.name }} · {% endif %}{{ review.publishedAt|date('d/m/Y') }}
+        </span>
+    </div>
+
+    {% if review.text %}
+        <p class="rr-review-text">{{ review.text }}</p>
+    {% else %}
+        <p class="rr-review-text rr-review-text-empty">Note laissée sans commentaire.</p>
+    {% endif %}
+
+    <div class="rr-review-actions" data-role="review-actions">
+        <button type="button" class="rr-btn rr-btn-primary" data-reply-action="suggest">Proposer une réponse</button>
+        <button type="button" class="rr-btn rr-btn-secondary" data-reply-action="write">Écrire moi-même</button>
+    </div>
+</article>

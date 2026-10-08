@@ -32,71 +32,19 @@ class DashboardController extends AbstractController
             ['createdAt' => 'DESC']
         );
 
-        $current = $establishments[0] ?? null;
-        $stats = null;
-        $reviews = [];
-
-        if ($current) {
-            $allReviews = $this->reviewRepository->findBy([
-                'establishment' => $current,
-            ]);
-
-            $total = count($allReviews);
-            $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
-
-            $positive = count(array_filter(
-                $allReviews,
-                fn ($r) => $r->getRating() >= 4
-            ));
-
-            $negative = count(array_filter(
-                $allReviews,
-                fn ($r) => $r->getRating() <= 2
-            ));
-
-            $unread = count(array_filter(
-                $allReviews,
-                fn ($r) => !$r->isRead()
-            ));
-
-            $repartition = [
-                1 => 0,
-                2 => 0,
-                3 => 0,
-                4 => 0,
-                5 => 0,
-            ];
-
-            foreach ($allReviews as $review) {
-                ++$repartition[$review->getRating()];
-            }
-
-            $stats = [
-                'average' => $total > 0 ? round($sum / $total, 1) : null,
-                'total' => $total,
-                'positiveRate' => $total > 0 ? round(($positive / $total) * 100) : 0,
-                'negativeRate' => $total > 0 ? round(($negative / $total) * 100) : 0,
-                'unreadCount' => $unread,
-                'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
-                'repartition' => $repartition,
-            ];
-
-            $reviews = $this->reviewRepository->findBy(
-                ['establishment' => $current],
-                ['publishedAt' => 'DESC'],
-                5
-            );
+        // Un établissement au moins : on ouvre directement son tableau de bord.
+        if ([] !== $establishments) {
+            return $this->redirectToRoute('dashboard_establishment', ['id' => (string) $establishments[0]->getId()]);
         }
 
-        $token = $this->jwtManager->create($user);
-
+        // Aucun établissement : écran de démarrage.
         return $this->render('dashboard/dashboard.html.twig', [
-            'establishments' => $establishments,
-            'current_establishment' => $current,
-            'stats' => $stats,
-            'reviews' => $reviews,
-            'unread_count' => $stats['unreadCount'] ?? 0,
-            'jwt_token' => $token,
+            'establishments' => [],
+            'current_establishment' => null,
+            'stats' => null,
+            'reviews' => [],
+            'unread_count' => 0,
+            'jwt_token' => $this->jwtManager->create($user),
         ]);
     }
 
@@ -109,23 +57,21 @@ class DashboardController extends AbstractController
         $establishments = $this->establishmentRepository->findBy(['owner' => $user], ['name' => 'ASC']);
         $reviews = $this->reviewRepository->findUnansweredForOwner($user, 100);
 
-        $groups = [];
+        $counts = ['all' => 0, 'neg' => 0, 'mid' => 0, 'pos' => 0];
         foreach ($reviews as $review) {
-            $establishment = $review->getEstablishment();
-            if (null === $establishment) {
-                continue;
-            }
-            $key = (string) $establishment->getId();
-            $groups[$key] ??= ['establishment' => $establishment, 'reviews' => []];
-            $groups[$key]['reviews'][] = $review;
+            $rating = (int) $review->getRating();
+            ++$counts['all'];
+            ++$counts[$rating <= 2 ? 'neg' : (3 === $rating ? 'mid' : 'pos')];
         }
 
         return $this->render('dashboard/inbox.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => null,
-            'groups' => $groups,
+            'reviews' => $reviews,
+            'counts' => $counts,
             'total' => $this->reviewRepository->countUnansweredForOwner($user),
             'unread_count' => 0,
+            'jwt_token' => $this->jwtManager->create($user),
         ]);
     }
 
@@ -168,6 +114,11 @@ class DashboardController extends AbstractController
             fn ($r) => !$r->isRead()
         ));
 
+        $unanswered = count(array_filter(
+            $allReviews,
+            fn ($r) => null === $r->getOwnerReply()
+        ));
+
         $repartition = [
             1 => 0,
             2 => 0,
@@ -186,6 +137,8 @@ class DashboardController extends AbstractController
             'positiveRate' => $total > 0 ? round(($positive / $total) * 100) : 0,
             'negativeRate' => $total > 0 ? round(($negative / $total) * 100) : 0,
             'unreadCount' => $unread,
+            'unanswered' => $unanswered,
+            'responseRate' => $total > 0 ? (int) round((($total - $unanswered) / $total) * 100) : 0,
             'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
             'repartition' => $repartition,
         ];

@@ -1,122 +1,70 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Analyse IA —
-	{{ current_establishment.name }}
-{% endblock %}
-{% block page_title %}Analyse IA
-{% endblock %}
+{% block title %}Analyse — {{ current_establishment.name }}{% endblock %}
+{% block page_title %}Analyse{% endblock %}
 
 {% block topbar_actions %}
-	<button onclick="refreshAnalysis()" class="rr-btn rr-btn-primary rr-btn-sm" id="refresh-btn">
-		✨ Relancer l'analyse
+	<button type="button" class="rr-btn rr-btn-secondary" data-action="refresh-analysis">
+		<span>{{ analysis ? 'Relancer l\'analyse' : 'Lancer l\'analyse' }}</span>
 	</button>
 {% endblock %}
 
+{% macro themes(list, tone) %}
+	{% for theme in list %}
+		{% set label = theme.theme is defined ? theme.theme : theme %}
+		{% set percentage = theme.percentage is defined ? theme.percentage : 0 %}
+		{% set example = theme.example is defined ? theme.example : null %}
+		<div class="rr-theme">
+			<div class="d-flex justify-content-between gap-3">
+				<span class="rr-theme-label">{{ label|capitalize }}</span>
+				<span class="rr-bar-pct {{ tone == 'pos' ? 'rr-green' : 'rr-red' }}">{{ percentage }} %</span>
+			</div>
+			<div class="rr-bar-track"><div class="rr-bar-fill rr-bar-fill-{{ tone == 'pos' ? 'green' : 'red' }}" data-width="{{ percentage }}"></div></div>
+			{% if example %}<p class="rr-theme-example">« {{ example }} »</p>{% endif %}
+		</div>
+	{% else %}
+		<p class="rr-hint">Rien de marquant pour l'instant.</p>
+	{% endfor %}
+{% endmacro %}
+
 {% block body %}
-
-
-	<div id="analysis-container">
-		{% if analysis %}
-
-			<div
-				class="row g-3 mb-4">
-
-				{# Thèmes positifs #}
-				<div class="col-12 col-lg-6">
-					<div class="rr-card rr-card-lg rr-card-success h-100">
-						<div class="rr-analyse-title rr-analyse-pos">Points forts</div>
-
-						{% for theme in analysis.positiveThemes %}
-							{% set label = theme.theme is defined ? theme.theme : theme %}
-							{% set percentage = theme.percentage is defined ? theme.percentage : 0 %}
-							{% set example = theme.example is defined ? theme.example : null %}
-
-							<div class="rr-bar mb-3">
-								<div style="flex:1">
-									<div class="d-flex justify-content-between mb-1">
-										<span style="font-size:12px;color:var(--rr-t1);font-weight:600">{{ label }}</span>
-										<span class="rr-bar-pct rr-green">{{ percentage }}%</span>
-									</div>
-									<div class="rr-bar-track">
-										<div class="rr-bar-fill rr-bar-fill-green" style="width:{{ percentage }}%"></div>
-									</div>
-									{% if example %}
-										<div style="font-size:11px;color:var(--rr-t3);margin-top:4px;font-style:italic">
-											"{{ example }}"
-										</div>
-									{% endif %}
-								</div>
-							</div>
-						{% endfor %}
-					</div>
-				</div>
-
-				{# Thèmes négatifs #}
-				<div class="col-12 col-lg-6">
-					<div class="rr-card rr-card-lg rr-card-neg h-100">
-						<div class="rr-analyse-title rr-analyse-neg">Points à améliorer</div>
-
-						{% for theme in analysis.negativeThemes %}
-							{% set label = theme.theme is defined ? theme.theme : theme %}
-							{% set percentage = theme.percentage is defined ? theme.percentage : 0 %}
-							{% set example = theme.example is defined ? theme.example : null %}
-
-							<div class="rr-bar mb-3">
-								<div style="flex:1">
-									<div class="d-flex justify-content-between mb-1">
-										<span style="font-size:12px;color:var(--rr-t1);font-weight:600">{{ label }}</span>
-										<span class="rr-bar-pct rr-red">{{ percentage }}%</span>
-									</div>
-									<div class="rr-bar-track">
-										<div class="rr-bar-fill rr-bar-fill-red" style="width:{{ percentage }}%"></div>
-									</div>
-									{% if example %}
-										<div style="font-size:11px;color:var(--rr-t3);margin-top:4px;font-style:italic">
-											"{{ example }}"
-										</div>
-									{% endif %}
-								</div>
-							</div>
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-
-			{# Suggestion d'action #}
-			<div class="rr-card rr-card-warn mb-4">
-				<div class="d-flex align-items-start gap-3">
-					<span style="font-size:20px">💡</span>
-					<div>
-						<div style="font-size:11px;font-weight:700;color:var(--rr-yellow);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
-							Action recommandée cette semaine
-						</div>
-						<div style="font-size:14px;color:var(--rr-t1);line-height:1.6">
-							{{ analysis.actionSuggestion }}
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div style="font-size:11px;color:var(--rr-t3);text-align:right">
-				Dernière analyse :
-				{{ analysis.updatedAt|date('d/m/Y à H:i') }}
-			</div>
-
-		{% else %}
-
-			<div class="rr-empty">
-				<div style="font-size:32px;margin-bottom:12px">🤖</div>
-				<div style="font-size:16px;font-weight:700;color:var(--rr-t1);margin-bottom:8px">
-					Aucune analyse disponible
-				</div>
-				<div>Lancez votre première analyse IA pour découvrir les thèmes récurrents dans vos avis.</div>
-				<button onclick="refreshAnalysis()" class="rr-btn rr-btn-primary rr-btn-lg mt-4">
-					✨ Lancer l'analyse
-				</button>
-			</div>
-
-		{% endif %}
+	<div class="rr-inbox-head">
+		<div>
+			<h1 class="rr-page-title">Ce que disent vos clients</h1>
+			<p class="rr-page-sub">
+				{{ current_establishment.name }}{% if analysis %} · analyse du {{ analysis.updatedAt|date('d/m/Y') }}{% endif %}
+			</p>
+		</div>
 	</div>
+
+	{% if analysis %}
+		<section class="rr-card rr-card-lg rr-card-warn mb-4" aria-labelledby="action-title">
+			<h2 class="rr-section-title rr-yellow mb-2" id="action-title">Action conseillée</h2>
+			<p class="rr-action-text mb-0">{{ analysis.actionSuggestion }}</p>
+		</section>
+
+		<div class="row g-3">
+			<div class="col-12 col-lg-6">
+				<section class="rr-card rr-card-lg h-100" aria-labelledby="pos-title">
+					<h2 class="rr-analyse-title rr-analyse-pos" id="pos-title">Points forts</h2>
+					{{ _self.themes(analysis.positiveThemes, 'pos') }}
+				</section>
+			</div>
+			<div class="col-12 col-lg-6">
+				<section class="rr-card rr-card-lg h-100" aria-labelledby="neg-title">
+					<h2 class="rr-analyse-title rr-analyse-neg" id="neg-title">Points à améliorer</h2>
+					{{ _self.themes(analysis.negativeThemes, 'neg') }}
+				</section>
+			</div>
+		</div>
+		<p class="rr-hint mt-3">Le pourcentage indique la part des avis qui abordent le sujet.</p>
+	{% else %}
+		<div class="rr-card rr-card-lg rr-empty-state">
+			<h2 class="rr-empty-title">Pas encore d'analyse</h2>
+			<p class="rr-empty-text">L'IA lit l'ensemble de vos avis et fait ressortir ce que vos clients apprécient, ce qui les agace, et une action concrète à mener.</p>
+			<button type="button" class="rr-btn rr-btn-primary rr-btn-lg mt-4" data-action="refresh-analysis"><span>Lancer l'analyse</span></button>
+		</div>
+	{% endif %}
 {% endblock %}
 
 {% block javascripts %}

@@ -1,111 +1,139 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Avis Pro— Gérez vos avis Google en 5 minutes par semaine
-{% endblock %}
+{% block title %}MonAvisPro — Répondez à vos avis Google en quelques secondes{% endblock %}
+
+{% set can_register = app_registration_enabled and not app_demo_mode %}
 
 {% block body %}
-	<div class="rr-landing-hero">
+	<section class="rr-landing-hero">
 		<div class="container">
-			<div class="row justify-content-center">
-				<div class="col-12 col-lg-8 text-center">
-
-					<h1 class="rr-landing-title mb-3">
-						Gérez votre réputation Google<br class="d-none d-md-inline">
-						en 5 minutes par semaine
-					</h1>
-
-					<p class="rr-landing-sub mx-auto">
-						MonAvisPro centralise vos avis Google, vous alerte instantanément en cas d'avis défavorable et propose des réponses générées par IA, modifiables à votre guise. Une approche maîtrisée de votre e-réputation.
+			<div class="row align-items-center g-5">
+				<div class="col-12 col-lg-6 text-center text-lg-start">
+					<h1 class="rr-landing-title">Répondez à tous vos avis Google, sans y passer vos soirées.</h1>
+					<p class="rr-landing-sub mx-auto mx-lg-0">
+						MonAvisPro rassemble les avis de vos commerces, vous prévient dès qu'un client est mécontent et vous propose une réponse dans votre ton. Vous relisez, vous publiez.
 					</p>
-
-					<div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
-						<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta rr-btn-lg">
-							Tester la démo en 1 clic
-						</a>
-						{% if app_registration_enabled and not app_demo_mode %}
-							<a href="{{ path('app_register') }}" class="rr-btn rr-btn-secondary rr-btn-lg">
-								Créer un compte
-							</a>
+					<div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+						{% if can_register %}
+							<a href="{{ path('app_register') }}" class="rr-btn rr-btn-cta">Créer mon compte gratuit</a>
+							<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-secondary rr-btn-lg">Voir la démo</a>
+						{% else %}
+							<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta">Essayer la démo</a>
+							<a href="mailto:contact@monavispro.fr" class="rr-btn rr-btn-secondary rr-btn-lg">Nous contacter</a>
 						{% endif %}
 					</div>
+					<p class="rr-hint mt-3">Démo sans inscription, avec de faux avis : rien n'est publié sur Google.</p>
+				</div>
 
-					{# Métriques #}
-					<div class="row g-3 justify-content-center">
-						<div class="col-6 col-md-4">
-							<div class="rr-card text-center">
-								<div class="rr-stat-val rr-green">88%</div>
-								<div class="rr-stat-label">Des clients font confiance aux avis Google</div>
+				<div class="col-12 col-lg-6" aria-hidden="true">
+					<div class="rr-preview">
+						<div class="rr-review mb-0">
+							<div class="rr-review-head">
+								<span class="rr-rating rr-rating-neg">★ 2/5</span>
+								<span class="rr-review-author">Isabelle F.</span>
+								<span class="rr-review-meta">il y a 2 heures</span>
 							</div>
-						</div>
-						<div class="col-6 col-md-4">
-							<div class="rr-card text-center">
-								<div class="rr-stat-val rr-yellow">30s</div>
-								<div class="rr-stat-label">Pour répondre à un avis avec l'Intelligence Artificielle</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-4">
-							<div class="rr-card text-center">
-								<div class="rr-stat-val rr-purple">IA</div>
-								<div class="rr-stat-label">Analyse thématique & réponses contextualisées</div>
+							<p class="rr-review-text">Les viennoiseries sont bonnes mais une seule personne en caisse le dimanche matin, la file était interminable.</p>
+							<div class="rr-reply-zone is-open">
+								<span class="rr-reply-label">Réponse proposée</span>
+								<p class="rr-reply-text">Bonjour Isabelle, merci pour votre retour et désolés pour cette attente. Dès ce week-end, une deuxième personne sera en caisse le dimanche matin. Au plaisir de vous revoir !
+L'équipe de la Boulangerie du Coin</p>
+								<div class="rr-review-actions">
+									<span class="rr-btn rr-btn-primary">Publier sur Google</span>
+									<span class="rr-btn rr-btn-secondary">Modifier</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	{# Features section #}
-	<section id="features" style="position:relative;z-index:1;padding:48px 0">
+	<section class="rr-landing-section" aria-labelledby="how-title">
 		<div class="container">
-			<div class="text-center mb-5">
-				<h2 style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:10px">
-					Détectez, comprenez, répondez. Trois étapes essentielles, regroupées dans un outil unique.
-				</h2>
-				<p style="font-size:14px;color:rgba(255,255,255,.45);max-width:400px;margin:0 auto">
-					Un seul outil pour surveiller, analyser et répondre à vos avis Google.
-				</p>
-			</div>
+			<h2 class="rr-landing-h2" id="how-title">Comment ça marche</h2>
+			<ol class="row g-3 list-unstyled">
+				<li class="col-12 col-md-4">
+					<div class="rr-card h-100">
+						<span class="rr-step-num mb-3" aria-hidden="true">1</span>
+						<h3 class="rr-feature-title">Connectez votre fiche Google</h3>
+						<p class="rr-feature-text">En deux minutes, avec votre compte Google. Aucun mot de passe transmis, accès révocable à tout moment.</p>
+					</div>
+				</li>
+				<li class="col-12 col-md-4">
+					<div class="rr-card h-100">
+						<span class="rr-step-num mb-3" aria-hidden="true">2</span>
+						<h3 class="rr-feature-title">Recevez vos avis au même endroit</h3>
+						<p class="rr-feature-text">Tous vos commerces, triés par urgence. Un e-mail vous prévient dès qu'un avis de 1 ou 2 étoiles arrive.</p>
+					</div>
+				</li>
+				<li class="col-12 col-md-4">
+					<div class="rr-card h-100">
+						<span class="rr-step-num mb-3" aria-hidden="true">3</span>
+						<h3 class="rr-feature-title">Répondez en un clic</h3>
+						<p class="rr-feature-text">L'IA propose une réponse dans le ton de votre commerce. Vous la relisez, la modifiez si besoin, et elle part sur Google.</p>
+					</div>
+				</li>
+			</ol>
+		</div>
+	</section>
 
+	<section class="rr-landing-section" aria-labelledby="features-title">
+		<div class="container">
+			<h2 class="rr-landing-h2" id="features-title">Ce que vous y gagnez</h2>
 			<div class="row g-3">
-				<div class="col-12 col-md-6 col-lg-4">
+				<div class="col-12 col-md-6">
 					<div class="rr-card h-100">
-						<div class="rr-pill rr-pill-red mb-3">Alertes temps réel</div>
-						<div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">Soyez informé immédiatement</div>
-						<div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.6">
-							Notification email instantanée à chaque nouvel avis négatif. Vous intervenez avant que l'impact ne se propage à votre note globale.
-						</div>
+						<h3 class="rr-feature-title">Vos réponses vous ressemblent</h3>
+						<p class="rr-feature-text">Vouvoiement ou tutoiement, ton cordial ou formel, signature, consignes à respecter (« fermé le lundi », « jamais de remboursement par écrit »). L'IA suit vos règles.</p>
 					</div>
 				</div>
-				<div class="col-12 col-md-6 col-lg-4">
+				<div class="col-12 col-md-6">
 					<div class="rr-card h-100">
-						<div class="rr-pill rr-pill-green mb-3">Analyse intelligente</div>
-						<div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">Comprenez vos clients en un coup d'œil</div>
-						<div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.6">
-							L'IA analyse l'ensemble de vos avis et fait ressortir les points forts récurrents et les axes d'amélioration prioritaires.
-						</div>
+						<h3 class="rr-feature-title">Vous savez quoi améliorer</h3>
+						<p class="rr-feature-text">L'analyse fait ressortir ce que vos clients apprécient, ce qui revient dans les critiques, et une action concrète pour la semaine.</p>
 					</div>
 				</div>
-				<div class="col-12 col-md-6 col-lg-4">
+				<div class="col-12 col-md-6">
 					<div class="rr-card h-100">
-						<div class="rr-pill rr-pill-purple mb-3">Réponses générées par IA</div>
-						<div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">Répondez avec le ton juste, à chaque fois</div>
-						<div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.6">
-							L'IA rédige une réponse personnalisée pour chaque avis. Choisissez le ton, ajustez si besoin, validez. Pro et rapide.
-						</div>
+						<h3 class="rr-feature-title">Plusieurs commerces, une seule boîte</h3>
+						<p class="rr-feature-text">Gérant de plusieurs boutiques ou prestataire pour vos clients : tous les avis arrivent dans la même liste, et chaque commerce garde ses réglages.</p>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="rr-card h-100">
+						<h3 class="rr-feature-title">Un bilan chaque mois</h3>
+						<p class="rr-feature-text">Le 1er du mois, un e-mail récapitule la note, les nouveaux avis et les réponses. Pratique pour suivre l'évolution ou rendre compte à un client.</p>
 					</div>
 				</div>
 			</div>
+		</div>
+	</section>
 
-			{# CTA final #}
-			<div class="text-center mt-5">
-				<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta rr-btn-lg">
-					Voir la démo en action
-				</a>
-				<div class="mt-3" style="font-size:12px;color:rgba(255,255,255,.3)">
-					Gratuit · Sans engagement · Résultat immédiat
-				</div>
-			</div>
+	<section class="rr-landing-section" aria-labelledby="faq-title">
+		<div class="container rr-faq">
+			<h2 class="rr-landing-h2" id="faq-title">Questions fréquentes</h2>
+			<details class="rr-card mb-2">
+				<summary>Est-ce que l'IA publie des réponses sans moi ?</summary>
+				<p class="rr-feature-text mt-3 mb-0">Non. Chaque réponse est une proposition : vous la lisez, la modifiez si besoin, puis cliquez sur « Publier ». Rien ne part sur Google sans votre validation.</p>
+			</details>
+			<details class="rr-card mb-2">
+				<summary>Que voit MonAvisPro de mon compte Google ?</summary>
+				<p class="rr-feature-text mt-3 mb-0">Uniquement les fiches d'établissement que vous choisissez et leurs avis. L'accès passe par la connexion officielle de Google et se retire en un clic depuis votre compte Google.</p>
+			</details>
+			<details class="rr-card mb-2">
+				<summary>Je n'ai pas de fiche Google, est-ce utile ?</summary>
+				<p class="rr-feature-text mt-3 mb-0">Il faut d'abord créer votre fiche sur Google Business Profile (gratuit). Une fois validée par Google, vous la connectez à MonAvisPro.</p>
+			</details>
+		</div>
+	</section>
+
+	<section class="rr-landing-section text-center">
+		<div class="container">
+			<h2 class="rr-landing-h2">Voyez par vous-même</h2>
+			<p class="rr-landing-sub">La démo contient deux commerces fictifs et leurs avis. Testez la réponse proposée par l'IA en un clic.</p>
+			<a href="{{ path('demo_login') }}" class="rr-btn rr-btn-cta">Essayer la démo</a>
 		</div>
 	</section>
 {% endblock %}
