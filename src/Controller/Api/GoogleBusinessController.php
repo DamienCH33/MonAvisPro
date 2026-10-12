@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Establishment;
 use App\Entity\User;
 use App\Security\DemoAccountGuard;
+use App\Service\GoogleApiErrorDescriber;
 use App\Service\GoogleBusinessProfileService;
 use App\Service\GoogleTokenManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,7 @@ class GoogleBusinessController extends AbstractController
         private readonly GoogleBusinessProfileService $googleService,
         private readonly EntityManagerInterface $em,
         private readonly GoogleTokenManager $tokenManager,
+        private readonly GoogleApiErrorDescriber $errorDescriber,
     ) {
     }
 
@@ -87,7 +89,7 @@ class GoogleBusinessController extends AbstractController
 
             return $this->redirectToRoute('google_business_select_location');
         } catch (\Exception $e) {
-            $this->addFlash('error', 'La connexion à Google a échoué. Réessayez dans quelques instants.');
+            $this->addFlash('error', $this->errorDescriber->describe($e, 'callback OAuth'));
 
             return $this->redirectToRoute('dashboard');
         }
@@ -127,7 +129,7 @@ class GoogleBusinessController extends AbstractController
                 'locations' => $allLocations,
             ]);
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Impossible de récupérer vos établissements Google. Vérifiez les accès de votre compte.');
+            $this->addFlash('error', $this->errorDescriber->describe($e, 'liste des établissements'));
 
             return $this->redirectToRoute('dashboard');
         }

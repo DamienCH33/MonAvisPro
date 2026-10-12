@@ -18,6 +18,7 @@ class ReviewReplyService
         private readonly GoogleBusinessProfileService $googleService,
         private readonly EntityManagerInterface $em,
         private readonly GoogleTokenManager $tokenManager,
+        private readonly GoogleApiErrorDescriber $errorDescriber,
     ) {
     }
 
@@ -60,7 +61,7 @@ class ReviewReplyService
 
             return [
                 'success' => true,
-                'warning' => 'Réponse sauvegardée localement mais non publiée sur Google : '.$e->getMessage(),
+                'warning' => 'Réponse enregistrée dans MonAvisPro mais pas publiée sur Google. '.$this->errorDescriber->describe($e, 'publication réponse'),
             ];
         }
     }
@@ -88,7 +89,7 @@ class ReviewReplyService
                     (string) $accessToken,
                 );
             } catch (\Exception $e) {
-                $warning = 'Réponse supprimée localement mais erreur Google : '.$e->getMessage();
+                $warning = 'Réponse supprimée dans MonAvisPro mais pas sur Google. '.$this->errorDescriber->describe($e, 'suppression réponse');
             }
         }
 

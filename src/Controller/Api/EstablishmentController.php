@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Establishment;
 use App\Repository\EstablishmentRepository;
 use App\Security\DemoAccountGuard;
+use App\Service\GoogleApiErrorDescriber;
 use App\Service\ReviewSyncService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -161,11 +162,15 @@ class EstablishmentController extends AbstractController
     }
 
     #[Route('/{id}/sync', name: 'api_establishments_sync', methods: ['POST'])]
-    public function sync(Establishment $establishment, ReviewSyncService $reviewSyncService): JsonResponse
+    public function sync(Establishment $establishment, ReviewSyncService $reviewSyncService, GoogleApiErrorDescriber $errorDescriber): JsonResponse
     {
         $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
-        $count = $reviewSyncService->sync($establishment);
+        try {
+            $count = $reviewSyncService->sync($establishment);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $errorDescriber->describe($e, 'synchronisation des avis')], 502);
+        }
 
         return $this->json([
             'message' => 'Sync terminée',
