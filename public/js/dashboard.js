@@ -75,12 +75,12 @@
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                alert(data.error || data.message || "La synchronisation a échoué.");
+                window.notify(data.error || data.message || "La synchronisation a échoué.", "error");
                 return;
             }
             location.reload();
         } catch (e) {
-            alert("Connexion impossible. Réessayez dans un instant.");
+            window.notify("Connexion impossible. Réessayez dans un instant.", "error");
         } finally {
             label.textContent = "Synchroniser";
             syncButton.disabled = false;

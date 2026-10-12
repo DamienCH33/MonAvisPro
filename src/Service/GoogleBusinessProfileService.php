@@ -136,4 +136,14 @@ class GoogleBusinessProfileService
             ]
         );
     }
+
+    /**
+     * Retire l'accès de MonAvisPro au compte Google (jeton de rafraîchissement ou d'accès).
+     */
+    public function revokeToken(string $token): void
+    {
+        $this->httpClient->request('POST', 'https://oauth2.googleapis.com/revoke', [
+            'body' => ['token' => $token],
+        ])->getStatusCode();
+    }
 }

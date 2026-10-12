@@ -149,7 +149,7 @@
             card.dispatchEvent(
                 new CustomEvent("review:replied", {
                     bubbles: true,
-                    detail: { id: card.dataset.reviewId, reply: text, warning: data.warning || null },
+                    detail: { id: card.dataset.reviewId, reply: text, warning: data.warning || null, mapsUrl: data.mapsUrl || null },
                 }),
             );
         } catch (e) {

@@ -221,6 +221,8 @@ h1, h2, h3, h4 {
 }
 
 /* ---- USER CHIP / AVATAR ---- */
+.rr-user-chip:hover { background: var(--rr-surface-2); }
+a.rr-user-chip { text-decoration: none; color: inherit; border-radius: 10px; }
 .rr-user-chip {
     display: flex;
     align-items: center;
@@ -516,6 +518,48 @@ h1, h2, h3, h4 {
     font-weight: 600;
     border-bottom-color: var(--rr-green);
 }
+
+/* Onglets qui sont des liens (Réglages › Mon compte) */
+.rr-tabs-group { display: contents; }
+.rr-tab-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+.rr-tab-link[aria-current="page"] {
+    color: #fff;
+    font-weight: 600;
+    border-bottom-color: var(--rr-green);
+}
+
+/* ---- MON COMPTE ---- */
+.rr-account { display: flex; flex-direction: column; gap: 20px; max-width: 760px; }
+.rr-account-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.rr-account-section h2 { margin: 0 0 12px; font-size: 19px; font-weight: 700; }
+.rr-account-section p { margin: 0 0 16px; color: var(--rr-t2); line-height: 1.55; }
+.rr-account-danger { border-color: #5a2f20; }
+.rr-account-danger h2 { color: var(--rr-red); }
+.rr-btn-danger-outline {
+    border: 1px solid var(--rr-red-strong);
+    background: transparent;
+    color: var(--rr-red);
+    font-weight: 700;
+}
+.rr-btn-danger-outline:hover { background: var(--rr-red-soft); color: var(--rr-red); }
+.rr-btn-danger { background: #b3401f; color: #fff; border: 0; font-weight: 700; }
+.rr-btn-danger:hover { background: #c24a27; color: #fff; }
+.rr-dialog {
+    width: min(520px, calc(100vw - 32px));
+    padding: 28px;
+    border: 1px solid var(--rr-bd-strong);
+    border-radius: var(--rr-radius-lg);
+    background: var(--rr-surface);
+    color: var(--rr-t1);
+}
+.rr-dialog::backdrop { background: rgba(5, 7, 10, 0.72); }
+.rr-dialog h2 { margin: 0 0 16px; font-size: 22px; font-weight: 700; }
+.rr-dialog ul { margin: 0 0 20px; padding-left: 20px; color: var(--rr-t2); line-height: 1.6; }
+.rr-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
 /* Filtres en pastilles (À traiter, liste des avis) */
 .rr-chips {
@@ -1046,10 +1090,87 @@ h1, h2, h3, h4 {
 .rr-inbox-done {
     background: var(--rr-green-soft);
     border: 1px solid #1d4a3c;
-    color: var(--rr-green);
+    color: var(--rr-t1);
     border-radius: 12px;
     padding: 12px 16px;
     font-size: 15px;
+    margin-bottom: 16px;
+}
+.rr-inbox-done-warning {
+    background: var(--rr-yellow-soft);
+    border-color: #5a4b1c;
+}
+
+/* Avis ignoré, avec « Annuler » */
+.rr-inbox-ignored {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border: 1px dashed var(--rr-bd-strong);
+    border-radius: 16px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: var(--rr-t2);
+}
+.rr-inbox-ignored strong { color: var(--rr-t1); }
+.rr-btn-ignore {
+    margin-left: auto;
+    color: var(--rr-t2);
+}
+
+/* « X avis affichés sur Y » + Afficher plus */
+.rr-load-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0 8px;
+}
+.rr-load-more-count { margin: 0; font-size: 15px; color: var(--rr-t2); }
+.rr-progress {
+    width: 240px;
+    max-width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--rr-surface-2);
+    overflow: hidden;
+}
+.rr-progress-bar { height: 100%; background: var(--rr-green); }
+
+/* Messages courts (remplacent les alert() du navigateur) */
+.rr-toasts {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(420px, calc(100vw - 32px));
+}
+.rr-toast {
+    background: var(--rr-surface-2);
+    border: 1px solid var(--rr-bd-strong);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--rr-t1);
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+}
+.rr-toast-error { border-color: var(--rr-red-strong); }
+.rr-toast-success { border-color: #1d4a3c; }
+
+/* « À traiter » sur téléphone : boutons pleine largeur, cibles de 44 px */
+@media (max-width: 575.98px) {
+    .rr-review { padding: 16px; }
+    .rr-review-actions .rr-btn { flex: 1 1 auto; min-height: 44px; }
+    .rr-review-actions .rr-btn-primary { flex-basis: 100%; }
+    .rr-btn-ignore { margin-left: 0; }
+    .rr-inbox-toolbar .rr-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+    .rr-inbox-toolbar .rr-chip { flex: none; }
+    .rr-inbox-ignored .rr-btn { width: 100%; }
 }
 
 /* ---- PAGE D'ACCUEIL ---- */
@@ -1192,6 +1313,43 @@ body.modal-open .modal * {
     .rr-review-flags { margin-left: 0; }
     .rr-inbox-toolbar .rr-select-wrap { margin-left: 0; }
     .rr-footer-links { justify-content: center; }
+}
+
+/* ---- ÉCRAN APRÈS L'INSCRIPTION ---- */
+.rr-welcome {
+    max-width: 720px;
+    margin: 40px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.rr-welcome-kicker { margin: 0; font-size: 14px; font-weight: 600; color: var(--rr-green); }
+.rr-welcome-title { margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; }
+.rr-welcome-lead { margin: 0 0 16px; font-size: 18px; line-height: 1.55; color: var(--rr-t2); }
+.rr-welcome-card { display: flex; flex-direction: column; gap: 24px; }
+.rr-welcome-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 18px; }
+.rr-welcome-steps li { display: flex; gap: 16px; align-items: flex-start; }
+.rr-welcome-steps li div { display: flex; flex-direction: column; gap: 2px; }
+.rr-welcome-steps strong { font-size: 16px; }
+.rr-welcome-steps span:not(.rr-welcome-step) { font-size: 15px; color: var(--rr-t2); }
+.rr-welcome-step {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--rr-surface-2);
+    color: var(--rr-t2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.rr-welcome-step-current { background: var(--rr-green-soft); color: var(--rr-green); }
+.rr-welcome-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: 12px; }
+.rr-welcome-foot { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 15px; color: var(--rr-t2); }
+@media (max-width: 575.98px) {
+    .rr-welcome { margin-top: 8px; }
+    .rr-welcome-cta { align-self: stretch; justify-content: center; }
 }
 
 /* ---- PAGES LÉGALES ---- */

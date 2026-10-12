@@ -1,5 +1,5 @@
 {# Carte d'avis avec réponse intégrée.
-   Paramètres : review (Review), show_establishment (bool, défaut false) #}
+   Paramètres : review (Review), show_establishment (bool, défaut false), can_ignore (bool, défaut false : bouton « Ignorer » de À traiter) #}
 {% set rating = review.rating %}
 {% set bucket = rating <= 2 ? 'neg' : (rating == 3 ? 'mid' : 'pos') %}
 {% set establishment = review.establishment %}
@@ -9,7 +9,11 @@
          data-review-id="{{ review.id }}"
          data-tone="{{ establishment.replyTone }}"
          data-bucket="{{ bucket }}"
-         data-establishment="{{ establishment.id }}">
+         data-establishment="{{ establishment.id }}"
+         data-author="{{ author }}"
+         data-rating="{{ rating }}"
+         data-has-text="{{ review.text ? '1' : '0' }}"
+         data-maps-url="{{ establishment.googleMapsUrl }}">
     <div class="rr-review-head">
         <span class="rr-rating rr-rating-{{ bucket }}" aria-label="Note : {{ rating }} sur 5">★ {{ rating }}/5</span>
         <span class="rr-review-author">{{ author }}</span>
@@ -27,5 +31,8 @@
     <div class="rr-review-actions" data-role="review-actions">
         <button type="button" class="rr-btn rr-btn-primary" data-reply-action="suggest">Proposer une réponse</button>
         <button type="button" class="rr-btn rr-btn-secondary" data-reply-action="write">Écrire moi-même</button>
+        {% if can_ignore|default(false) %}
+            <button type="button" class="rr-btn rr-btn-ghost rr-btn-ignore" data-inbox-action="ignore">Ignorer</button>
+        {% endif %}
     </div>
 </article>

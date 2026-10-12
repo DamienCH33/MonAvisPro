@@ -17,7 +17,7 @@ class ReviewAnalysis
     private ?Uuid $id = null;
 
     #[ORM\OneToOne(inversedBy: 'reviewAnalysis')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Establishment $establishment = null;
 
     /**

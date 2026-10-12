@@ -19,7 +19,7 @@ class Establishment
     private ?Uuid $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'establishments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $owner = null;
 
     #[ORM\Column(length: 255)]
@@ -377,5 +377,23 @@ class Establishment
         $this->clientEmail = $clientEmail;
 
         return $this;
+    }
+
+    /**
+     * Lien vers la fiche sur Google Maps (bouton « Voir sur Google Maps » après publication).
+     */
+    public function getGoogleMapsUrl(): string
+    {
+        $query = ['api' => '1', 'query' => (string) $this->name];
+
+        foreach ([$this->googlePlaceId, $this->placeId] as $candidate) {
+            // Seuls les identifiants Google Maps (« ChIJ… ») sont compris par ce lien.
+            if (null !== $candidate && str_starts_with($candidate, 'ChIJ')) {
+                $query['query_place_id'] = $candidate;
+                break;
+            }
+        }
+
+        return 'https://www.google.com/maps/search/?'.http_build_query($query);
     }
 }

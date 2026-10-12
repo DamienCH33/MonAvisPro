@@ -25,9 +25,9 @@
                     location.reload();
                     return;
                 }
-                alert(data.error || "L'analyse n'a pas pu être lancée.");
+                window.notify(data.error || "L'analyse n'a pas pu être lancée.", "error");
             } catch (e) {
-                alert("Connexion impossible. Réessayez dans un instant.");
+                window.notify("Connexion impossible. Réessayez dans un instant.", "error");
             }
             label.textContent = original;
             button.disabled = false;

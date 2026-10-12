@@ -13,10 +13,13 @@
 		</div>
 	</div>
 
-	<div class="rr-tabs" role="tablist" aria-label="Sections des réglages">
-		<button type="button" class="rr-tab" role="tab" id="tab-reponses" aria-controls="panel-reponses" aria-selected="true">Réponses</button>
-		<button type="button" class="rr-tab" role="tab" id="tab-etablissement" aria-controls="panel-etablissement" aria-selected="false" tabindex="-1">Établissement</button>
-		<button type="button" class="rr-tab" role="tab" id="tab-notifications" aria-controls="panel-notifications" aria-selected="false" tabindex="-1">Notifications</button>
+	<div class="rr-tabs">
+		<div class="rr-tabs-group" role="tablist" aria-label="Sections des réglages">
+			<button type="button" class="rr-tab" role="tab" id="tab-reponses" aria-controls="panel-reponses" aria-selected="true">Réponses</button>
+			<button type="button" class="rr-tab" role="tab" id="tab-etablissement" aria-controls="panel-etablissement" aria-selected="false" tabindex="-1">Établissement</button>
+			<button type="button" class="rr-tab" role="tab" id="tab-notifications" aria-controls="panel-notifications" aria-selected="false" tabindex="-1">Notifications</button>
+		</div>
+		<a class="rr-tab rr-tab-link" href="{{ path('account') }}">Mon compte</a>
 	</div>
 
 	<p class="rr-flash" data-role="settings-flash" role="status" hidden></p>

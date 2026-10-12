@@ -14,12 +14,37 @@
 
 {% block body %}
 	{% if establishments is empty %}
-		<div class="rr-card rr-card-lg rr-empty-state">
-			<div class="rr-empty-icon" aria-hidden="true">+</div>
-			<h1 class="rr-empty-title">Ajoutez votre premier établissement</h1>
-			<p class="rr-empty-text">Connectez votre fiche Google : vos avis arrivent ici, et vous pouvez y répondre en quelques secondes.</p>
-			<a href="{{ path('establishment_new') }}" class="rr-btn rr-btn-primary rr-btn-lg mt-4">Ajouter un établissement</a>
-		</div>
+		<section class="rr-welcome" aria-labelledby="welcome-title">
+			<p class="rr-welcome-kicker">Compte créé</p>
+			<h1 class="rr-welcome-title" id="welcome-title">Reliez votre fiche Google pour voir vos avis</h1>
+			<p class="rr-welcome-lead">Une minute, une seule fois. Ensuite, chaque nouvel avis arrive ici avec une réponse déjà prête.</p>
+
+			<div class="rr-card rr-card-lg rr-welcome-card">
+				<ol class="rr-welcome-steps">
+					<li>
+						<span class="rr-welcome-step rr-welcome-step-current" aria-hidden="true">1</span>
+						<div><strong>Connectez-vous avec le compte Google de votre fiche</strong><span>Celui que vous utilisez pour gérer votre établissement sur Google Maps.</span></div>
+					</li>
+					<li>
+						<span class="rr-welcome-step" aria-hidden="true">2</span>
+						<div><strong>Choisissez votre établissement</strong><span>Si vous en avez plusieurs, vous pourrez ajouter les autres ensuite.</span></div>
+					</li>
+					<li>
+						<span class="rr-welcome-step" aria-hidden="true">3</span>
+						<div><strong>Vos avis arrivent</strong><span>Les plus urgents en premier, dans « À traiter ».</span></div>
+					</li>
+				</ol>
+				<a href="{{ path('google_business_connect') }}" class="rr-btn rr-btn-primary rr-btn-lg rr-welcome-cta">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+					Connecter ma fiche Google
+				</a>
+			</div>
+
+			<p class="rr-welcome-foot">
+				<span>MonAvisPro ne publie rien sans votre accord.</span>
+				<a href="{{ path('establishment_new') }}" class="rr-link">Pas de fiche Google ? Ajouter mon commerce à la main</a>
+			</p>
+		</section>
 	{% else %}
 		<script type="application/json" id="curve-data">{{ stats.curve|default([])|json_encode|raw }}</script>
 

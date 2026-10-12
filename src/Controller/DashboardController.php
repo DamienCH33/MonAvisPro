@@ -7,6 +7,7 @@ use App\Repository\EstablishmentRepository;
 use App\Repository\ReviewRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
@@ -48,28 +49,33 @@ class DashboardController extends AbstractController
         ]);
     }
 
+    /** Avis affichés d'un coup dans « À traiter », puis par tranche avec « Afficher plus ». */
+    private const INBOX_PAGE = 100;
+    private const INBOX_STEP = 50;
+    private const INBOX_MAX = 1000;
+
     #[Route('/a-traiter', name: 'inbox')]
-    public function inbox(): Response
+    public function inbox(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
 
-        $establishments = $this->establishmentRepository->findBy(['owner' => $user], ['name' => 'ASC']);
-        $reviews = $this->reviewRepository->findUnansweredForOwner($user, 100);
+        $limit = max(self::INBOX_PAGE, min(self::INBOX_MAX, $request->query->getInt('afficher', self::INBOX_PAGE)));
 
-        $counts = ['all' => 0, 'neg' => 0, 'mid' => 0, 'pos' => 0];
-        foreach ($reviews as $review) {
-            $rating = (int) $review->getRating();
-            ++$counts['all'];
-            ++$counts[$rating <= 2 ? 'neg' : (3 === $rating ? 'mid' : 'pos')];
-        }
+        $establishments = $this->establishmentRepository->findBy(['owner' => $user], ['name' => 'ASC']);
+        $reviews = $this->reviewRepository->findUnansweredForOwner($user, $limit);
+        $counts = $this->reviewRepository->countUnansweredByBucketForOwner($user);
 
         return $this->render('dashboard/inbox.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => null,
             'reviews' => $reviews,
             'counts' => $counts,
-            'total' => $this->reviewRepository->countUnansweredForOwner($user),
+            'total' => $counts['all'],
+            'shown' => count($reviews),
+            'previous_limit' => $limit > self::INBOX_PAGE ? $limit - self::INBOX_STEP : null,
+            'next_limit' => min(self::INBOX_MAX, $limit + self::INBOX_STEP),
+            'step' => self::INBOX_STEP,
             'unread_count' => 0,
             'jwt_token' => $this->jwtManager->create($user),
         ]);
@@ -104,7 +110,7 @@ class DashboardController extends AbstractController
             'negativeRate' => $total > 0 ? round(($counts['negative'] / $total) * 100) : 0,
             'unreadCount' => $unread,
             'unanswered' => $unanswered,
-            'responseRate' => $total > 0 ? (int) round((($total - $unanswered) / $total) * 100) : 0,
+            'responseRate' => $total > 0 ? (int) round(($counts['replied'] / $total) * 100) : 0,
             'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
             'repartition' => $counts['repartition'],
         ];

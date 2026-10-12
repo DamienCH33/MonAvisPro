@@ -115,6 +115,28 @@ class ReviewController extends AbstractController
         return $this->json(['message' => 'Avis marqué comme lu.']);
     }
 
+    #[Route('/reviews/{id}/ignore', name: 'api_reviews_ignore', methods: ['PATCH'])]
+    public function ignore(Review $review): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $review->getEstablishment());
+
+        $review->setIgnoredAt(new \DateTimeImmutable());
+        $this->em->flush();
+
+        return $this->json(['message' => 'Avis retiré de « À traiter ».']);
+    }
+
+    #[Route('/reviews/{id}/unignore', name: 'api_reviews_unignore', methods: ['PATCH'])]
+    public function unignore(Review $review): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $review->getEstablishment());
+
+        $review->setIgnoredAt(null);
+        $this->em->flush();
+
+        return $this->json(['message' => 'Avis remis dans « À traiter ».']);
+    }
+
     #[Route('/reviews/{id}/unread', name: 'api_reviews_mark_unread', methods: ['PATCH'])]
     public function markUnread(Review $review): JsonResponse
     {
@@ -141,7 +163,17 @@ class ReviewController extends AbstractController
             ], 400);
         }
 
-        return $this->json($this->reviewReplyService->publish($review, $reply));
+        if (mb_strlen($reply) > 4000) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Réponse trop longue (4 000 caractères au maximum).',
+            ], 422);
+        }
+
+        $result = $this->reviewReplyService->publish($review, $reply);
+        $result['mapsUrl'] = $review->getEstablishment()?->getGoogleMapsUrl();
+
+        return $this->json($result);
     }
 
     #[Route('/reviews/{id}/reply', name: 'api_review_delete_reply', methods: ['DELETE'])]

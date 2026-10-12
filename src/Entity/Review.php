@@ -17,7 +17,7 @@ class Review
     private ?Uuid $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Establishment $establishment = null;
 
     #[ORM\Column(length: 255)]
@@ -26,7 +26,7 @@ class Review
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $googleAuthorPhoto = null;
 
-    #[ORM\Column]
+    #[ORM\Column] // contrainte CHECK 1..5 posée par la migration Version20261012120000
     private ?int $rating = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -198,6 +198,22 @@ class Review
     public function setGoogleReviewName(?string $googleReviewName): self
     {
         $this->googleReviewName = $googleReviewName;
+
+        return $this;
+    }
+
+    /** Avis sorti de « À traiter » sans réponse (ex. 5 étoiles sans texte). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $ignoredAt = null;
+
+    public function getIgnoredAt(): ?\DateTimeImmutable
+    {
+        return $this->ignoredAt;
+    }
+
+    public function setIgnoredAt(?\DateTimeImmutable $ignoredAt): self
+    {
+        $this->ignoredAt = $ignoredAt;
 
         return $this;
     }

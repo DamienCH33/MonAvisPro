@@ -1,3 +1,4 @@
+{% set establishments = establishments is defined ? establishments : owner_establishments() %}
 {% set current_id = current_establishment is defined and current_establishment ? current_establishment.id~'' : null %}
 {% set route = app.request.attributes.get('_route') %}
 
@@ -26,7 +27,7 @@
     </svg>
     <span>À traiter</span>
     {% if pending > 0 %}
-        <span class="rr-nav-badge" data-role="inbox-badge">{{ pending > 99 ? '99+' : pending }}</span>
+        <span class="rr-nav-badge" data-role="inbox-badge">{{ pending > 999 ? '999+' : pending }}</span>
     {% endif %}
 </a>
 
@@ -82,11 +83,11 @@
 </a>
 
 <div class="rr-sidebar-footer">
-    <div class="rr-user-chip">
+    <a class="rr-user-chip" href="{{ path('account') }}" title="Mon compte">
         <div class="rr-avatar" aria-hidden="true">{{ app.user.email|first|upper }}</div>
         <div>
             <div class="rr-user-name">{{ app.user.email|split('@')[0] }}</div>
             <div class="rr-user-plan">{{ establishments is defined ? establishments|length : 0 }} établissement{{ establishments is defined and establishments|length > 1 ? 's' }}</div>
         </div>
-    </div>
+    </a>
 </div>

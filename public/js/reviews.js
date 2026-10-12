@@ -150,7 +150,7 @@
             headers: headers(),
         });
         if (!res.ok) {
-            alert("La réponse n'a pas pu être supprimée.");
+            window.notify("La réponse n'a pas pu être supprimée.", "error");
             return;
         }
         loadReviews(currentPage);
@@ -173,7 +173,7 @@
     });
 
     container.addEventListener("review:replied", (event) => {
-        if (event.detail.warning) alert(event.detail.warning);
+        if (event.detail.warning) window.notify(event.detail.warning, "error");
         loadReviews(currentPage);
     });
 

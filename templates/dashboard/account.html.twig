@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte — MonAvisPro{% endblock %}
+{% block page_title %}Réglages{% endblock %}
+
+{% block body %}
+	<div class="rr-inbox-head">
+		<div>
+			<h1 class="rr-page-title">Réglages</h1>
+			<p class="rr-page-sub">Votre compte MonAvisPro</p>
+		</div>
+	</div>
+
+	<nav class="rr-tabs" aria-label="Sections des réglages">
+		{% if current_establishment %}
+			<a class="rr-tab rr-tab-link" href="{{ path('settings', {id: current_establishment.id~''}) }}">Réponses</a>
+			<a class="rr-tab rr-tab-link" href="{{ path('settings', {id: current_establishment.id~''}) }}#etablissement">Établissement</a>
+			<a class="rr-tab rr-tab-link" href="{{ path('settings', {id: current_establishment.id~''}) }}#notifications">Notifications</a>
+		{% endif %}
+		<a class="rr-tab rr-tab-link" href="{{ path('account') }}" aria-current="page">Mon compte</a>
+	</nav>
+
+	<div class="rr-account">
+		<section class="rr-card rr-card-lg rr-account-section" aria-labelledby="account-ids">
+			<h2 id="account-ids">Identifiants</h2>
+			<div class="rr-account-row">
+				<div>
+					<span class="rr-review-meta d-block">E-mail de connexion</span>
+					<strong>{{ app.user.email }}</strong>
+				</div>
+				<a href="{{ path('app_forgot_password_request') }}" class="rr-link">Changer mon mot de passe</a>
+			</div>
+		</section>
+
+		<section class="rr-card rr-card-lg rr-account-section" aria-labelledby="account-data">
+			<h2 id="account-data">Mes données</h2>
+			<p>Un fichier avec votre compte, vos établissements, vos avis et vos réponses. Jamais de mot de passe ni d'accès Google.</p>
+			<a href="{{ path('account_export') }}" class="rr-btn rr-btn-secondary" download>Télécharger mes données</a>
+		</section>
+
+		<section class="rr-card rr-card-lg rr-account-section rr-account-danger" aria-labelledby="account-delete">
+			<h2 id="account-delete">Supprimer mon compte</h2>
+			{% if is_demo %}
+				<p>Le compte démo est partagé et remis à zéro chaque nuit : il ne peut pas être supprimé.</p>
+			{% else %}
+				<p>
+					Efface votre compte{% if establishments|length > 0 %}, vos {{ establishments|length }} établissement{{ establishments|length > 1 ? 's' }}, leurs avis et vos réponses{% endif %} dans MonAvisPro,
+					et retire l'accès de MonAvisPro à votre compte Google. Vos réponses déjà publiées restent sur Google.
+				</p>
+				<button type="button" class="rr-btn rr-btn-danger-outline" data-role="open-delete">Supprimer mon compte…</button>
+			{% endif %}
+		</section>
+	</div>
+
+	{% if not is_demo %}
+		<dialog class="rr-dialog" id="delete-dialog" aria-labelledby="delete-title">
+			<form method="post" action="{{ path('account_delete') }}">
+				<h2 id="delete-title">Supprimer définitivement votre compte ?</h2>
+				<ul>
+					{% if establishments|length > 0 %}
+						<li>{{ establishments|length }} établissement{{ establishments|length > 1 ? 's' }} et {{ review_count|number_format(0, ',', ' ') }} avis effacés de MonAvisPro</li>
+						<li>Accès Google retiré</li>
+					{% endif %}
+					<li>Impossible d'annuler</li>
+				</ul>
+				<label class="rr-label" for="delete-password">Votre mot de passe, pour confirmer</label>
+				<input class="rr-input" type="password" id="delete-password" name="password" autocomplete="current-password" required>
+				<input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
+				<div class="rr-dialog-actions">
+					<button type="button" class="rr-btn rr-btn-secondary" data-role="close-delete">Garder mon compte</button>
+					<button type="submit" class="rr-btn rr-btn-danger">Supprimer mon compte</button>
+				</div>
+			</form>
+		</dialog>
+	{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('js/account.js') }}"></script>
+{% endblock %}

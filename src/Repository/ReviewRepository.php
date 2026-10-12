@@ -201,6 +201,7 @@ class ReviewRepository extends ServiceEntityRepository
             ->addSelect('e')
             ->where('e.owner = :owner')
             ->andWhere('r.ownerReply IS NULL')
+            ->andWhere('r.ignoredAt IS NULL')
             ->setParameter('owner', $owner)
             ->orderBy('r.rating', 'ASC')
             ->addOrderBy('r.publishedAt', 'DESC')
@@ -218,19 +219,51 @@ class ReviewRepository extends ServiceEntityRepository
             ->join('r.establishment', 'e')
             ->where('e.owner = :owner')
             ->andWhere('r.ownerReply IS NULL')
+            ->andWhere('r.ignoredAt IS NULL')
             ->setParameter('owner', $owner)
             ->getQuery()
             ->getSingleScalarResult();
     }
 
     /**
+     * Compteurs des filtres de « À traiter », sur tous les avis en attente (pas seulement ceux affichés).
+     *
+     * @return array{all: int, neg: int, mid: int, pos: int}
+     */
+    public function countUnansweredByBucketForOwner(User $owner): array
+    {
+        /** @var array{neg: int|string|null, mid: int|string|null, pos: int|string|null} $row */
+        $row = $this->createQueryBuilder('r')
+            ->select(
+                'COALESCE(SUM(CASE WHEN r.rating <= 2 THEN 1 ELSE 0 END), 0) AS neg',
+                'COALESCE(SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END), 0) AS mid',
+                'COALESCE(SUM(CASE WHEN r.rating >= 4 THEN 1 ELSE 0 END), 0) AS pos',
+            )
+            ->join('r.establishment', 'e')
+            ->where('e.owner = :owner')
+            ->andWhere('r.ownerReply IS NULL')
+            ->andWhere('r.ignoredAt IS NULL')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getSingleResult();
+
+        $neg = (int) $row['neg'];
+        $mid = (int) $row['mid'];
+        $pos = (int) $row['pos'];
+
+        return ['all' => $neg + $mid + $pos, 'neg' => $neg, 'mid' => $mid, 'pos' => $pos];
+    }
+
+    /**
      * Chiffres du tableau de bord calculés par la base, sans charger les avis en mémoire.
      *
-     * @return array{total: int, sum: int, positive: int, negative: int, unread: int, unanswered: int, repartition: array<int, int>}
+     * « unanswered » = avis en attente dans À traiter (sans réponse et non ignorés).
+     *
+     * @return array{total: int, sum: int, positive: int, negative: int, unread: int, unanswered: int, replied: int, repartition: array<int, int>}
      */
     public function getDashboardStats(Establishment $establishment): array
     {
-        /** @var array{total: int|string|null, sum: int|string|null, positive: int|string|null, negative: int|string|null, unread: int|string|null, unanswered: int|string|null} $row */
+        /** @var array{total: int|string|null, sum: int|string|null, positive: int|string|null, negative: int|string|null, unread: int|string|null, unanswered: int|string|null, replied: int|string|null} $row */
         $row = $this->createQueryBuilder('r')
             ->select(
                 'COUNT(r.id) AS total',
@@ -238,7 +271,8 @@ class ReviewRepository extends ServiceEntityRepository
                 'COALESCE(SUM(CASE WHEN r.rating >= 4 THEN 1 ELSE 0 END), 0) AS positive',
                 'COALESCE(SUM(CASE WHEN r.rating <= 2 THEN 1 ELSE 0 END), 0) AS negative',
                 'COALESCE(SUM(CASE WHEN r.isRead = false THEN 1 ELSE 0 END), 0) AS unread',
-                'COALESCE(SUM(CASE WHEN r.ownerReply IS NULL THEN 1 ELSE 0 END), 0) AS unanswered',
+                'COALESCE(SUM(CASE WHEN r.ownerReply IS NULL AND r.ignoredAt IS NULL THEN 1 ELSE 0 END), 0) AS unanswered',
+                'COALESCE(SUM(CASE WHEN r.ownerReply IS NOT NULL THEN 1 ELSE 0 END), 0) AS replied',
             )
             ->where('r.establishment = :establishment')
             ->setParameter('establishment', $establishment)
@@ -269,6 +303,7 @@ class ReviewRepository extends ServiceEntityRepository
             'negative' => (int) $row['negative'],
             'unread' => (int) $row['unread'],
             'unanswered' => (int) $row['unanswered'],
+            'replied' => (int) $row['replied'],
             'repartition' => $repartition,
         ];
     }

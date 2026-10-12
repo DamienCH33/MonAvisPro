@@ -9,7 +9,7 @@
 			<h1 class="rr-page-title" data-role="inbox-title" data-total="{{ total }}">
 				{% if total > 0 %}{{ total }} avis attend{{ total > 1 ? 'ent' }} une réponse{% else %}Tout est à jour{% endif %}
 			</h1>
-			<p class="rr-page-sub">Les plus mauvaises notes d'abord. Une réponse rapide limite l'effet d'un avis négatif.</p>
+			<p class="rr-page-sub">Les plus mauvaises notes d'abord. Un avis sans texte peut simplement être ignoré.</p>
 		</div>
 	</div>
 
@@ -48,16 +48,30 @@
 			{% endif %}
 		</div>
 
+		<div data-role="inbox-feedback" aria-live="polite"></div>
+
 		<div data-role="inbox-list">
 			{% for review in reviews %}
-				{% include 'partials/_review_card.html.twig' with {review: review, show_establishment: establishments|length > 1} only %}
+				{% if previous_limit and loop.index == previous_limit + 1 %}<span id="suite" tabindex="-1"></span>{% endif %}
+				{% include 'partials/_review_card.html.twig' with {review: review, show_establishment: establishments|length > 1, can_ignore: true} only %}
 			{% endfor %}
 		</div>
 
 		<p class="rr-empty" data-role="filter-empty" hidden>Aucun avis pour ce filtre.</p>
 
-		{% if total > reviews|length %}
-			<p class="rr-hint">Les {{ reviews|length }} avis les plus urgents sont affichés. Les suivants apparaîtront au fur et à mesure.</p>
+		{% if total > shown %}
+			{% set percent = (shown / total * 100)|round %}
+			<div class="rr-load-more">
+				<p class="rr-load-more-count"><span data-role="shown-count">{{ shown }}</span> avis affichés sur <span data-role="total-count">{{ total }}</span></p>
+				<div class="rr-progress" role="progressbar" aria-label="Avis affichés" aria-valuemin="0" aria-valuemax="{{ total }}" aria-valuenow="{{ shown }}">
+					<div class="rr-progress-bar" style="width: {{ percent }}%"></div>
+				</div>
+				{% if shown < 1000 %}
+					<a class="rr-btn rr-btn-secondary" href="{{ path('inbox', {afficher: next_limit}) }}#suite">Afficher {{ min(step, total - shown) }} avis de plus</a>
+				{% else %}
+					<p class="rr-hint">Répondez à ces avis pour faire apparaître les suivants.</p>
+				{% endif %}
+			</div>
 		{% endif %}
 	{% endif %}
 {% endblock %}
