@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\User;
+use App\Repository\EstablishmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -16,6 +17,7 @@ class AccountDeletionService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly EstablishmentRepository $establishmentRepository,
         private readonly GoogleBusinessProfileService $googleService,
         private readonly TokenCipher $cipher,
         private readonly LoggerInterface $logger,
@@ -24,7 +26,7 @@ class AccountDeletionService
 
     public function delete(User $user): void
     {
-        foreach ($user->getEstablishments() as $establishment) {
+        foreach ($this->establishmentRepository->findBy(['owner' => $user]) as $establishment) {
             $token = $this->cipher->decrypt($establishment->getGoogleRefreshToken())
                 ?? $this->cipher->decrypt($establishment->getGoogleAccessToken());
 

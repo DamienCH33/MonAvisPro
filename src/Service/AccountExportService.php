@@ -5,12 +5,20 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\User;
+use App\Repository\EstablishmentRepository;
+use App\Repository\ReviewRepository;
 
 /**
  * Données du compte au format JSON (droit à la portabilité). Jamais de mot de passe ni de jeton Google.
  */
 class AccountExportService
 {
+    public function __construct(
+        private readonly EstablishmentRepository $establishmentRepository,
+        private readonly ReviewRepository $reviewRepository,
+    ) {
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -18,9 +26,10 @@ class AccountExportService
     {
         $establishments = [];
 
-        foreach ($user->getEstablishments() as $establishment) {
+        // Lu en base (et non via les collections de l'entité) : l'export reflète toujours l'état réel.
+        foreach ($this->establishmentRepository->findBy(['owner' => $user], ['name' => 'ASC']) as $establishment) {
             $reviews = [];
-            foreach ($establishment->getReviews() as $review) {
+            foreach ($this->reviewRepository->findBy(['establishment' => $establishment], ['publishedAt' => 'DESC']) as $review) {
                 $reviews[] = [
                     'auteur' => $review->getGoogleAuthor(),
                     'note' => $review->getRating(),
