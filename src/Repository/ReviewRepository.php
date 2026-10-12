@@ -222,4 +222,65 @@ class ReviewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * Chiffres du tableau de bord calculés par la base, sans charger les avis en mémoire.
+     *
+     * @return array{total: int, sum: int, positive: int, negative: int, unread: int, unanswered: int, repartition: array<int, int>}
+     */
+    public function getDashboardStats(Establishment $establishment): array
+    {
+        /** @var array{total: int|string|null, sum: int|string|null, positive: int|string|null, negative: int|string|null, unread: int|string|null, unanswered: int|string|null} $row */
+        $row = $this->createQueryBuilder('r')
+            ->select(
+                'COUNT(r.id) AS total',
+                'COALESCE(SUM(r.rating), 0) AS sum',
+                'COALESCE(SUM(CASE WHEN r.rating >= 4 THEN 1 ELSE 0 END), 0) AS positive',
+                'COALESCE(SUM(CASE WHEN r.rating <= 2 THEN 1 ELSE 0 END), 0) AS negative',
+                'COALESCE(SUM(CASE WHEN r.isRead = false THEN 1 ELSE 0 END), 0) AS unread',
+                'COALESCE(SUM(CASE WHEN r.ownerReply IS NULL THEN 1 ELSE 0 END), 0) AS unanswered',
+            )
+            ->where('r.establishment = :establishment')
+            ->setParameter('establishment', $establishment)
+            ->getQuery()
+            ->getSingleResult();
+
+        /** @var list<array{rating: int|string, n: int|string}> $rows */
+        $rows = $this->createQueryBuilder('r')
+            ->select('r.rating AS rating', 'COUNT(r.id) AS n')
+            ->where('r.establishment = :establishment')
+            ->setParameter('establishment', $establishment)
+            ->groupBy('r.rating')
+            ->getQuery()
+            ->getArrayResult();
+
+        $repartition = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        foreach ($rows as $r) {
+            $rating = (int) $r['rating'];
+            if (isset($repartition[$rating])) {
+                $repartition[$rating] = (int) $r['n'];
+            }
+        }
+
+        return [
+            'total' => (int) $row['total'],
+            'sum' => (int) $row['sum'],
+            'positive' => (int) $row['positive'],
+            'negative' => (int) $row['negative'],
+            'unread' => (int) $row['unread'],
+            'unanswered' => (int) $row['unanswered'],
+            'repartition' => $repartition,
+        ];
+    }
+
+    public function countUnreadForEstablishment(Establishment $establishment): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.establishment = :establishment')
+            ->andWhere('r.isRead = false')
+            ->setParameter('establishment', $establishment)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

@@ -185,4 +185,46 @@ class AuthControllerTest extends WebTestCase
         $this->assertStringNotContainsStringIgnoringCase('déjà', $data['error']);
         $this->assertStringNotContainsStringIgnoringCase('existe', $data['error']);
     }
+
+    // Audit d'octobre 2026
+
+    public function testLoginIsCaseInsensitive(): void
+    {
+        $this->postJson('/api/auth/register', ['email' => 'Jean@Test.fr', 'password' => 'password123']);
+
+        $response = $this->postJson('/api/auth/login', ['email' => 'JEAN@test.FR', 'password' => 'password123']);
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+    }
+
+    public function testRegisterSameEmailWithOtherCaseIsRefused(): void
+    {
+        $this->postJson('/api/auth/register', ['email' => 'jean@test.fr', 'password' => 'password123']);
+
+        $response = $this->postJson('/api/auth/register', ['email' => 'JEAN@test.fr', 'password' => 'password123']);
+
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+    }
+
+    public function testFormRegistrationDoesNotRevealExistingAccount(): void
+    {
+        $this->postJson('/api/auth/register', ['email' => 'deja@test.fr', 'password' => 'password123']);
+
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+        foreach (array_keys($form->all()) as $name) {
+            if (str_contains($name, '[email]')) {
+                $form[$name] = 'deja@test.fr';
+            } elseif (str_contains($name, 'plainPassword')) {
+                $form[$name] = 'password123';
+            } elseif (str_contains($name, 'agree')) {
+                $form[$name]->tick();
+            }
+        }
+        $this->client->submit($form);
+
+        $content = (string) $this->client->getResponse()->getContent();
+        $this->assertStringNotContainsString('déjà utilisé', $content);
+        $this->assertStringContainsString('Inscription impossible', $content);
+    }
 }

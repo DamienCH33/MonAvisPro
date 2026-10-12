@@ -28,6 +28,11 @@ framework:
             policy: "token_bucket"
             limit: 60
             rate: { interval: "1 hour", amount: 60 }
+        # Synchronisation manuelle : 6 par heure et par établissement (quota Google partagé par tous les clients)
+        review_sync:
+            policy: "sliding_window"
+            limit: 6
+            interval: "1 hour"
         # Compte démo public : 10 appels IA par heure et par IP
         demo_ai:
             policy: "sliding_window"
@@ -48,5 +53,6 @@ when@test:
             registration: { policy: "no_limit" }
             ai_generation: { policy: "no_limit" }
             demo_ai: { policy: "no_limit" }
+            review_sync: { policy: "no_limit" }
         session:
             storage_factory_id: session.storage.factory.mock_file

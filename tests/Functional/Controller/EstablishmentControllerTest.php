@@ -150,4 +150,31 @@ class EstablishmentControllerTest extends WebTestCase
 
         $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
     }
+
+    // Audit d'octobre 2026 : la synchro du compte démo n'appelle jamais Google.
+    public function testDemoSyncDoesNotCallGoogle(): void
+    {
+        $em = self::getContainer()->get('doctrine')->getManager();
+        $existing = $em->getRepository(\App\Entity\User::class)->findOneBy(['email' => \App\Security\DemoAccountGuard::DEMO_EMAIL]);
+        if (null !== $existing) {
+            $em->remove($existing);
+            $em->flush();
+        }
+
+        $token = $this->registerAndLogin(\App\Security\DemoAccountGuard::DEMO_EMAIL);
+        $demo = $em->getRepository(\App\Entity\User::class)->findOneBy(['email' => \App\Security\DemoAccountGuard::DEMO_EMAIL]);
+
+        $establishment = (new \App\Entity\Establishment())
+            ->setOwner($demo)
+            ->setName('Boulangerie démo')
+            ->setPlaceId('ChIJdemo'.uniqid())
+            ->setAddress('1 rue Démo');
+        $em->persist($establishment);
+        $em->flush();
+
+        $response = $this->postJson('/api/establishments/'.$establishment->getId().'/sync', [], $token);
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertStringContainsString('Démo', (string) $response->getContent());
+    }
 }

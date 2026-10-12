@@ -8,7 +8,7 @@
 		<a href="{{ app.user ? path('dashboard') : path('app_home') }}" class="rr-legal-back">Retour</a>
 
 		<h1>Politique de confidentialité</h1>
-		<p class="rr-legal-meta">Dernière mise à jour : 8 octobre 2026</p>
+		<p class="rr-legal-meta">Dernière mise à jour : 12 octobre 2026</p>
 
 		<h2>Responsable du traitement</h2>
 		<p>Damien Chauveau, entrepreneur individuel, éditeur de MonAvisPro. Contact : <a href="mailto:contact@monavispro.fr">contact@monavispro.fr</a>.</p>
@@ -18,8 +18,8 @@
 			<li><strong>Votre compte</strong> : adresse e-mail et mot de passe (stocké sous forme de hachage, jamais en clair).</li>
 			<li><strong>Vos établissements</strong> : nom, adresse, réglages de réponse, e-mail de destination du bilan mensuel si vous en indiquez un.</li>
 			<li><strong>Connexion Google</strong> : identifiants de vos fiches et jetons d'accès Google, chiffrés en base.</li>
-			<li><strong>Avis Google</strong> : nom affiché de l'auteur, note, texte, date, et vos réponses.</li>
-			<li><strong>Données techniques</strong> : adresse IP et journaux de connexion, utilisés pour la sécurité (limitation des tentatives de connexion).</li>
+			<li><strong>Avis Google</strong> : nom affiché de l'auteur et sa photo de profil Google, note, texte, date, et vos réponses.</li>
+			<li><strong>Données techniques</strong> : adresse IP et journaux de connexion, utilisés pour la sécurité (limitation des tentatives de connexion), conservés au plus 30 jours.</li>
 		</ul>
 
 		<h2>Pourquoi</h2>
@@ -41,6 +41,7 @@
 		<ul>
 			<li>Compte, établissements et avis : tant que votre compte existe. Supprimer un établissement supprime ses avis dans MonAvisPro (rien n'est supprimé sur Google).</li>
 			<li>Après une demande de suppression du compte : effacement sous 30 jours.</li>
+			<li>Sauvegardes de la base de données : conservées au plus 30 jours, puis écrasées. Une donnée supprimée disparaît donc aussi des sauvegardes dans ce délai.</li>
 		</ul>
 
 		<h2>Vos droits</h2>
@@ -50,6 +51,6 @@
 		<p>Vous pouvez retirer à tout moment l'accès de MonAvisPro à votre compte Google depuis la page <a href="https://myaccount.google.com/permissions" rel="noopener">Applications tierces</a> de votre compte Google. L'utilisation des données obtenues via les API Google respecte la <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, y compris ses exigences d'utilisation limitée.</p>
 
 		<h2>Cookies</h2>
-		<p>MonAvisPro n'utilise que les cookies nécessaires à la connexion (session et « rester connecté »). Aucun cookie publicitaire ni de mesure d'audience.</p>
+		<p>MonAvisPro n'utilise que les cookies nécessaires à la connexion (session de connexion). Aucun cookie publicitaire ni de mesure d'audience.</p>
 	</article>
 {% endblock %}

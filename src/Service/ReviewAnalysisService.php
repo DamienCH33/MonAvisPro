@@ -16,11 +16,17 @@ class ReviewAnalysisService
     ) {
     }
 
+    private const MAX_REVIEWS = 200;
+
     public function analyze(Establishment $establishment): ?ReviewAnalysis
     {
-        $reviews = $this->reviewRepository->findBy([
-            'establishment' => $establishment,
-        ]);
+        // Les 200 avis les plus récents suffisent pour dégager les thèmes, et gardent
+        // le coût et la taille de la requête à l'IA sous contrôle.
+        $reviews = $this->reviewRepository->findBy(
+            ['establishment' => $establishment],
+            ['publishedAt' => 'DESC'],
+            self::MAX_REVIEWS,
+        );
 
         $reviewsData = array_filter(
             array_map(

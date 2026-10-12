@@ -4,8 +4,15 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="google-site-verification" content="To8fXuk1DV1uyYgRflzRh3YpnioNpgtCsgjXUJnf7mI"/>
-		<meta name="description" content="Gérez vos avis Google, détectez les avis négatifs et générez des réponses automatiques grâce à l’IA. Améliorez votre e-réputation et votre note client."/>
-		<meta name="robots" content="index, follow"/>
+		<meta name="description" content="{% block meta_description %}Gérez vos avis Google, détectez les avis négatifs et générez des réponses automatiques grâce à l’IA. Améliorez votre e-réputation et votre note client.{% endblock %}"/>
+		<meta name="robots" content="{% block meta_robots %}{{ app.user ? 'noindex, nofollow' : 'index, follow' }}{% endblock %}"/>
+		{# Aperçu quand le lien est partagé (WhatsApp, LinkedIn, Facebook…) #}
+		<meta property="og:type" content="website"/>
+		<meta property="og:locale" content="fr_FR"/>
+		<meta property="og:site_name" content="MonAvisPro"/>
+		<meta property="og:title" content="MonAvisPro — Répondez à vos avis Google en quelques secondes"/>
+		<meta property="og:description" content="Une réponse prête pour chaque avis Google, dans le ton de votre commerce. Vous relisez, vous publiez."/>
+		<meta property="og:url" content="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
 		<title>

@@ -92,55 +92,21 @@ class DashboardController extends AbstractController
             ['createdAt' => 'DESC']
         );
 
-        $allReviews = $this->reviewRepository->findBy([
-            'establishment' => $current,
-        ]);
-
-        $total = count($allReviews);
-        $sum = array_sum(array_map(fn ($r) => $r->getRating(), $allReviews));
-
-        $positive = count(array_filter(
-            $allReviews,
-            fn ($r) => $r->getRating() >= 4
-        ));
-
-        $negative = count(array_filter(
-            $allReviews,
-            fn ($r) => $r->getRating() <= 2
-        ));
-
-        $unread = count(array_filter(
-            $allReviews,
-            fn ($r) => !$r->isRead()
-        ));
-
-        $unanswered = count(array_filter(
-            $allReviews,
-            fn ($r) => null === $r->getOwnerReply()
-        ));
-
-        $repartition = [
-            1 => 0,
-            2 => 0,
-            3 => 0,
-            4 => 0,
-            5 => 0,
-        ];
-
-        foreach ($allReviews as $review) {
-            ++$repartition[$review->getRating()];
-        }
+        $counts = $this->reviewRepository->getDashboardStats($current);
+        $total = $counts['total'];
+        $unread = $counts['unread'];
+        $unanswered = $counts['unanswered'];
 
         $stats = [
-            'average' => $total > 0 ? round($sum / $total, 1) : null,
+            'average' => $total > 0 ? round($counts['sum'] / $total, 1) : null,
             'total' => $total,
-            'positiveRate' => $total > 0 ? round(($positive / $total) * 100) : 0,
-            'negativeRate' => $total > 0 ? round(($negative / $total) * 100) : 0,
+            'positiveRate' => $total > 0 ? round(($counts['positive'] / $total) * 100) : 0,
+            'negativeRate' => $total > 0 ? round(($counts['negative'] / $total) * 100) : 0,
             'unreadCount' => $unread,
             'unanswered' => $unanswered,
             'responseRate' => $total > 0 ? (int) round((($total - $unanswered) / $total) * 100) : 0,
             'curve' => $this->reviewRepository->getAverageRatingByMonth($current),
-            'repartition' => $repartition,
+            'repartition' => $counts['repartition'],
         ];
 
         $reviews = $this->reviewRepository->findBy(
@@ -174,10 +140,7 @@ class DashboardController extends AbstractController
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
         $token = $this->jwtManager->create($user);
-        $unread = count(array_filter(
-            $this->reviewRepository->findBy(['establishment' => $current]),
-            fn ($r) => !$r->isRead()
-        ));
+        $unread = $this->reviewRepository->countUnreadForEstablishment($current);
 
         return $this->render('dashboard/reviews.html.twig', [
             'establishments' => $establishments,

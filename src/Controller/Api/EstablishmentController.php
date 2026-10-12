@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/establishments')]
@@ -162,9 +163,26 @@ class EstablishmentController extends AbstractController
     }
 
     #[Route('/{id}/sync', name: 'api_establishments_sync', methods: ['POST'])]
-    public function sync(Establishment $establishment, ReviewSyncService $reviewSyncService, GoogleApiErrorDescriber $errorDescriber): JsonResponse
-    {
+    public function sync(
+        Establishment $establishment,
+        ReviewSyncService $reviewSyncService,
+        GoogleApiErrorDescriber $errorDescriber,
+        RateLimiterFactoryInterface $reviewSyncLimiter,
+    ): JsonResponse {
         $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
+
+        // Le compte démo n'a pas de vraie fiche : pas d'appel à Google.
+        if ($this->demoGuard->isDemo($this->getUser())) {
+            return $this->json([
+                'message' => 'Démo : les avis sont déjà à jour.',
+                'newReviews' => 0,
+                'lastSyncAt' => $establishment->getLastSyncAt()?->format('c'),
+            ]);
+        }
+
+        if (!$reviewSyncLimiter->create((string) $establishment->getId())->consume()->isAccepted()) {
+            return $this->json(['error' => 'Synchronisation déjà lancée plusieurs fois cette heure-ci. Les avis se mettent aussi à jour tout seuls toutes les 6 heures.'], 429);
+        }
 
         try {
             $count = $reviewSyncService->sync($establishment);

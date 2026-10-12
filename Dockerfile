@@ -4,6 +4,10 @@ RUN apt-get update && apt-get install -y git unzip libpq-dev \
     && docker-php-ext-install pdo_pgsql \
     && apt-get clean
 
+# Réglages PHP de production : erreurs jamais affichées aux visiteurs, version de PHP masquée.
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && printf "expose_php = Off\nopcache.enable = 1\nopcache.memory_consumption = 128\nopcache.max_accelerated_files = 20000\n" > "$PHP_INI_DIR/conf.d/zz-monavispro.ini"
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app

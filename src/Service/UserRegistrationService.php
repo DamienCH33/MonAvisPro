@@ -27,7 +27,7 @@ class UserRegistrationService
      */
     public function register(RegisterRequestDTO $dto): User
     {
-        if ($this->userRepository->findOneBy(['email' => $dto->email])) {
+        if ($this->userRepository->findOneByEmail((string) $dto->email)) {
             throw new EmailAlreadyUsedException('Cet email est déjà utilisé.');
         }
 
@@ -53,7 +53,7 @@ class UserRegistrationService
      */
     public function registerFromForm(User $user, string $plainPassword): User
     {
-        if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
+        if ($this->userRepository->findOneByEmail((string) $user->getEmail())) {
             throw new EmailAlreadyUsedException('Cet email est déjà utilisé.');
         }
 

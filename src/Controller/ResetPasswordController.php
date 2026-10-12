@@ -5,12 +5,15 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\ChangePasswordFormType;
 use App\Form\ResetPasswordRequestFormType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,6 +29,8 @@ class ResetPasswordController extends AbstractController
     public function __construct(
         private ResetPasswordHelperInterface $resetPasswordHelper,
         private EntityManagerInterface $entityManager,
+        private UserRepository $userRepository,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -128,9 +133,7 @@ class ResetPasswordController extends AbstractController
 
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
-        $user = $this->entityManager->getRepository(User::class)->findOneBy([
-            'email' => $emailFormData,
-        ]);
+        $user = $this->userRepository->findOneByEmail($emailFormData);
 
         // Do not reveal whether a user account was found or not.
         if (!$user) {
@@ -155,14 +158,23 @@ class ResetPasswordController extends AbstractController
 
         $email = (new TemplatedEmail())
             ->to((string) $user->getEmail())
-            ->subject('Your password reset request')
+            ->subject('MonAvisPro : réinitialisez votre mot de passe')
             ->htmlTemplate('reset_password/email.html.twig')
             ->context([
                 'resetToken' => $resetToken,
             ])
         ;
 
-        $mailer->send($email);
+        try {
+            $mailer->send($email);
+        } catch (TransportExceptionInterface $e) {
+            // Même page que pour une adresse inconnue : une panne d'envoi ne doit pas
+            // révéler qu'un compte existe. L'erreur reste visible dans les logs.
+            $this->logger->error('Envoi de l\'e-mail de réinitialisation impossible : {message}', ['message' => $e->getMessage()]);
+            $this->resetPasswordHelper->removeResetRequest($resetToken->getToken());
+
+            return $this->redirectToRoute('app_check_email');
+        }
 
         // Store the token object in session for retrieval in check-email route.
         $this->setTokenObjectInSession($resetToken);

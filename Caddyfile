@@ -8,5 +8,15 @@
 	# Les en-têtes de sécurité sont ajoutés par l'application (SecurityHeadersSubscriber).
 	header -Server
 
+	# Compression des réponses (HTML, CSS, JS, JSON).
+	encode zstd gzip
+
+	# CSS et JS sont toujours appelés avec ?v=<commit> : on peut les garder un an en cache.
+	@versioned path /css/* /js/*
+	header @versioned Cache-Control "public, max-age=31536000, immutable"
+
+	@images path /images/*
+	header @images Cache-Control "public, max-age=604800"
+
 	php_server
 }

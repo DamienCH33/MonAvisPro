@@ -84,9 +84,17 @@ class AuthController extends AbstractController
             return $this->json(['error' => 'Trop de tentatives, réessayez dans quelques minutes.'], 429);
         }
 
-        $user = $this->userRepository->findOneBy(['email' => $dto->email]);
+        $user = $this->userRepository->findOneByEmail((string) $dto->email);
 
-        if (!$user || !$this->passwordHasher->isPasswordValid($user, $dto->password)) {
+        if (!$user) {
+            // Même durée de traitement que pour un compte existant : on ne peut pas
+            // deviner qui a un compte en chronométrant la réponse.
+            $this->passwordHasher->hashPassword(new User(), (string) $dto->password);
+
+            return $this->json(['error' => 'Identifiants invalides.'], 401);
+        }
+
+        if (!$this->passwordHasher->isPasswordValid($user, (string) $dto->password)) {
             return $this->json(['error' => 'Identifiants invalides.'], 401);
         }
 

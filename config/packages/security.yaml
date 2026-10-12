@@ -4,9 +4,9 @@ security:
 
     providers:
         app_user_provider:
+            # Recherche insensible à la casse : UserRepository::loadUserByIdentifier()
             entity:
                 class: App\Entity\User
-                property: email
 
     firewalls:
         dev:

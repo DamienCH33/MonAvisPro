@@ -58,6 +58,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
+    public static function normalizeEmail(string $email): string
+    {
+        return mb_strtolower(trim($email));
+    }
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -65,7 +70,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        $this->email = self::normalizeEmail($email);
 
         return $this;
     }
