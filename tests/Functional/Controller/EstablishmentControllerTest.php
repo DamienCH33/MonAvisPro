@@ -175,6 +175,8 @@ class EstablishmentControllerTest extends WebTestCase
         $response = $this->postJson('/api/establishments/'.$establishment->getId().'/sync', [], $token);
 
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertStringContainsString('Démo', (string) $response->getContent());
+        $data = json_decode((string) $response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertStringContainsString('Démo', $data['message']);
+        $this->assertSame(0, $data['newReviews']);
     }
 }

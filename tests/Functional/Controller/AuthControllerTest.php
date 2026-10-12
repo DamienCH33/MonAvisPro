@@ -225,6 +225,6 @@ class AuthControllerTest extends WebTestCase
 
         $content = (string) $this->client->getResponse()->getContent();
         $this->assertStringNotContainsString('déjà utilisé', $content);
-        $this->assertStringContainsString('Inscription impossible', $content);
+        $this->assertStringContainsString('Inscription impossible', html_entity_decode($content));
     }
 }

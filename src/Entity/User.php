@@ -14,7 +14,8 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé')]
+// Message neutre : ne pas confirmer qu'une adresse a déjà un compte (audit d'octobre 2026).
+#[UniqueEntity(fields: ['email'], message: 'Inscription impossible avec ces informations. Si vous avez déjà un compte, connectez-vous ou utilisez « Mot de passe oublié ».')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
