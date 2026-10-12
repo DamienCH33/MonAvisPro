@@ -5,11 +5,11 @@
 
 .lp,
 .lp-nav {
-    --lp-night: #0e1117;
-    --lp-slate: #161b22;
-    --lp-line: #262d38;
+    --lp-night: #182030;
+    --lp-slate: #212a3b;
+    --lp-line: #334057;
     --lp-chalk: #e8ecf1;
-    --lp-mist: #a9b3c1;
+    --lp-mist: #bac3d0;
     --lp-mint: #4fd1a5;
     --lp-mint-ink: #06261b;
     --lp-lavender: #8b7cf6;
@@ -19,6 +19,15 @@
 
     color: var(--lp-chalk);
     overflow-x: clip;
+}
+
+/* Fond de page éclairci sur l'accueil uniquement : l'appli garde son thème sombre. */
+body:has(.lp) {
+    background: #182030;
+}
+body:has(.lp) .rr-public,
+body:has(.lp) .rr-footer {
+    background: transparent;
 }
 
 .lp-wrap {
@@ -70,8 +79,8 @@
     margin: 0;
     max-width: 38em;
 }
-.lp-muted { color: #8f99a8; font-size: 14px; }
-.lp-note { margin: 18px 0 0; font-size: 14px; color: #8f99a8; }
+.lp-muted { color: #9ea8b8; font-size: 14px; }
+.lp-note { margin: 18px 0 0; font-size: 14px; color: #9ea8b8; }
 
 /* ---- Boutons ---- */
 .lp-actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -89,7 +98,7 @@
 }
 .lp-btn-main { background: var(--lp-mint); color: var(--lp-mint-ink) !important; }
 .lp-btn-main:hover { background: #74dfba; transform: translateY(-1px); }
-.lp-btn-ghost { border: 1px solid #3a4352; color: var(--lp-chalk) !important; }
+.lp-btn-ghost { border: 1px solid #46536b; color: var(--lp-chalk) !important; }
 .lp-btn-ghost:hover { border-color: var(--lp-chalk); }
 .lp-btn:focus-visible { outline: 3px solid var(--lp-lavender); outline-offset: 3px; }
 
@@ -128,7 +137,7 @@
     border: 1px solid var(--lp-line);
     border-radius: 34px;
     padding: 22px 18px 26px;
-    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 40px 80px -20px rgba(4, 8, 16, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -158,7 +167,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #1e2530;
+    background: #2a3447;
     border-radius: 14px;
     padding: 12px 14px;
     font-size: 14px;
@@ -179,7 +188,7 @@
 .lp-card-text { margin: 0; font-size: 15px; line-height: 1.55; color: #d9dee5; }
 
 .lp-stars { font-size: 17px; letter-spacing: 2px; color: var(--lp-star); }
-.lp-stars span { color: #3a4352; }
+.lp-stars span { color: #46536b; }
 .lp-stars-low { color: var(--lp-ember); }
 
 .lp-reply {
@@ -215,7 +224,7 @@
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 .lp-fake-btn.is-pressed { transform: scale(0.95); box-shadow: 0 0 0 6px rgba(79, 209, 165, 0.25); }
-.lp-fake-ghost { background: transparent; border: 1px solid #3a4352; color: var(--lp-chalk); }
+.lp-fake-ghost { background: transparent; border: 1px solid #46536b; color: var(--lp-chalk); }
 
 .lp-toast {
     align-self: center;
@@ -253,7 +262,7 @@
     min-height: 48px;
     padding: 0 22px;
     border-radius: 999px;
-    border: 1px solid #3a4352;
+    border: 1px solid #46536b;
     background: transparent;
     color: var(--lp-chalk);
     font-family: inherit;
@@ -277,8 +286,8 @@
 .lp-stars-mid { color: var(--lp-star); }
 .lp-answer {
     margin-left: clamp(0px, 4vw, 48px);
-    background: #1b1f33;
-    border: 1px solid #332d63;
+    background: #262b47;
+    border: 1px solid #3d3672;
     border-radius: 20px 20px 20px 6px;
     padding: 22px 24px;
     min-height: 168px;
