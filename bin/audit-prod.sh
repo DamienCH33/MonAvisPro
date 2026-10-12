@@ -61,6 +61,16 @@ for i in 1 2 3 4 5 6 7; do
 done
 [ "$GOT429" = yes ] && ok "changer X-Forwarded-For ne contourne pas le limiteur" || ko "LIMITEUR CONTOURNABLE : une fausse IP dans X-Forwarded-For remet le compteur à zéro"
 
+echo "== Contournement du limiteur avec un faux X-Real-IP"
+EMAIL="audit-$RANDOM-$RANDOM@example.invalid"
+GOT429=no
+for i in 1 2 3 4 5 6 7; do
+  C=$(code -X POST -H "Content-Type: application/json" -H "X-Real-IP: 10.$RANDOM.$((RANDOM % 255)).$i" \
+      -d "{\"email\":\"$EMAIL\",\"password\":\"mauvais-$i\"}" "$BASE/api/auth/login")
+  [ "$C" = "429" ] && GOT429=yes && break
+done
+[ "$GOT429" = yes ] && ok "un faux X-Real-IP ne contourne pas le limiteur" || ko "LIMITEUR CONTOURNABLE : Railway laisse passer un X-Real-IP inventé"
+
 echo "== Performance et cache (après déploiement de fix/audit-octobre)"
 CSS=$(curl -s --max-time 20 "$BASE/" | grep -oE '/css/style\.css\?v=[^"]+' | head -1)
 if [ -n "$CSS" ]; then

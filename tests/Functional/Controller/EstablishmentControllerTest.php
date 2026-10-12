@@ -73,7 +73,7 @@ class EstablishmentControllerTest extends WebTestCase
     {
         $response = $this->getJson('/api/establishments');
 
-        $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+        $this->assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
     public function testListWithValidToken(): void

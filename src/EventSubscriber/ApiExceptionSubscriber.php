@@ -2,6 +2,7 @@
 
 namespace App\EventSubscriber;
 
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -12,6 +13,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ApiExceptionSubscriber implements EventSubscriberInterface
 {
+    public function __construct(
+        private readonly Security $security,
+    ) {
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -32,6 +38,10 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
         if ($exception instanceof NotFoundHttpException) {
             $statusCode = 404;
             $message = 'Ressource introuvable.';
+        } elseif ($exception instanceof AccessDeniedException && null === $this->security->getUser()) {
+            // Pas connecté (jeton absent ou expiré) : 401, le front sait qu'il faut se reconnecter.
+            $statusCode = 401;
+            $message = 'Authentification requise.';
         } elseif ($exception instanceof AccessDeniedException) {
             $statusCode = 403;
             $message = 'Accès refusé.';
