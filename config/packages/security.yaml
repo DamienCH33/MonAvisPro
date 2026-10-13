@@ -18,15 +18,20 @@ security:
             stateless: true
             security: false
 
+        # API : session du site (même contexte que « main ») pour le front,
+        # ou jeton JWT (en-tête Authorization) pour un client externe.
         api:
             pattern: ^/api
-            stateless: true
+            lazy: true
+            provider: app_user_provider
+            context: monavispro
             jwt: ~
             entry_point: jwt
 
         main:
             lazy: true
             provider: app_user_provider
+            context: monavispro
             form_login:
                 login_path: app_login
                 check_path: app_login

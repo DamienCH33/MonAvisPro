@@ -69,7 +69,7 @@ class UxAndAccountTest extends WebTestCase
 
     public function testWelcomeScreenWithoutEstablishment(): void
     {
-        $this->client->loginUser($this->createUser());
+        $this->client->loginUser($this->createUser(), 'monavispro');
         $this->client->request('GET', '/dashboard');
 
         $this->assertResponseIsSuccessful();
@@ -82,7 +82,7 @@ class UxAndAccountTest extends WebTestCase
         $user = $this->createUser();
         $establishment = $this->createEstablishment($user, [1, 5]);
         $review = $this->em->getRepository(Review::class)->findOneBy(['establishment' => $establishment, 'rating' => 1]);
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $this->client->request('PATCH', '/api/reviews/'.$review->getId().'/ignore', [], [], $this->jwt($user));
         $this->assertResponseIsSuccessful();
@@ -111,7 +111,7 @@ class UxAndAccountTest extends WebTestCase
     {
         $user = $this->createUser();
         $this->createEstablishment($user, array_fill(0, 120, 4));
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $crawler = $this->client->request('GET', '/dashboard/a-traiter');
         $this->assertSame(100, $crawler->filter('[data-review-id]')->count());
@@ -129,7 +129,7 @@ class UxAndAccountTest extends WebTestCase
         $establishment = $this->createEstablishment($user, [3]);
         $establishment->setGoogleRefreshToken('secret-refresh-token');
         $this->em->flush();
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $this->client->request('GET', '/dashboard/compte/export');
 
@@ -146,7 +146,7 @@ class UxAndAccountTest extends WebTestCase
     {
         $user = $this->createUser();
         $this->createEstablishment($user, [2, 4]);
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $crawler = $this->client->request('GET', '/dashboard/compte');
         $form = $crawler->filter('#delete-dialog form')->form(['password' => 'mauvais']);
@@ -163,7 +163,7 @@ class UxAndAccountTest extends WebTestCase
         $userId = $user->getId();
         $establishment = $this->createEstablishment($user, [2, 4]);
         $establishmentId = $establishment->getId();
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $crawler = $this->client->request('GET', '/dashboard/compte');
         $form = $crawler->filter('#delete-dialog form')->form(['password' => 'password123']);
@@ -183,11 +183,52 @@ class UxAndAccountTest extends WebTestCase
     {
         $user = $this->createUser();
         $this->createEstablishment($user, []);
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'monavispro');
 
         $this->client->request('GET', '/privacy');
 
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('.rr-sidebar', 'Boulangerie test');
+    }
+
+    // ---- API par la session du site (plus de jeton dans la page) ----
+
+    public function testApiAcceptsTheSiteSessionWithTheAjaxHeader(): void
+    {
+        $user = $this->createUser();
+        $establishment = $this->createEstablishment($user, [2]);
+        $review = $this->em->getRepository(Review::class)->findOneBy(['establishment' => $establishment]);
+        $this->client->loginUser($user, 'monavispro');
+
+        $this->client->request('PATCH', '/api/reviews/'.$review->getId().'/ignore', [], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testApiRefusesASessionWriteWithoutTheAjaxHeader(): void
+    {
+        $user = $this->createUser();
+        $establishment = $this->createEstablishment($user, [2]);
+        $review = $this->em->getRepository(Review::class)->findOneBy(['establishment' => $establishment]);
+        $this->client->loginUser($user, 'monavispro');
+
+        // Ce que ferait un formulaire piégé sur un autre site.
+        $this->client->request('PATCH', '/api/reviews/'.$review->getId().'/ignore');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        $this->em->clear();
+        $this->assertNull($this->em->getRepository(Review::class)->find($review->getId())->getIgnoredAt());
+    }
+
+    public function testPagesNoLongerExposeTheJwt(): void
+    {
+        $user = $this->createUser();
+        $this->createEstablishment($user, [3]);
+        $this->client->loginUser($user, 'monavispro');
+
+        $this->client->request('GET', '/dashboard/a-traiter');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringNotContainsString('JWT_TOKEN', (string) $this->client->getResponse()->getContent());
     }
 }

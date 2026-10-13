@@ -6,3 +6,4 @@ vendor/
 config/jwt/*.pem
 tests/
 .phpunit.cache
+node_modules/

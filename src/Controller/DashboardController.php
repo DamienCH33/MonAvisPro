@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\EstablishmentRepository;
 use App\Repository\ReviewRepository;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,6 @@ class DashboardController extends AbstractController
     public function __construct(
         private EstablishmentRepository $establishmentRepository,
         private ReviewRepository $reviewRepository,
-        private JWTTokenManagerInterface $jwtManager,
     ) {
     }
 
@@ -45,7 +43,6 @@ class DashboardController extends AbstractController
             'stats' => null,
             'reviews' => [],
             'unread_count' => 0,
-            'jwt_token' => $this->jwtManager->create($user),
         ]);
     }
 
@@ -77,7 +74,6 @@ class DashboardController extends AbstractController
             'next_limit' => min(self::INBOX_MAX, $limit + self::INBOX_STEP),
             'step' => self::INBOX_STEP,
             'unread_count' => 0,
-            'jwt_token' => $this->jwtManager->create($user),
         ]);
     }
 
@@ -121,15 +117,12 @@ class DashboardController extends AbstractController
             5
         );
 
-        $token = $this->jwtManager->create($user);
-
         return $this->render('dashboard/dashboard.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => $current,
             'stats' => $stats,
             'reviews' => $reviews,
             'unread_count' => $unread,
-            'jwt_token' => $token,
         ]);
     }
 
@@ -145,14 +138,12 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token = $this->jwtManager->create($user);
         $unread = $this->reviewRepository->countUnreadForEstablishment($current);
 
         return $this->render('dashboard/reviews.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => $current,
             'unread_count' => $unread,
-            'jwt_token' => $token,
         ]);
     }
 
@@ -168,14 +159,12 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/analysis.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => $current,
             'analysis' => $current->getReviewAnalysis(),
             'unread_count' => 0,
-            'jwt_token' => $token,
         ]);
     }
 
@@ -191,21 +180,17 @@ class DashboardController extends AbstractController
         }
 
         $establishments = $this->establishmentRepository->findBy(['owner' => $user]);
-        $token = $this->jwtManager->create($user);
 
         return $this->render('dashboard/settings.html.twig', [
             'establishments' => $establishments,
             'current_establishment' => $current,
             'unread_count' => 0,
-            'jwt_token' => $token,
         ]);
     }
 
     #[Route('/establishment/new', name: 'establishment_new')]
     public function newEstablishment(): Response
     {
-        $token = $this->jwtManager->create($this->getUser());
-
         $establishments = $this->establishmentRepository->findBy(
             ['owner' => $this->getUser()],
             ['createdAt' => 'DESC']
@@ -215,7 +200,6 @@ class DashboardController extends AbstractController
             'establishments' => $establishments,
             'current_establishment' => null,
             'unread_count' => 0,
-            'jwt_token' => $token,
         ]);
     }
 }

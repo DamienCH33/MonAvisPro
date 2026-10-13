@@ -8,7 +8,7 @@
 
     function headers(json) {
         const h = {};
-        if (window.JWT_TOKEN) h.Authorization = "Bearer " + window.JWT_TOKEN;
+        h["X-Requested-With"] = "XMLHttpRequest";
         if (json) h["Content-Type"] = "application/json";
         return h;
     }

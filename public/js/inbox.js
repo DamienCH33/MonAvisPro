@@ -19,7 +19,7 @@
 
     function authHeaders() {
         const headers = {};
-        if (window.JWT_TOKEN) headers.Authorization = "Bearer " + window.JWT_TOKEN;
+        headers["X-Requested-With"] = "XMLHttpRequest";
         return headers;
     }
 

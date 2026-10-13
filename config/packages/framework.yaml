@@ -40,7 +40,12 @@ framework:
             interval: "1 hour"
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        # Cookie de session jamais envoyé par un autre site sur un POST (protection CSRF de base),
+        # et seulement en HTTPS en prod.
+        cookie_samesite: lax
+        cookie_secure: auto
+        cookie_httponly: true
 
     #esi: true
     #fragments: true

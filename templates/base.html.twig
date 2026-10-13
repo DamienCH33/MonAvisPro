@@ -147,7 +147,6 @@
 			{# Variables globales JS #}
 			{% if app.user %}
 				<script>
-					window.JWT_TOKEN = '{{ jwt_token|default('') }}';
 window.ESTABLISHMENT_ID = '{{ current_establishment.id|default('') }}' || null;
 				</script>
 			{% endif %}

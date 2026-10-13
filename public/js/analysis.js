@@ -18,7 +18,7 @@
                 const res = await fetch(`/api/establishments/${window.ESTABLISHMENT_ID}/analysis/refresh`, {
                     method: "POST",
                     credentials: "same-origin",
-                    headers: window.JWT_TOKEN ? { Authorization: "Bearer " + window.JWT_TOKEN } : {},
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok) {

@@ -5,6 +5,9 @@ on:
         branches: [main, develop]
     pull_request:
         branches: [main]
+    # Chaque lundi : vérifie qu'aucune faille n'a été publiée sur les dépendances, même sans push.
+    schedule:
+        - cron: "0 6 * * 1"
 
 jobs:
     tests:
@@ -13,7 +16,7 @@ jobs:
 
         services:
             postgres:
-                image: postgres:15-alpine
+                image: postgres:16-alpine
                 env:
                     POSTGRES_DB: monavispro_test
                     POSTGRES_USER: postgres
@@ -46,6 +49,9 @@ jobs:
 
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-interaction
+
+            - name: Audit de sécurité des dépendances
+              run: composer audit --no-interaction
 
             - name: Generate JWT keys
               run: |

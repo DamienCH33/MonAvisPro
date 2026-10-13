@@ -42,7 +42,7 @@ class AlertEmailServiceTest extends TestCase
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects($this->once())->method('send');
 
-        $twig = $this->createMock(Environment::class);
+        $twig = $this->createStub(Environment::class);
         $twig->method('render')->willReturn('<html>email</html>');
 
         $service = new AlertEmailService($mailer, $twig);
@@ -62,7 +62,7 @@ class AlertEmailServiceTest extends TestCase
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects($this->never())->method('send');
 
-        $twig = $this->createMock(Environment::class);
+        $twig = $this->createStub(Environment::class);
 
         $service = new AlertEmailService($mailer, $twig);
         $service->sendNegativeReviewAlert($establishment, $review);
@@ -81,7 +81,7 @@ class AlertEmailServiceTest extends TestCase
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects($this->never())->method('send');
 
-        $twig = $this->createMock(Environment::class);
+        $twig = $this->createStub(Environment::class);
 
         $service = new AlertEmailService($mailer, $twig);
         $service->sendNegativeReviewAlert($establishment, $review);

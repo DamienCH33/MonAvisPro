@@ -51,11 +51,16 @@ Bilan : **2 bloquants** avant de vrais clients, **8 importants**, une douzaine d
 | M5 | RGPD | Pas de registre des traitements. | **Ajouté** : `docs/registre-traitements.md`. |
 | M6 | Sécurité | Historique Git : clés JWT et `APP_SECRET` de dev (`.env.dev`, `config/jwt/private.pem`). Sans risque si la prod utilise d'autres valeurs (les clés JWT sont régénérées à chaque déploiement). | **À vérifier** : la variable `APP_SECRET` sur Railway ne doit pas commencer par `c8d1`. Sinon, en mettre une nouvelle. |
 | M7 | Base | Pas de contrainte `CHECK` sur la note (1 à 5), pas de `ON DELETE CASCADE` : supprimer un établissement charge et supprime ses avis un par un, et supprimer un utilisateur échoue s'il a une demande de mot de passe en cours. | À traiter avec la suppression de compte (migration). |
-| M8 | Google | Supprimer un établissement ne **révoque pas l'accès** côté Google. | À traiter avec la suppression de compte. |
-| M9 | Exploitation | Dépendances de développement installées en prod (`composer install` sans `--no-dev`). | Plus tard : vérifier d'abord que la démo n'en dépend pas. |
+| M8 | Google | Supprimer un établissement ne **révoquait pas l'accès** côté Google. | **Corrigé** : révocation à la suppression d'un établissement (sauf si un autre établissement du client utilise le même compte Google) et à la suppression du compte. |
+| M9 | Exploitation | Dépendances de développement installées en prod (`composer install` sans `--no-dev`). | **Corrigé** : `--no-dev` dans le `Dockerfile`. Vérifié : le conteneur de prod compile sans elles (`lint:container`), la démo n'en dépend pas. |
 | M10 | Accessibilité | Pas de lien « Aller au contenu » ; confirmations et erreurs via les fenêtres natives `alert()` / `confirm()`. Les formulaires ont bien leurs étiquettes, et la note n'est jamais donnée par la couleur seule. | Avec la branche UX. |
 | M11 | Démo | Compte démo partagé : un visiteur peut modifier la signature, visible par les autres jusqu'à la remise à zéro de la nuit. | Accepté (aucun risque XSS, la remise à zéro corrige). |
 | M12 | Tests | Tests fonctionnels absents pour À traiter, Réglages, la démo. | En cours (synchro démo couverte). |
+
+### Ajouté le 13 octobre (`fix/finitions`)
+
+- **Plus de jeton JWT dans les pages** (`window.JWT_TOKEN`) : l'API utilise la session du site. Protection CSRF : toute écriture sans jeton exige l'en-tête `X-Requested-With`, qu'un autre site ne peut pas ajouter ; cookie de session `SameSite=Lax`, `Secure`, `HttpOnly`. Le JWT reste accepté pour un client externe.
+- **CI** : `composer audit` à chaque push et chaque lundi ; Postgres 16 comme en prod. Le style du code (PHP CS Fixer) bloquait la CI de `main` depuis l'audit : corrigé.
 
 ### Vérifié et conforme
 

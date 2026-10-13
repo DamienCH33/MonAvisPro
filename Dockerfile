@@ -13,8 +13,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
+# Prod : sans les outils de dev (tests, fixtures, profiler, maker). Pas de scripts ici :
+# le cache est construit au démarrage par docker/start.sh, avec les vraies variables.
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --optimize-autoloader --no-interaction
+ENV APP_ENV=prod
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 RUN mkdir -p config/jwt && rm -f config/jwt/*.pem && chmod +x docker/start.sh
 
 EXPOSE 8080

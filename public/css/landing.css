@@ -375,3 +375,28 @@ body:has(.lp) .rr-footer {
 /* Barre du haut sur l'accueil */
 .lp-nav { display: flex; align-items: center; gap: 10px; }
 .lp-nav .lp-btn { min-height: 44px; padding: 0 18px; font-size: 15px; border-radius: 12px; }
+
+/* Captures du produit */
+.lp-shots {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    gap: clamp(16px, 2.5vw, 28px);
+    margin-top: 40px;
+    align-items: start;
+}
+.lp-shot { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.lp-shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--lp-line);
+    border-radius: 16px;
+    background: var(--lp-slate);
+}
+.lp-shot-phone img { border-radius: 28px; }
+.lp-shot-wide { grid-column: 1 / -1; }
+.lp-shot figcaption { font-size: 14px; color: var(--lp-mist); }
+@media (max-width: 760px) {
+    .lp-shots { grid-template-columns: minmax(0, 1fr); }
+    .lp-shot-phone { max-width: 280px; justify-self: center; }
+}

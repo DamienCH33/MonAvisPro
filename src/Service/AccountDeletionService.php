@@ -7,7 +7,6 @@ namespace App\Service;
 use App\Entity\User;
 use App\Repository\EstablishmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Suppression définitive d'un compte : accès Google retiré, puis tout effacé
@@ -18,30 +17,21 @@ class AccountDeletionService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly EstablishmentRepository $establishmentRepository,
-        private readonly GoogleBusinessProfileService $googleService,
-        private readonly TokenCipher $cipher,
-        private readonly LoggerInterface $logger,
+        private readonly GoogleAccessRevoker $revoker,
     ) {
     }
 
     public function delete(User $user): void
     {
+        // Une révocation par compte Google suffit (elle couvre toutes ses fiches).
+        $revokedAccounts = [];
         foreach ($this->establishmentRepository->findBy(['owner' => $user]) as $establishment) {
-            $token = $this->cipher->decrypt($establishment->getGoogleRefreshToken())
-                ?? $this->cipher->decrypt($establishment->getGoogleAccessToken());
-
-            if (null === $token) {
+            $account = $establishment->getGoogleAccountId() ?? (string) $establishment->getId();
+            if (isset($revokedAccounts[$account])) {
                 continue;
             }
-
-            // Un jeton déjà révoqué ou expiré ne doit pas empêcher la suppression.
-            try {
-                $this->googleService->revokeToken($token);
-            } catch (\Throwable $e) {
-                $this->logger->warning('Révocation Google impossible lors de la suppression du compte : {message}', [
-                    'message' => $e->getMessage(),
-                    'establishment' => (string) $establishment->getId(),
-                ]);
+            if ($this->revoker->revokeFor($establishment, wholeAccount: true)) {
+                $revokedAccounts[$account] = true;
             }
         }
 

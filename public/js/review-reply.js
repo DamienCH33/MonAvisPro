@@ -13,7 +13,7 @@
 
     function authHeaders(json) {
         const headers = {};
-        if (window.JWT_TOKEN) headers.Authorization = "Bearer " + window.JWT_TOKEN;
+        headers["X-Requested-With"] = "XMLHttpRequest";
         if (json) headers["Content-Type"] = "application/json";
         return headers;
     }

@@ -105,6 +105,33 @@
 		</div>
 	</section>
 
+	{# ───────────── Dans l'appli : vraies captures (bin/captures-accueil.mjs) ───────────── #}
+	{% if public_file_exists('images/captures/a-traiter.jpg') and public_file_exists('images/captures/tableau-de-bord.jpg') and public_file_exists('images/captures/mobile.jpg') %}
+		<section class="lp-section" aria-labelledby="shots-title">
+			<div class="lp-wrap">
+				<h2 class="lp-h2" id="shots-title">Ce que vous verrez chaque matin</h2>
+				<p class="lp-lead">Les avis à traiter d'abord, les plus mauvaises notes en haut. Une réponse prête, que vous relisez et publiez.</p>
+				<div class="lp-shots">
+					<figure class="lp-shot lp-shot-main">
+						<img src="{{ asset('images/captures/a-traiter.jpg') }}" width="1440" height="900" loading="lazy" decoding="async"
+							alt="Écran « À traiter » : les avis sans réponse, triés par note, avec une réponse en cours de rédaction.">
+						<figcaption>À traiter : les avis qui attendent une réponse</figcaption>
+					</figure>
+					<figure class="lp-shot lp-shot-phone">
+						<img src="{{ asset('images/captures/mobile.jpg') }}" width="780" height="1688" loading="lazy" decoding="async"
+							alt="La même liste sur téléphone, avec les boutons Proposer et Ignorer.">
+						<figcaption>Sur téléphone, entre deux clients</figcaption>
+					</figure>
+					<figure class="lp-shot lp-shot-wide">
+						<img src="{{ asset('images/captures/tableau-de-bord.jpg') }}" width="1440" height="900" loading="lazy" decoding="async"
+							alt="Tableau de bord : note moyenne, taux de réponse, répartition des notes et derniers avis.">
+						<figcaption>Le tableau de bord : note, taux de réponse, tendance</figcaption>
+					</figure>
+				</div>
+			</div>
+		</section>
+	{% endif %}
+
 	{# ───────────── Les trois étapes (vraie séquence) ───────────── #}
 	<section class="lp-section" aria-labelledby="how-title">
 		<div class="lp-wrap">

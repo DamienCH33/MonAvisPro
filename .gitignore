@@ -40,3 +40,8 @@ phpstan-result-cache.php
 config/jwt/private.pem
 config/jwt/public.pem
 graphify-out/
+###> captures de l accueil (bin/captures-accueil.mjs) ###
+/node_modules/
+/package.json
+/package-lock.json
+###< captures ###

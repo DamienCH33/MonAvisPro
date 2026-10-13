@@ -13,7 +13,7 @@
     let targetReviewId = null;
 
     function headers() {
-        return window.JWT_TOKEN ? { Authorization: "Bearer " + window.JWT_TOKEN } : {};
+        return { "X-Requested-With": "XMLHttpRequest" };
     }
 
     /** Le texte des avis vient de Google : tout est échappé avant insertion. */

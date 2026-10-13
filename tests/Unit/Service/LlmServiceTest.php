@@ -21,14 +21,14 @@ class LlmServiceTest extends TestCase
             'action_suggestion' => 'Réduire le temps d\'attente.',
         ]);
 
-        $response = $this->createMock(ResponseInterface::class);
+        $response = $this->createStub(ResponseInterface::class);
         $response->method('toArray')->willReturn([
             'choices' => [
                 ['message' => ['content' => $validJson]],
             ],
         ]);
 
-        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient = $this->createStub(HttpClientInterface::class);
         $httpClient->method('request')->willReturn($response);
 
         $service = new LlmService($httpClient, 'fake-api-key');
@@ -45,7 +45,7 @@ class LlmServiceTest extends TestCase
 
     public function testAnalyzeReviewsReturnsNullOnApiError(): void
     {
-        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient = $this->createStub(HttpClientInterface::class);
         $httpClient->method('request')->willThrowException(new \Exception('API Error'));
 
         $service = new LlmService($httpClient, 'fake-api-key');

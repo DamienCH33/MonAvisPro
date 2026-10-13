@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Establishment;
 use App\Repository\EstablishmentRepository;
 use App\Security\DemoAccountGuard;
+use App\Service\GoogleAccessRevoker;
 use App\Service\GoogleApiErrorDescriber;
 use App\Service\ReviewSyncService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -148,7 +149,7 @@ class EstablishmentController extends AbstractController
     }
 
     #[Route('/{id}', name: 'api_establishments_delete', methods: ['DELETE'])]
-    public function delete(Establishment $establishment): JsonResponse
+    public function delete(Establishment $establishment, GoogleAccessRevoker $revoker): JsonResponse
     {
         $this->denyAccessUnlessGranted('ESTABLISHMENT_OWNER', $establishment);
 
@@ -156,8 +157,11 @@ class EstablishmentController extends AbstractController
             return $this->json(['error' => 'Action désactivée sur le compte démo.'], 403);
         }
 
-        $this->em->remove($establishment);
-        $this->em->flush();
+        $revoker->revokeFor($establishment);
+
+        // Les avis et l'analyse partent avec (ON DELETE CASCADE), en une seule requête.
+        $this->em->getConnection()->executeStatement('DELETE FROM establishment WHERE id = :id', ['id' => (string) $establishment->getId()]);
+        $this->em->clear();
 
         return $this->json(['message' => 'Établissement supprimé.']);
     }

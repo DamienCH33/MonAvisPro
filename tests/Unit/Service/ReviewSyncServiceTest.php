@@ -33,19 +33,19 @@ class ReviewSyncServiceTest extends TestCase
             ],
         ];
 
-        $googleService = $this->createMock(GooglePlacesService::class);
+        $googleService = $this->createStub(GooglePlacesService::class);
         $googleService->method('getPlaceDetails')->willReturn($googleData);
 
         $existingReview = new Review();
         $existingReview->setGoogleReviewId('existing-review-id');
 
-        $reviewRepository = $this->createMock(ReviewRepository::class);
+        $reviewRepository = $this->createStub(ReviewRepository::class);
         $reviewRepository->method('findBy')->willReturn([$existingReview]);
 
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->never())->method('persist');
 
-        $alertService = $this->createMock(AlertEmailService::class);
+        $alertService = $this->createStub(AlertEmailService::class);
 
         $service = new ReviewSyncService(
             $googleService,
@@ -78,17 +78,17 @@ class ReviewSyncServiceTest extends TestCase
             ],
         ];
 
-        $googleService = $this->createMock(GooglePlacesService::class);
+        $googleService = $this->createStub(GooglePlacesService::class);
         $googleService->method('getPlaceDetails')->willReturn($googleData);
 
-        $reviewRepository = $this->createMock(ReviewRepository::class);
+        $reviewRepository = $this->createStub(ReviewRepository::class);
         $reviewRepository->method('findBy')->willReturn([]);
 
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('persist');
         $em->expects($this->once())->method('flush');
 
-        $alertService = $this->createMock(AlertEmailService::class);
+        $alertService = $this->createStub(AlertEmailService::class);
 
         $service = new ReviewSyncService(
             $googleService,
