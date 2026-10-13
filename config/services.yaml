@@ -9,6 +9,8 @@ parameters:
     # Par défaut aucun proxy de confiance ; sur Railway : TRUSTED_PROXIES=REMOTE_ADDR
     env(TRUSTED_PROXIES): "127.0.0.1"
     env(MAILER_FROM): "MonAvisPro <noreply@monavispro.fr>"
+    # En-tête qui porte la vraie IP du visiteur derrière le proxy (Railway : X-Real-IP). Vide = désactivé.
+    env(CLIENT_IP_HEADER): "X-Real-IP"
 
 services:
     _defaults:
@@ -17,6 +19,10 @@ services:
 
     App\:
         resource: "../src/"
+
+    App\EventSubscriber\RealClientIpSubscriber:
+        arguments:
+            $header: "%env(CLIENT_IP_HEADER)%"
 
     App\Service\GooglePlacesService:
         arguments:
