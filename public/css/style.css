@@ -256,6 +256,22 @@ h1, h2, h3, h4 {
     font-size: 12px;
     color: var(--rr-t3);
 }
+.rr-sidebar-legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 8px 10px 0;
+    font-size: 12px;
+}
+.rr-sidebar-legal a {
+    color: var(--rr-t3);
+    text-decoration: none;
+}
+.rr-sidebar-legal a:hover,
+.rr-sidebar-legal a:focus-visible {
+    color: var(--rr-t1);
+    text-decoration: underline;
+}
 
 /* ---- TOPBAR ---- */
 .rr-topbar {

@@ -89,4 +89,9 @@
             <div class="rr-user-plan">{{ establishments is defined ? establishments|length : 0 }} établissement{{ establishments is defined and establishments|length > 1 ? 's' }}</div>
         </div>
     </div>
+    <nav class="rr-sidebar-legal" aria-label="Liens légaux">
+        <a href="{{ path('app_legal') }}">Mentions légales</a>
+        <a href="{{ path('app_privacy') }}">Confidentialité</a>
+        <a href="{{ path('app_cgu') }}">CGU</a>
+    </nav>
 </div>
