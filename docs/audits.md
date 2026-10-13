@@ -4,6 +4,18 @@ Même grille que Cap Monta : sécurité (tests d'intrusion), back et API, base d
 
 ---
 
+## Audit de prod du 13 octobre 2026 (`bin/audit-prod.sh`)
+
+**27 OK, 0 KO.** Seul point « à regarder » : l'en-tête `Server: railway-hikari`, posé par Railway (non modifiable, ne révèle rien d'exploitable).
+
+Trouvé par le premier passage du script, puis corrigé (`fix/ip-reelle`) :
+
+- **Limiteurs inopérants** : derrière Railway, `getClientIp()` renvoyait l'IP d'un relais, différente à chaque requête. Aucun blocage après 7 connexions ratées, et changer `X-Forwarded-For` remettait le compteur à zéro. Corrigé : l'IP vient de `X-Real-IP`, posé par Railway, uniquement si la requête arrive par le proxy de confiance. Un faux `X-Real-IP` envoyé par le visiteur est bien écrasé par Railway (testé en prod).
+- **API sans jeton** : 403 au lieu de 401. Corrigé.
+- **Planificateur arrêté** depuis la mise en ligne : paquet `dragonmantank/cron-expression` manquant, donc ni synchro automatique, ni bilans, ni remise à zéro de la démo. Corrigé.
+
+---
+
 ## Audit d'octobre 2026 (branche `fix/audit-octobre`)
 
 Bilan : **2 bloquants** avant de vrais clients, **8 importants**, une douzaine de moindres. Tous les points de code importants sont corrigés sur la branche. Il reste des actions dans tes comptes (Google, Railway) et des chantiers plus longs.
@@ -20,7 +32,7 @@ Bilan : **2 bloquants** avant de vrais clients, **8 importants**, une douzaine d
 | # | Domaine | Constat | Statut |
 |---|---|---|---|
 | I1 | Sécurité | Le formulaire d'inscription affichait « Cet email est déjà utilisé » (on pouvait tester qui a un compte), et n'avait **aucune limite** (l'API en avait une). | **Corrigé** : message neutre, 3 créations par heure et par IP. Test fonctionnel ajouté. |
-| I2 | Sécurité | Limiteurs de débit peut-être **contournables avec un faux `X-Forwarded-For`** (même faille que Cap Monta). Dépend de la façon dont Railway remplit cet en-tête : invérifiable sans la prod. | **À tester** avec `bin/audit-prod.sh`. Si KO, je corrige. |
+| I2 | Sécurité | Limiteurs de débit **contournables**, et en fait inopérants derrière Railway (voir l'audit de prod du 13 octobre). | **Corrigé** (`fix/ip-reelle`), vérifié en prod. |
 | I3 | API / coûts | La **synchro manuelle** n'avait ni limite ni blocage démo : n'importe qui pouvait épuiser le quota Google (300 requêtes/minute **partagées par tous les clients**) et faire payer l'API Places. | **Corrigé** : 6 synchros par heure et par établissement ; sur le compte démo, aucune requête à Google. Test ajouté. |
 | I4 | IA | L'analyse envoyait **tous les avis** à OpenAI (coût, et échec au-delà de la taille maximale), sans délai maximum, et les erreurs n'étaient pas journalisées. | **Corrigé** : 200 derniers avis, 30 s maximum, erreurs dans les logs, consigne anti-injection ajoutée au prompt d'analyse. |
 | I5 | Performance | Le tableau de bord **chargeait tous les avis en mémoire** à chaque affichage pour calculer les chiffres en PHP. Lent dès quelques milliers d'avis. | **Corrigé** : calcul en SQL (vérifié sur Postgres 16 : chiffres identiques). |
