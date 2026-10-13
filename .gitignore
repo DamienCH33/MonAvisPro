@@ -39,3 +39,4 @@ phpstan-result-cache.php
 
 config/jwt/private.pem
 config/jwt/public.pem
+graphify-out/
