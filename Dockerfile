@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:php8.4-bookworm
+FROM dunglas/frankenphp:1.13.2-php8.4-bookworm
 
 RUN apt-get update && apt-get install -y git unzip libpq-dev \
     && docker-php-ext-install pdo_pgsql \
