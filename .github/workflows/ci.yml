@@ -47,6 +47,9 @@ jobs:
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-interaction
 
+            - name: Audit des dépendances
+              run: composer audit --locked
+
             - name: Generate JWT keys
               run: |
                   mkdir -p config/jwt
