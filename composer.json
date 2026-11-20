@@ -20,7 +20,7 @@
         "symfony/brevo-mailer": "7.4.*",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
-        "symfony/flex": "^2.11",
+        "symfony/flex": "^2.12",
         "symfony/form": "7.4.*",
         "symfony/framework-bundle": "7.4.*",
         "symfony/http-client": "7.4.*",
